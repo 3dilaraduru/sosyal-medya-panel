@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İçerik Onay Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0e0f; --surface: #18181b; --surface2: #222226;
+  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0; --text2: #9a9a9f; --text3: #606065;
+  --accent: #7c6af7; --accent2: #5f50d4;
+  --green: #3ecf8e; --green-bg: rgba(62,207,142,0.1);
+  --amber: #f0a030; --amber-bg: rgba(240,160,48,0.1);
+  --red: #f05060; --red-bg: rgba(240,80,96,0.1);
+  --radius: 10px; --radius-sm: 6px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+/* LOGIN */
+#login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.login-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 40px; text-align: center; max-width: 360px; width: 90%; }
+.login-logo { width: 52px; height: 52px; border-radius: 14px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; color: #fff; margin: 0 auto 20px; }
+.login-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.login-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; line-height: 1.6; }
+.btn-google { width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.15s; }
+.btn-google:hover { background: #2a2a2e; }
+
+/* APP */
+#app-screen { display: none; flex-direction: column; height: 100vh; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 50px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.brand-avatar { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+.brand-name { font-size: 14px; font-weight: 500; }
+.topbar-center { display: flex; align-items: center; gap: 8px; }
+.month-btn { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.month-btn:hover { background: var(--surface2); color: var(--text); }
+.month-label { font-size: 13px; color: var(--text2); min-width: 90px; text-align: center; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.topbar-stats { display: flex; gap: 5px; }
+.stat-chip { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.chip-all { background: rgba(255,255,255,0.05); color: var(--text2); }
+.chip-wait { background: var(--amber-bg); color: var(--amber); }
+.chip-ok { background: var(--green-bg); color: var(--green); }
+.chip-rev { background: var(--red-bg); color: var(--red); }
+.user-email { font-size: 11px; color: var(--text2); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.signout-btn { padding: 3px 9px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* MAIN 3-COL LAYOUT */
+.main { display: grid; grid-template-columns: 360px 1fr 300px; flex: 1; overflow: hidden; height: calc(100vh - 50px); }
+.col { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.col:last-child { border-right: none; }
+.col-header { padding: 10px 14px; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+/* LEFT COL: MOCKUP */
+.col-left { overflow-y: auto; padding: 16px; gap: 12px; display: flex; flex-direction: column; }
+
+.phone-wrap { background: var(--surface2); border-radius: 20px; padding: 10px; border: 1px solid var(--border2); }
+.phone-screen { background: #000; border-radius: 12px; overflow: hidden; }
+.phone-bar { background: #111; padding: 7px 10px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #1a1a1a; }
+.phone-av { width: 20px; height: 20px; border-radius: 50%; background: #333; }
+.phone-un { color: #fff; font-size: 11px; font-weight: 500; }
+.phone-img { width: 100%; aspect-ratio: 4/5; display: flex; align-items: center; justify-content: center; font-size: 36px; background: #1a1a2e; position: relative; overflow: hidden; }
+.phone-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.phone-img-emoji { font-size: 36px; }
+.phone-actions { padding: 7px 10px 3px; display: flex; gap: 12px; color: #aaa; font-size: 14px; }
+.phone-caption { padding: 6px 10px; font-size: 9px; line-height: 1.55; color: #ccc; max-height: 80px; overflow: hidden; }
+.phone-caption strong { color: #fff; }
+.phone-date { padding: 2px 10px 9px; font-size: 8px; color: #555; }
+
+.sel-info { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+.sel-info-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+.sel-info-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.sel-info-date { font-size: 11px; color: var(--text2); }
+
+/* MIDDLE COL: APPROVAL + GRID */
+.col-mid { display: flex; flex-direction: column; overflow: hidden; }
+
+/* APPROVAL AREA - top 25% */
+.approval-area { flex: 0 0 auto; border-bottom: 1px solid var(--border); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.approval-top { display: flex; align-items: center; justify-content: space-between; }
+.approval-title { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+.approval-status { }
+.btn-row { display: flex; gap: 7px; }
+.btn { flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn-approve { background: var(--green-bg); color: var(--green); border-color: rgba(62,207,142,0.25); }
+.btn-approve:hover { background: rgba(62,207,142,0.18); }
+.btn-revize { background: var(--red-bg); color: var(--red); border-color: rgba(240,80,96,0.25); }
+.btn-revize:hover { background: rgba(240,80,96,0.18); }
+.note-wrap { display: none; }
+.note-wrap textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text); resize: none; margin-bottom: 6px; }
+.note-wrap textarea:focus { outline: none; border-color: var(--accent); }
+.note-wrap textarea::placeholder { color: var(--text3); }
+.btn-send { width: 100%; padding: 8px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; }
+.btn-send:hover { background: var(--accent2); }
+.btn-send:disabled { opacity: 0.5; }
+
+.info-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+.info-label { color: var(--text3); font-size: 11px; }
+.info-val { color: var(--text); font-weight: 500; }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+.badge-ok { background: var(--green-bg); color: var(--green); }
+.badge-wait { background: var(--amber-bg); color: var(--amber); }
+.badge-rev { background: var(--red-bg); color: var(--red); }
+.badge-past { background: rgba(255,255,255,0.05); color: var(--text2); }
+.badge-taslak { background: rgba(255,255,255,0.05); color: var(--text2); }
+
+/* FEED GRID - bottom 75% */
+.feed-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.feed-profile { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.fp-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.fp-name { font-size: 13px; font-weight: 500; }
+.fp-handle { font-size: 11px; color: var(--text2); }
+.feed-scroll { flex: 1; overflow-y: auto; }
+.feed-month-label { padding: 8px 12px 4px; font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); }
+.feed-month-label.past { opacity: 0.45; }
+.feed-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 0 2px 2px; }
+.feed-cell { aspect-ratio: 4/5; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; position: relative; overflow: hidden; transition: opacity 0.15s; background: #1a1a2e; }
+.feed-cell:hover { opacity: 0.85; }
+.feed-cell.active::after { content: ''; position: absolute; inset: 0; border: 2.5px solid var(--accent); }
+.feed-cell.past { opacity: 0.4; cursor: default; }
+.feed-cell.past:hover { opacity: 0.4; }
+.feed-cell img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.feed-dot { position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.5); z-index: 2; }
+.dot-ok { background: var(--green); }
+.dot-wait { background: var(--amber); }
+.dot-rev { background: var(--red); }
+.dot-past { background: #555; }
+.feed-legend { display: flex; gap: 10px; padding: 6px 12px; border-top: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text3); }
+.legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+.no-content { padding: 14px; font-size: 12px; color: var(--text3); grid-column: 1/-1; }
+
+/* RIGHT COL: COMMENTS */
+.col-right { display: flex; flex-direction: column; overflow: hidden; }
+.comments-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.comment-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.comment-card-top { display: flex; gap: 10px; padding: 10px 12px; }
+.comment-thumb { width: 48px; height: 60px; border-radius: 6px; object-fit: cover; background: var(--surface); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; }
+.comment-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.comment-meta { flex: 1; min-width: 0; }
+.comment-title { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.comment-date { font-size: 10px; color: var(--text3); margin-bottom: 5px; }
+.comment-text { font-size: 11px; color: var(--text2); line-height: 1.5; background: var(--surface); border-radius: var(--radius-sm); padding: 6px 8px; }
+.comment-label { font-size: 9px; font-weight: 600; color: var(--amber); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+.comment-footer { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.agency-reply { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.agency-reply-label { font-size: 9px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+.reply-input-wrap { display: flex; gap: 6px; }
+.reply-input { flex: 1; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 6px 9px; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text); }
+.reply-input:focus { outline: none; border-color: var(--accent); }
+.reply-input::placeholder { color: var(--text3); }
+.btn-reply { padding: 6px 10px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.btn-reply:hover { background: var(--accent2); }
+.solved-row { display: flex; align-items: center; justify-content: space-between; }
+.solved-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); cursor: pointer; }
+.solved-toggle input[type=checkbox] { accent-color: var(--green); width: 13px; height: 13px; }
+.solved-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
+.solved-yes { background: var(--green-bg); color: var(--green); }
+.solved-no { background: var(--red-bg); color: var(--red); }
+
+.no-comments { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 12px; }
+.comment-actions { display: flex; gap: 5px; margin-top: 4px; }
+.btn-edit-note { padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-edit-note:hover { color: var(--text); border-color: var(--accent); }
+.btn-delete-rev { padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(240,80,96,0.25); background: var(--red-bg); color: var(--red); font-size: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-delete-rev:hover { background: rgba(240,80,96,0.2); }
+.edit-note-wrap { display: none; margin-top: 5px; }
+.edit-note-wrap textarea { width: 100%; background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 6px 8px; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text); resize: none; }
+.edit-note-wrap textarea:focus { outline: none; }
+.edit-note-btns { display: flex; gap: 5px; margin-top: 4px; }
+.btn-save-note { padding: 4px 10px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-cancel-note { padding: 4px 10px; background: transparent; border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border2); padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; white-space: nowrap; }
+.toast.show { opacity: 1; }
+.spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">A</div>
+    <div class="login-title">İçerik Onay Paneli</div>
+    <div class="login-sub">Sosyal medya içeriklerinizi görüntülemek ve onaylamak için Google hesabınızla giriş yapın.</div>
+    <button class="btn-google" onclick="window.firebaseSignIn()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Google ile Giriş Yap
+    </button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <div class="toast" id="toast"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-avatar" id="brand-initial">A</div>
+      <span class="brand-name" id="brand-title">Yükleniyor...</span>
+    </div>
+    <div class="topbar-center">
+      <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+      <span class="month-label" id="month-label">—</span>
+      <button class="month-btn" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-stats">
+        <span class="stat-chip chip-all"><span id="stat-all">0</span> toplam</span>
+        <span class="stat-chip chip-wait"><span id="stat-wait">0</span> beklemede</span>
+        <span class="stat-chip chip-ok"><span id="stat-ok">0</span> onaylı</span>
+        <span class="stat-chip chip-rev"><span id="stat-rev">0</span> revize</span>
+      </div>
+      <span class="user-email" id="user-email"></span>
+      <button class="signout-btn" onclick="window.firebaseSignOut()">Çıkış</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LEFT: MOCKUP -->
+    <div class="col col-left">
+      <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Instagram Önizleme</div>
+      <div class="phone-wrap">
+        <div class="phone-screen">
+          <div class="phone-bar">
+            <div class="phone-av"></div>
+            <span class="phone-un" id="ig-handle">—</span>
+          </div>
+          <div class="phone-img" id="phone-img">
+            <img id="phone-img-el" alt="">
+            <span class="phone-img-emoji" id="phone-img-emoji">✈</span>
+          </div>
+          <div class="phone-actions">♡ &nbsp; 💬 &nbsp; ↗</div>
+          <div class="phone-caption"><strong id="ph-handle2">—</strong><span id="ph-caption"> —</span></div>
+          <div class="phone-date" id="ph-date">—</div>
+        </div>
+      </div>
+      <div class="sel-info">
+        <div class="sel-info-label">Seçili içerik</div>
+        <div class="sel-info-title" id="msb-title">—</div>
+        <div class="sel-info-date" id="msb-date">—</div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: APPROVAL + FEED -->
+    <div class="col col-mid">
+
+      <!-- APPROVAL TOP -->
+      <div class="approval-area">
+        <div class="approval-top">
+          <span class="approval-title">Karar Ver</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:11px;color:var(--text3);" id="sel-name-mid">—</span>
+            <span class="badge badge-wait" id="sel-status">—</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-approve" onclick="doAction('Onaylı')">✓ Onayla</button>
+          <button class="btn btn-revize" onclick="toggleNote()">↩ Revize İste</button>
+        </div>
+        <div class="note-wrap" id="note-area">
+          <textarea id="note-text" rows="2" placeholder="Revize notunuzu yazın..."></textarea>
+          <button class="btn-send" id="send-btn" onclick="doAction('Revize')">Gönder</button>
+        </div>
+      </div>
+
+      <!-- FEED BOTTOM -->
+      <div class="feed-area">
+        <div class="feed-profile">
+          <div class="fp-avatar" id="fp-av">A</div>
+          <div>
+            <div class="fp-name" id="fp-name">—</div>
+            <div class="fp-handle" id="fp-handle">—</div>
+          </div>
+        </div>
+        <div class="feed-scroll">
+          <div class="feed-month-label" id="current-month-label">—</div>
+          <div class="feed-grid" id="current-grid"></div>
+          <div class="feed-month-label past" id="prev-month-label">—</div>
+          <div class="feed-grid" id="prev-grid"></div>
+        </div>
+        <div class="feed-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Onaylı</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Beklemede</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Revize</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#555"></div>Geçmiş</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: COMMENTS -->
+    <div class="col col-right">
+      <div class="col-header">Yorumlar & Revizeler</div>
+      <div class="comments-list" id="comments-list">
+        <div class="no-comments">Henüz yorum yok.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN = 'patSGTs0lm7hWoWhg.28d46ae2190d2222c507488c25c957414959e803f1fac9ab89f3f77ac8559bf1';
+const BASE_ID = 'appZTgya9zX9uZ9nN';
+const H = { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
+const BG = ['linear-gradient(135deg,#1a1a2e,#0f3460)','linear-gradient(135deg,#0d3b2e,#1a6b4e)','linear-gradient(135deg,#3b1a2e,#6b1a4a)','linear-gradient(135deg,#2e1a0d,#6b3d1a)','linear-gradient(135deg,#1a2e3b,#1a4a6b)','linear-gradient(135deg,#2e2a0d,#6b5e1a)','linear-gradient(135deg,#1a2e1a,#3b6b3b)','linear-gradient(135deg,#2e0d3b,#5e1a6b)'];
+const EM = ['✈','🌍','🌸','🧳','💺','⭐','🏖','🛫','🌅','🗺','💫','🎯'];
+
+let allRecords = [], allRevizes = [], brandRecord = null, selectedRecordId = null, currentMonthOffset = 0;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function getRange(offset) {
+  const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + offset);
+  const start = new Date(d.getFullYear(), d.getMonth(), 1);
+  const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+  const label = d.toLocaleDateString('tr-TR', {month:'long',year:'numeric'});
+  return { start, end, label: label.charAt(0).toUpperCase() + label.slice(1) };
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'}) + ' · ' + d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function dc(s) { return s==='Onaylı'?'dot-ok':s==='Revize'?'dot-rev':'dot-wait'; }
+function bc(s) { return s==='Onaylı'?'badge-ok':s==='Revize'?'badge-rev':s==='Yayında'?'badge-past':'badge-wait'; }
+
+function updateStats(recs) {
+  const wait=recs.filter(r=>r.fields['Durum']==='Beklemede').length;
+  const ok=recs.filter(r=>r.fields['Durum']==='Onaylı').length;
+  const rev=recs.filter(r=>r.fields['Durum']==='Revize').length;
+  document.getElementById('stat-all').textContent=recs.length;
+  document.getElementById('stat-wait').textContent=wait;
+  document.getElementById('stat-ok').textContent=ok;
+  document.getElementById('stat-rev').textContent=rev;
+}
+
+function getImgUrl(rec) {
+  const f = rec.fields;
+  return f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
+}
+
+function renderGrid(el, recs, past) {
+  el.innerHTML = '';
+  if (!recs.length) { el.innerHTML='<div class="no-content">İçerik bulunamadı.</div>'; return; }
+  recs.forEach((rec, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'feed-cell' + (past?' past':'') + (rec.id===selectedRecordId?' active':'');
+    const imgUrl = getImgUrl(rec);
+    const status = rec.fields['Durum'] || 'Beklemede';
+    if (imgUrl) {
+      cell.innerHTML = '<img src="' + imgUrl + '" alt=""><div class="feed-dot ' + (past?'dot-past':dc(status)) + '"></div>';
+    } else {
+      cell.style.background = BG[i%BG.length];
+      cell.innerHTML = '<span>' + EM[i%EM.length] + '</span><div class="feed-dot ' + (past?'dot-past':dc(status)) + '"></div>';
+    }
+    if (!past) cell.onclick = () => selectRecord(rec, i);
+    el.appendChild(cell);
+  });
+}
+
+function selectRecord(rec, idx) {
+  selectedRecordId = rec.id;
+  const f = rec.fields;
+  const status = f['Durum'] || 'Beklemede';
+  const caption = f['AI Caption Taslak'] || f['Onaylı Caption'] || '—';
+  const dateStr = fmtDate(f['Yayın Tarihi']);
+  const name = f['İçerik Adı'] || '—';
+  const imgUrl = getImgUrl(rec);
+
+  // Mockup
+  const imgEl = document.getElementById('phone-img-el');
+  const emojiEl = document.getElementById('phone-img-emoji');
+  if (imgUrl) {
+    imgEl.src = imgUrl; imgEl.style.display = 'block';
+    emojiEl.style.display = 'none';
+    document.getElementById('phone-img').style.background = 'none';
+  } else {
+    imgEl.style.display = 'none'; emojiEl.style.display = 'block';
+    document.getElementById('phone-img').style.background = BG[idx%BG.length];
+  }
+  document.getElementById('ph-caption').textContent = ' ' + caption;
+  document.getElementById('ph-date').textContent = dateStr;
+  document.getElementById('msb-title').textContent = name;
+  document.getElementById('msb-date').textContent = dateStr;
+  document.getElementById('sel-name-mid').textContent = name;
+  const sb = document.getElementById('sel-status');
+  sb.textContent = status; sb.className = 'badge ' + bc(status);
+  document.getElementById('note-area').style.display = 'none';
+  document.getElementById('note-text').value = '';
+
+  renderCurrentMonth();
+  renderAllComments();
+}
+
+function renderCurrentMonth() {
+  const cur = getRange(currentMonthOffset), prev = getRange(currentMonthOffset-1);
+  const curRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
+  const prevRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=prev.start&&d<=prev.end; });
+  document.getElementById('current-month-label').textContent = cur.label;
+  document.getElementById('prev-month-label').textContent = prev.label + ' · Yayınlandı';
+  document.getElementById('month-label').textContent = cur.label;
+  renderGrid(document.getElementById('current-grid'), curRecs, false);
+  renderGrid(document.getElementById('prev-grid'), prevRecs, true);
+  updateStats(curRecs);
+}
+
+function changeMonth(dir) { currentMonthOffset += dir; renderCurrentMonth(); }
+function toggleNote() {
+  const na = document.getElementById('note-area');
+  na.style.display = na.style.display === 'none' ? 'block' : 'none';
+}
+
+async function doAction(newStatus) {
+  if (!selectedRecordId) return;
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  const note = document.getElementById('note-text').value.trim();
+  const body = { fields: { 'Durum': newStatus } };
+  
+  try {
+    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + selectedRecordId, { method:'PATCH', headers:H, body:JSON.stringify(body) });
+
+    // Revize ise Revizeler tablosuna da ekle
+    if (newStatus === 'Revize' && note) {
+      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', {
+        method:'POST', headers:H,
+        body: JSON.stringify({ fields: { 'Revize Adı': 'Revize — ' + (allRecords.find(r=>r.id===selectedRecordId)?.fields['İçerik Adı']||''), 'İçerik': [selectedRecordId], 'Müşteri Notu': note, 'Durum': 'Açık' }})
+      });
+    }
+
+    const rec = allRecords.find(r=>r.id===selectedRecordId);
+    if (rec) { rec.fields['Durum'] = newStatus; if (note) rec.fields['Müşteri Notu'] = note; }
+    const sb = document.getElementById('sel-status');
+    sb.textContent = newStatus; sb.className = 'badge ' + bc(newStatus);
+    document.getElementById('note-area').style.display = 'none';
+    document.getElementById('note-text').value = '';
+    renderCurrentMonth();
+    await loadRevizes();
+    renderAllComments();
+    showToast(newStatus==='Onaylı'?'✓ İçerik onaylandı':'↩ Revize talebi gönderildi');
+  } catch(e) { showToast('Hata oluştu.'); }
+  btn.disabled = false;
+}
+
+// COMMENTS
+function renderAllComments() {
+  const list = document.getElementById('comments-list');
+  const revizes = allRevizes;
+
+  if (!revizes.length) {
+    list.innerHTML = '<div class="no-comments">Henüz yorum yok.</div>';
+    return;
+  }
+
+  list.innerHTML = revizes.map(rev => {
+    const f = rev.fields;
+    const solved = f['Durum'] === 'çözüldü';
+    const ajansYanit = f['Ajans Yanıtı'] || '';
+    const tarih = f['Tarih'] ? fmtDate(f['Tarih']) : '';
+    const icerikIds = f['İçerik'];
+    const icerikId = Array.isArray(icerikIds) ? icerikIds[0] : icerikIds;
+    const icerikRec = allRecords.find(r => r.id === icerikId);
+    const imgUrl = icerikRec ? getImgUrl(icerikRec) : '';
+    const contentName = icerikRec ? (icerikRec.fields['İçerik Adı'] || '—') : '—';
+    return `
+      <div class="comment-card" id="rev-${rev.id}">
+        <div class="comment-card-top">
+          <div class="comment-thumb">
+            ${imgUrl ? '<img src="' + imgUrl + '" alt="">' : '🖼'}
+          </div>
+          <div class="comment-meta">
+            <div class="comment-title">${contentName}</div>
+            <div class="comment-date">${tarih}</div>
+            <div class="comment-label">Notunuz</div>
+            <div class="comment-text" id="note-text-${rev.id}">${f['Müşteri Notu'] || '—'}</div>
+            <div class="edit-note-wrap" id="edit-wrap-${rev.id}">
+              <textarea rows="2" id="edit-textarea-${rev.id}">${f['Müşteri Notu'] || ''}</textarea>
+              <div class="edit-note-btns">
+                <button class="btn-save-note" onclick="saveNote('${rev.id}')">Kaydet</button>
+                <button class="btn-cancel-note" onclick="cancelEdit('${rev.id}')">İptal</button>
+              </div>
+            </div>
+            <div class="comment-actions">
+              <button class="btn-edit-note" onclick="startEdit('${rev.id}')">✎ Düzenle</button>
+              <button class="btn-delete-rev" onclick="deleteRevize('${rev.id}')">✕ Talebi Kaldır</button>
+            </div>
+          </div>
+        </div>
+        ${ajansYanit ? `
+        <div class="comment-footer" style="border-top: 1px solid var(--border);">
+          <div>
+            <div class="agency-reply-label">Ajans Yanıtı</div>
+            <div class="agency-reply">${ajansYanit}</div>
+          </div>
+        </div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function startEdit(revId) {
+  document.getElementById('note-text-' + revId).style.display = 'none';
+  document.getElementById('edit-wrap-' + revId).style.display = 'block';
+  const ta = document.getElementById('edit-textarea-' + revId);
+  ta.focus(); ta.selectionStart = ta.value.length;
+}
+
+function cancelEdit(revId) {
+  document.getElementById('note-text-' + revId).style.display = 'block';
+  document.getElementById('edit-wrap-' + revId).style.display = 'none';
+}
+
+async function saveNote(revId) {
+  const val = document.getElementById('edit-textarea-' + revId).value.trim();
+  if (!val) return;
+  try {
+    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+      method: 'PATCH', headers: H,
+      body: JSON.stringify({ fields: { 'Müşteri Notu': val } })
+    });
+    const rev = allRevizes.find(r => r.id === revId);
+    if (rev) rev.fields['Müşteri Notu'] = val;
+    renderAllComments();
+    showToast('✓ Not güncellendi');
+  } catch(e) { showToast('Hata oluştu.'); }
+}
+
+async function deleteRevize(revId) {
+  if (!confirm('Bu revize talebini kaldırmak istediğinize emin misiniz?')) return;
+  try {
+    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+      method: 'DELETE', headers: H
+    });
+    allRevizes = allRevizes.filter(r => r.id !== revId);
+    // İçeriğin durumunu güncelle - eğer başka revizesi yoksa Beklemede yap
+    const rev = allRevizes.find(r => r.id === revId);
+    renderAllComments();
+    showToast('Revize talebi kaldırıldı');
+  } catch(e) { showToast('Hata oluştu.'); }
+}
+
+async function sendReply(revId) {
+  const input = document.getElementById('reply-' + revId);
+  const val = input.value.trim();
+  if (!val) return;
+  try {
+    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+      method:'PATCH', headers:H,
+      body: JSON.stringify({ fields: { 'Ajans Yanıtı': val } })
+    });
+    const rev = allRevizes.find(r=>r.id===revId);
+    if (rev) rev.fields['Ajans Yanıtı'] = val;
+    renderAllComments();
+    showToast('✓ Yanıt gönderildi');
+  } catch(e) { showToast('Hata oluştu.'); }
+}
+
+async function toggleSolved(revId, solved) {
+  try {
+    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+      method:'PATCH', headers:H,
+      body: JSON.stringify({ fields: { 'Durum': solved ? 'çözüldü' : 'açık' } })
+    });
+    const rev = allRevizes.find(r=>r.id===revId);
+    if (rev) rev.fields['Durum'] = solved ? 'çözüldü' : 'açık';
+    renderAllComments();
+    showToast(solved ? '✓ Çözüldü olarak işaretlendi' : 'Açık olarak işaretlendi');
+  } catch(e) { showToast('Hata.'); }
+}
+
+async function loadRevizes() {
+  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: H });
+  const data = await res.json();
+  allRevizes = data.records || [];
+}
+
+window.initApp = async function(email) {
+  document.getElementById('user-email').textContent = email;
+  try {
+    // Marka bul
+    const formula = encodeURIComponent('{Müşteri E-postası} = "' + email + '"');
+    const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar?filterByFormula=' + formula, { headers: H });
+    const data = await res.json();
+    if (data.records && data.records.length > 0) {
+      brandRecord = data.records[0].fields;
+    } else {
+      const all = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar?maxRecords=1', { headers: H });
+      const bd = await all.json();
+      if (bd.records && bd.records.length > 0) brandRecord = bd.records[0].fields;
+    }
+    if (brandRecord) {
+      const name = brandRecord['Marka Adı'] || 'Marka';
+      const ig = brandRecord['Instagram Hesabı'] || name.toLowerCase();
+      document.getElementById('brand-title').textContent = name;
+      document.getElementById('brand-initial').textContent = name[0].toUpperCase();
+      document.getElementById('fp-av').textContent = name[0].toUpperCase();
+      document.getElementById('fp-name').textContent = name;
+      document.getElementById('fp-handle').textContent = '@' + ig;
+      document.getElementById('ig-handle').textContent = ig;
+      document.getElementById('ph-handle2').textContent = ig;
+    }
+
+    // İçerikleri çek
+    const markaAdi = brandRecord ? brandRecord['Marka Adı'] : null;
+    let url = 'https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler?sort[0][field]=Yay%C4%B1n%20Tarihi&sort[0][direction]=asc';
+    if (markaAdi) url += '&filterByFormula=' + encodeURIComponent('{Marka} = "' + markaAdi + '"');
+    let records = [], offset = null;
+    do {
+      const r = await fetch(url + (offset?'&offset='+offset:''), { headers: H });
+      const d = await r.json();
+      records = records.concat(d.records||[]);
+      offset = d.offset;
+    } while (offset);
+    allRecords = records;
+
+    // Revizeleri çek
+    await loadRevizes();
+    renderAllComments();
+    renderCurrentMonth();
+
+    const cur = getRange(0);
+    const curRecs = records.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
+    if (curRecs.length > 0) selectRecord(curRecs[0], 0);
+    else if (records.length > 0) selectRecord(records[0], 0);
+    renderAllComments();
+  } catch(e) { showToast('Veriler yüklenemedi.'); console.error(e); }
+};
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const app = initializeApp({
+  apiKey: "AIzaSyDEPhHa_SzAriRgkxjuL2mDFPCLinN5-Ok",
+  authDomain: "sosyal-medya-ajans.firebaseapp.com",
+  projectId: "sosyal-medya-ajans",
+  storageBucket: "sosyal-medya-ajans.firebasestorage.app",
+  messagingSenderId: "424662383973",
+  appId: "1:424662383973:web:3385c9cc8489e78df3358c"
+});
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+window.firebaseSignIn = async () => { try { await signInWithPopup(auth, provider); } catch(e) { alert('Giriş başarısız'); } };
+window.firebaseSignOut = async () => { await signOut(auth); };
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'flex';
+    window.initApp(user.email);
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
