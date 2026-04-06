@@ -170,6 +170,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .rev-open { background: var(--red-bg); color: var(--red); }
 .rev-solved { background: var(--green-bg); color: var(--green); }
 .no-revize { text-align: center; padding: 30px 16px; font-size: 12px; color: var(--text3); }
+.notif-section { flex: 0 0 40%; border-top: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.notif-header { padding: 10px 16px; font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.notif-scroll { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.notif-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.notif-card.onaylı { border-left: 3px solid var(--green); }
+.notif-card.revize { border-left: 3px solid var(--red); }
+.notif-thumb { width: 36px; height: 45px; border-radius: 4px; object-fit: cover; background: var(--surface); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.notif-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.notif-body { flex: 1; min-width: 0; }
+.notif-title { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.notif-status-ok { font-size: 10px; color: var(--green); font-weight: 600; }
+.notif-status-rev { font-size: 10px; color: var(--red); font-weight: 600; }
+.notif-time { font-size: 10px; color: var(--text3); }
+.no-notif { text-align: center; padding: 20px 16px; font-size: 11px; color: var(--text3); }
 .card-caption { font-size: 10px; color: var(--text3); line-height: 1.4; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .content-card { cursor: grab; transition: transform 0.15s, opacity 0.15s; }
 .content-card.dragging { opacity: 0.4; cursor: grabbing; transform: scale(0.97); }
@@ -306,8 +320,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <span>Revizeler & Yorumlar</span>
         <span class="revize-count" id="revize-count">0</span>
       </div>
-      <div class="comments-scroll" id="revize-list">
+      <div class="comments-scroll" id="revize-list" style="flex:1;">
         <div class="no-revize">Henüz revize yok.</div>
+      </div>
+      <div class="notif-section">
+        <div class="notif-header">Son Müşteri Aksiyonları</div>
+        <div class="notif-scroll" id="notif-list">
+          <div class="no-notif">Henüz aksiyon yok.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -709,15 +729,60 @@ async function toggleRevSolved(revId, solved) {
   } catch(e) { showToast('Hata.'); }
 }
 
+function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  
+  // Son 7 günde onaylanan veya revize olan içerikler
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  
+  const actions = allContents
+    .filter(r => {
+      const status = r.fields['Durum'];
+      const date = r.fields['Onay Tarihi'] || r.fields['Oluşturma Tarihi'];
+      return (status === 'Onaylı' || status === 'Revize') && date;
+    })
+    .sort((a, b) => {
+      const da = new Date(a.fields['Onay Tarihi'] || a.fields['Oluşturma Tarihi']);
+      const db = new Date(b.fields['Onay Tarihi'] || b.fields['Oluşturma Tarihi']);
+      return db - da;
+    })
+    .slice(0, 10);
+
+  if (!actions.length) {
+    list.innerHTML = '<div class="no-notif">Henüz aksiyon yok.</div>';
+    return;
+  }
+
+  list.innerHTML = actions.map(rec => {
+    const f = rec.fields;
+    const status = f['Durum'];
+    const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
+    const name = f['İçerik Adı'] || '—';
+    const dateStr = f['Onay Tarihi'] ? fmtDate(f['Onay Tarihi']) : '';
+    const isOk = status === 'Onaylı';
+
+    return '<div class="notif-card ' + (isOk ? 'onaylı' : 'revize') + '">' +
+      '<div class="notif-thumb">' + (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '🖼') + '</div>' +
+      '<div class="notif-body">' +
+        '<div class="notif-title">' + name + '</div>' +
+        '<div class="' + (isOk ? 'notif-status-ok' : 'notif-status-rev') + '">' + (isOk ? '✓ Onaylandı' : '↩ Revize İstendi') + '</div>' +
+        (dateStr ? '<div class="notif-time">' + dateStr + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
 window.initApp = async function(email) {
   document.getElementById('user-email').textContent = email;
   await loadBrands();
   await loadContents();
   await loadRevizes();  // içerikler yüklendikten sonra çalışır
+  renderNotifications();
   const now = new Date(); now.setHours(now.getHours() + 2, 0, 0, 0);
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);
   // Her 30 saniyede bir revize güncelle
-  setInterval(loadRevizes, 30000);
+  setInterval(async () => { await loadRevizes(); await loadContents(); renderNotifications(); }, 30000);
 };
 </script>
 
