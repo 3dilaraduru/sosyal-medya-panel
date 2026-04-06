@@ -115,6 +115,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .filter-tabs { display: flex; gap: 4px; }
 .filter-tab { padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-family: 'DM Sans', sans-serif; }
 .filter-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.month-selector { display: flex; align-items: center; gap: 6px; }
+.month-nav-btn { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
+.month-nav-btn:hover { background: var(--surface2); color: var(--text); }
+.month-display { font-size: 13px; color: var(--text); font-weight: 500; min-width: 110px; text-align: center; cursor: pointer; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); background: var(--surface2); }
+.month-all-btn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.month-all-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
 .content-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
@@ -211,6 +217,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="logo">A</div>
       <span class="topbar-title">Ajans Paneli</span>
       <span class="topbar-badge">İçerik Yönetimi</span>
+    </div>
+    <div class="month-selector">
+      <button class="month-nav-btn" onclick="changeAjansMonth(-1)">‹</button>
+      <span class="month-display" id="ajans-month-display">Tüm Aylar</span>
+      <button class="month-nav-btn" onclick="changeAjansMonth(1)">›</button>
+      <button class="month-all-btn active" id="all-months-btn" onclick="showAllMonths()">Tümü</button>
     </div>
     <div class="topbar-right">
       <span class="user-email" id="user-email"></span>
@@ -343,6 +355,33 @@ const UPLOAD_PRESET = 'sosyal-medya-ajans';
 let brands = [], allContents = [], selectedFile = null, uploadedUrl = null;
 let currentFilter = 'tümü';
 let currentFormat = { ratio: 0.8, name: 'Feed 4:5' };
+let ajansMonthOffset = null; // null = tüm aylar
+
+function getAjansMonthRange(offset) {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + offset);
+  const start = new Date(d.getFullYear(), d.getMonth(), 1);
+  const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+  const label = d.toLocaleDateString('tr-TR', {month: 'long', year: 'numeric'});
+  return { start, end, label: label.charAt(0).toUpperCase() + label.slice(1) };
+}
+
+function changeAjansMonth(dir) {
+  if (ajansMonthOffset === null) ajansMonthOffset = 0;
+  ajansMonthOffset += dir;
+  const range = getAjansMonthRange(ajansMonthOffset);
+  document.getElementById('ajans-month-display').textContent = range.label;
+  document.getElementById('all-months-btn').classList.remove('active');
+  renderContents();
+}
+
+function showAllMonths() {
+  ajansMonthOffset = null;
+  document.getElementById('ajans-month-display').textContent = 'Tüm Aylar';
+  document.getElementById('all-months-btn').classList.add('active');
+  renderContents();
+}
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -535,7 +574,17 @@ let dragSrcId = null;
 
 function renderContents() {
   const grid = document.getElementById('content-grid');
-  const filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
+  let filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
+  
+  // Month filter
+  if (ajansMonthOffset !== null) {
+    const range = getAjansMonthRange(ajansMonthOffset);
+    filtered = filtered.filter(r => {
+      if (!r.fields['Yayın Tarihi']) return false;
+      const d = new Date(r.fields['Yayın Tarihi']);
+      return d >= range.start && d <= range.end;
+    });
+  }
   if (!filtered.length) { grid.innerHTML = '<div class="empty-state">İçerik bulunamadı.</div>'; return; }
   
   // Sort by Sıra field
