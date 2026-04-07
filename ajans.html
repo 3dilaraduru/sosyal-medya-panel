@@ -290,14 +290,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <input type="text" id="icerik-adi" placeholder="örn: Nisan Kampanyası — Post 1">
       </div>
 
-      <!-- CAPTION -->
+      <!-- CAPTION BİLGİSİ -->
       <div class="field">
         <label>Caption</label>
-        <button class="btn-ai" id="ai-btn" onclick="generateCaptions()">
-          <span>✨</span> AI Caption Öner
-        </button>
-        <div class="suggestions" id="suggestions" style="display:none;"></div>
-        <textarea class="caption-textarea" id="caption-text" placeholder="Caption yazın veya AI önerisini seçin..."></textarea>
+        <div style="background:rgba(124,106,247,0.08);border:1px solid rgba(124,106,247,0.25);border-radius:6px;padding:10px 12px;font-size:11px;color:#9a9a9f;line-height:1.6;">
+          ✨ İçerik kaydedildikten sonra AI otomatik olarak Claude, Gemini ve ChatGPT ile caption üretecek. 1-2 dakika içinde hazır olacak.
+        </div>
       </div>
 
       <div class="upload-progress" id="upload-progress">
@@ -502,7 +500,7 @@ async function submitContent() {
   const markaId = document.getElementById('marka-select').value;
   const tarihi = document.getElementById('yayin-tarihi').value;
   const adi = document.getElementById('icerik-adi').value.trim();
-  const caption = document.getElementById('caption-text').value.trim();
+  const caption = '';
   if (!selectedFile && !uploadedUrl) { showToast('Görsel yükleyin'); return; }
   if (!markaId) { showToast('Marka seçin'); return; }
   if (!tarihi) { showToast('Yayın tarihi seçin'); return; }
@@ -540,8 +538,6 @@ async function submitContent() {
 function resetForm() {
   resetFile();
   document.getElementById('icerik-adi').value = '';
-  document.getElementById('caption-text').value = '';
-  document.getElementById('suggestions').style.display = 'none';
   uploadedUrl = null;
   const now = new Date(); now.setHours(now.getHours() + 2, 0, 0, 0);
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);
@@ -604,8 +600,9 @@ function renderContents() {
     const markaAd = markaRec ? markaRec.fields['Marka Adı'] : '—';
     const fmt = f['Format'] || 'Feed 4:5';
     const ar = ratioMap[fmt] || '4/5';
-    const caption = f['AI Caption Taslak'] || f['Onaylı Caption'] || '';
+    const caption = f['Onaylı Caption'] || f['AI Caption Taslak'] || '';
     const captionClean = caption.replace(/\*\*/g, '').replace(/#+/g, '').trim();
+    const captionPending = !caption && (status === 'Taslak' || status === 'Beklemede');
 
     const card = document.createElement('div');
     card.className = 'content-card';
@@ -618,7 +615,7 @@ function renderContents() {
       '<div class="card-body">' +
         '<div class="card-title">' + (f['İçerik Adı'] || '—') + '</div>' +
         '<div class="card-meta">' + date + '</div>' +
-        (captionClean ? '<div class="card-caption">' + captionClean + '</div>' : '') +
+        (captionClean ? '<div class="card-caption">' + captionClean + '</div>' : captionPending ? '<div class="card-caption" style="color:var(--text3);font-style:italic;">⏳ AI caption üretiyor...</div>' : '') +
         '<div class="card-footer">' +
           '<span class="badge badge-' + (bmap[status]||'taslak') + '">' + status + '</span>' +
           '<span class="card-brand">' + markaAd + '</span>' +
