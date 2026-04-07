@@ -590,6 +590,7 @@ async function editDate(e, recId, currentDate) {
 }
 
 
+async function loadBrands() {
   const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
   const data = await res.json();
   brands = data.records || [];
