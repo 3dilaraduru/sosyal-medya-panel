@@ -190,7 +190,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .notif-status-rev { font-size: 10px; color: var(--red); font-weight: 600; }
 .notif-time { font-size: 10px; color: var(--text3); }
 .no-notif { text-align: center; padding: 20px 16px; font-size: 11px; color: var(--text3); }
-.card-caption { font-size: 10px; color: var(--text3); line-height: 1.4; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.btn-ilet { padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(62,207,142,0.4); background: rgba(62,207,142,0.1); color: var(--green); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-ilet:hover { background: rgba(62,207,142,0.2); }
+.btn-ilet:disabled { opacity: 0.5; cursor: default; }
+.card-date-edit { font-size: 10px; color: var(--accent); cursor: pointer; margin-left: 4px; }
+.card-date-edit:hover { text-decoration: underline; }
 .content-card { cursor: grab; transition: transform 0.15s, opacity 0.15s; }
 .content-card.dragging { opacity: 0.4; cursor: grabbing; transform: scale(0.97); }
 .content-card.drag-over { border-color: var(--accent); border-width: 2px; }
@@ -225,6 +229,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <button class="month-all-btn active" id="all-months-btn" onclick="showAllMonths()">Tümü</button>
     </div>
     <div class="topbar-right">
+      <button class="btn-ilet" onclick="planiIlet()" id="ilet-btn">📤 Planı Müşteriye İlet</button>
       <span class="user-email" id="user-email"></span>
       <button class="btn-sm" onclick="window.firebaseSignOut()">Çıkış</button>
     </div>
@@ -304,7 +309,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
 
       <button class="btn-submit" id="submit-btn" onclick="submitContent()">
-        İçeriği Kaydet & Müşteriye Gönder
+        İçeriği Kaydet
       </button>
     </div>
 
@@ -515,7 +520,7 @@ async function submitContent() {
       'İçerik Adı': adi,
       'AI Caption Taslak': caption || '',
       'Yayın Tarihi': new Date(tarihi).toISOString(),
-      'Durum': 'Beklemede',
+      'Durum': 'Taslak',
       'Görsel URL': uploadedUrl,
       'Format': currentFormat.name,
     };
@@ -532,7 +537,7 @@ async function submitContent() {
     } else { throw new Error(JSON.stringify(data)); }
   } catch(e) { showToast('Hata: ' + e.message); console.error(e); }
   btn.disabled = false;
-  btn.innerHTML = 'İçeriği Kaydet & Müşteriye Gönder';
+  btn.innerHTML = 'İçeriği Kaydet';
 }
 
 function resetForm() {
@@ -543,7 +548,48 @@ function resetForm() {
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);
 }
 
-async function loadBrands() {
+async function planiIlet() {
+  const btn = document.getElementById('ilet-btn');
+  // Taslak durumundaki içerikleri Beklemede yap
+  const taslaklar = allContents.filter(r => r.fields['Durum'] === 'Taslak');
+  if (!taslaklar.length) { showToast('İletilecek içerik yok (Taslak durumunda)'); return; }
+  if (!confirm(taslaklar.length + ' içerik müşteriye iletilecek. Emin misiniz?')) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ İletiliyor...';
+  try {
+    for (const rec of taslaklar) {
+      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + rec.id, {
+        method: 'PATCH', headers: AT_HDR,
+        body: JSON.stringify({ fields: { 'Durum': 'Beklemede', 'Mail Gönderildi mi?': false } })
+      });
+      rec.fields['Durum'] = 'Beklemede';
+    }
+    showToast('✓ Plan müşteriye iletildi! Mail gönderiliyor...');
+    renderContents();
+  } catch(e) { showToast('Hata: ' + e.message); }
+  btn.disabled = false;
+  btn.textContent = '📤 Planı Müşteriye İlet';
+}
+
+async function editDate(e, recId, currentDate) {
+  e.stopPropagation();
+  const newDateStr = prompt('Yeni yayın tarihini girin (YYYY-MM-DDTHH:MM formatında):', currentDate ? currentDate.slice(0,16) : '');
+  if (!newDateStr) return;
+  const newDate = new Date(newDateStr);
+  if (isNaN(newDate)) { showToast('Geçersiz tarih formatı'); return; }
+  try {
+    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
+      method: 'PATCH', headers: AT_HDR,
+      body: JSON.stringify({ fields: { 'Yayın Tarihi': newDate.toISOString() } })
+    });
+    const rec = allContents.find(r => r.id === recId);
+    if (rec) rec.fields['Yayın Tarihi'] = newDate.toISOString();
+    showToast('✓ Tarih güncellendi');
+    renderContents();
+  } catch(e) { showToast('Hata: ' + e.message); }
+}
+
+
   const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
   const data = await res.json();
   brands = data.records || [];
@@ -614,7 +660,7 @@ function renderContents() {
       '</div>' +
       '<div class="card-body">' +
         '<div class="card-title">' + (f['İçerik Adı'] || '—') + '</div>' +
-        '<div class="card-meta">' + date + '</div>' +
+        '<div class="card-meta" style="display:flex;align-items:center;gap:4px;">' + date + '<span class="card-date-edit" onclick="editDate(event,\'' + rec.id + '\',\'' + (f['Yayın Tarihi']||'') + '\')">✎</span></div>' +
         (captionClean ? '<div class="card-caption">' + captionClean + '</div>' : captionPending ? '<div class="card-caption" style="color:var(--text3);font-style:italic;">⏳ AI caption üretiyor...</div>' : '') +
         '<div class="card-footer">' +
           '<span class="badge badge-' + (bmap[status]||'taslak') + '">' + status + '</span>' +
