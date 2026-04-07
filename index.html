@@ -636,41 +636,7 @@ async function quickRevize(e, recId) {
 }
 
 
-  const na = document.getElementById('note-area');
-  na.style.display = na.style.display === 'none' ? 'block' : 'none';
-}
 
-async function doAction(newStatus) {
-  if (!selectedRecordId) return;
-  const btn = document.getElementById('send-btn');
-  btn.disabled = true;
-  const note = document.getElementById('note-text').value.trim();
-  const body = { fields: { 'Durum': newStatus } };
-  
-  try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + selectedRecordId, { method:'PATCH', headers:H, body:JSON.stringify(body) });
-
-    // Revize ise Revizeler tablosuna da ekle
-    if (newStatus === 'Revize' && note) {
-      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', {
-        method:'POST', headers:H,
-        body: JSON.stringify({ fields: { 'Revize Adı': 'Revize — ' + (allRecords.find(r=>r.id===selectedRecordId)?.fields['İçerik Adı']||''), 'İçerik': [selectedRecordId], 'Müşteri Notu': note, 'Durum': 'Açık' }})
-      });
-    }
-
-    const rec = allRecords.find(r=>r.id===selectedRecordId);
-    if (rec) { rec.fields['Durum'] = newStatus; if (note) rec.fields['Müşteri Notu'] = note; }
-    const sb = document.getElementById('sel-status');
-    sb.textContent = newStatus; sb.className = 'badge ' + bc(newStatus);
-    document.getElementById('note-area').style.display = 'none';
-    document.getElementById('note-text').value = '';
-    renderCurrentMonth();
-    await loadRevizes();
-    renderAllComments();
-    showToast(newStatus==='Onaylı'?'✓ İçerik onaylandı':'↩ Revize talebi gönderildi');
-  } catch(e) { showToast('Hata oluştu.'); }
-  btn.disabled = false;
-}
 
 // COMMENTS
 function renderAllComments() {
