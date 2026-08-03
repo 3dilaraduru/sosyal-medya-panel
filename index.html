@@ -8,13 +8,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0e0e0f; --surface: #18181b; --surface2: #222226;
-  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f0; --text2: #9a9a9f; --text3: #606065;
-  --accent: #7c6af7; --accent2: #5f50d4;
-  --green: #3ecf8e; --green-bg: rgba(62,207,142,0.1);
-  --amber: #f0a030; --amber-bg: rgba(240,160,48,0.1);
-  --red: #f05060; --red-bg: rgba(240,80,96,0.1);
+  --bg: #F6F5F1; --surface: #FFFFFF; --surface2: #F0EEE7;
+  --border: #E5E2D9; --border2: #D2CEC1;
+  --text: #24231F; --text2: #6E6C61; --text3: #9C988B;
+  --accent: #3B4B6B; --accent2: #2C3A54;
+  --green: #2F7A52; --green-bg: #E3F0E8;
+  --amber: #B5791E; --amber-bg: #FBF0DC;
+  --red: #B23A2E; --red-bg: #FBE7E2;
   --radius: 10px; --radius-sm: 6px;
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
@@ -43,7 +43,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 .topbar-stats { display: flex; gap: 5px; }
 .stat-chip { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-.chip-all { background: rgba(255,255,255,0.05); color: var(--text2); }
+.chip-all { background: var(--surface2); color: var(--text2); }
 .chip-wait { background: var(--amber-bg); color: var(--amber); }
 .chip-ok { background: var(--green-bg); color: var(--green); }
 .chip-rev { background: var(--red-bg); color: var(--red); }
@@ -83,7 +83,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .modal-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; width: 100%; max-width: 980px; height: 90vh; display: flex; gap: 0; position: relative; overflow: hidden; }
 .modal-left { flex: 0 0 420px; background: #0a0a0b; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; border-right: 1px solid var(--border); }
 .modal-right { flex: 1; padding: 28px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
-.modal-phone-wrap { background: #1a1a1e; border-radius: 28px; padding: 14px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.modal-phone-wrap { background: #1a1a1e; border-radius: 28px; padding: 14px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 320px; }
 .modal-phone-screen { background: #000; border-radius: 18px; overflow: hidden; }
 .modal-phone-bar { background: #111; padding: 10px 14px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid #1a1a1a; }
 .modal-phone-av { width: 28px; height: 28px; border-radius: 50%; background: #333; }
@@ -143,8 +143,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .badge-ok { background: var(--green-bg); color: var(--green); }
 .badge-wait { background: var(--amber-bg); color: var(--amber); }
 .badge-rev { background: var(--red-bg); color: var(--red); }
-.badge-past { background: rgba(255,255,255,0.05); color: var(--text2); }
-.badge-taslak { background: rgba(255,255,255,0.05); color: var(--text2); }
+.badge-past { background: var(--surface2); color: var(--text2); }
+.badge-taslak { background: var(--surface2); color: var(--text2); }
 
 /* FEED GRID - bottom 75% */
 .feed-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
@@ -355,7 +355,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="col col-mid">
 
       <!-- FEED -->
-      <div class="feed-area" style="flex:1;
+      <div class="feed-area" style="flex:1;">
         <div class="feed-profile">
           <div class="fp-avatar" id="fp-av">A</div>
           <div>
@@ -566,14 +566,24 @@ function toggleModalNote() {
   nw.style.display = nw.style.display === 'none' ? 'flex' : 'none';
 }
 
+async function airtableCall(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); detail = j?.error?.message || j?.error?.type || ''; } catch(e) {}
+    throw new Error('Airtable ' + res.status + (detail ? ': ' + detail : ''));
+  }
+  return res;
+}
+
 async function modalAction(newStatus) {
   if (!selectedRecordId) return;
   const note = document.getElementById('modal-note-text').value.trim();
   const body = { fields: { 'Durum': newStatus } };
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + selectedRecordId, { method:'PATCH', headers:H, body:JSON.stringify(body) });
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + selectedRecordId, { method:'PATCH', headers:H, body:JSON.stringify(body) });
     if (newStatus === 'Revize' && note) {
-      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', {
         method:'POST', headers:H,
         body: JSON.stringify({ fields: { 'Revize Adı': 'Revize — ' + (allRecords.find(r=>r.id===selectedRecordId)?.fields['İçerik Adı']||''), 'İçerik': [selectedRecordId], 'Müşteri Notu': note, 'Durum': 'Açık' }})
       });
@@ -582,22 +592,20 @@ async function modalAction(newStatus) {
     if (rec) { rec.fields['Durum'] = newStatus; if (note) rec.fields['Müşteri Notu'] = note; }
     const sb = document.getElementById('modal-status');
     sb.textContent = newStatus; sb.className = 'badge ' + bc(newStatus);
-    document.getElementById('sel-status').textContent = newStatus;
-    document.getElementById('sel-status').className = 'badge ' + bc(newStatus);
     document.getElementById('modal-note-wrap').style.display = 'none';
     renderCurrentMonth();
     await loadRevizes();
     renderAllComments();
     showToast(newStatus==='Onaylı'?'✓ İçerik onaylandı':'↩ Revize talebi gönderildi');
     if (newStatus === 'Onaylı') closeModal();
-  } catch(e) { showToast('Hata oluştu.'); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 
 async function quickAction(e, recId, newStatus) {
   e.stopPropagation();
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
       method: 'PATCH', headers: H,
       body: JSON.stringify({ fields: { 'Durum': newStatus } })
     });
@@ -607,7 +615,7 @@ async function quickAction(e, recId, newStatus) {
     await loadRevizes();
     renderAllComments();
     showToast(newStatus === 'Onaylı' ? '✓ İçerik onaylandı' : '↩ Revize talebi gönderildi');
-  } catch(e) { showToast('Hata oluştu.'); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 async function quickRevize(e, recId) {
@@ -615,13 +623,13 @@ async function quickRevize(e, recId) {
   const note = prompt('Revize notunuzu yazın (isteğe bağlı):');
   if (note === null) return; // iptal
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
       method: 'PATCH', headers: H,
       body: JSON.stringify({ fields: { 'Durum': 'Revize' } })
     });
     if (note) {
       const rec = allRecords.find(r => r.id === recId);
-      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', {
         method: 'POST', headers: H,
         body: JSON.stringify({ fields: { 'Revize Adı': 'Revize — ' + (rec?.fields['İçerik Adı']||''), 'İçerik': [recId], 'Müşteri Notu': note, 'Durum': 'Açık' }})
       });
@@ -632,7 +640,7 @@ async function quickRevize(e, recId) {
     await loadRevizes();
     renderAllComments();
     showToast('↩ Revize talebi gönderildi');
-  } catch(err) { showToast('Hata oluştu.'); }
+  } catch(err) { showToast(err.message || 'Hata oluştu.'); console.error(err); }
 }
 
 
@@ -710,7 +718,7 @@ async function saveNote(revId) {
   const val = document.getElementById('edit-textarea-' + revId).value.trim();
   if (!val) return;
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
       method: 'PATCH', headers: H,
       body: JSON.stringify({ fields: { 'Müşteri Notu': val } })
     });
@@ -718,13 +726,13 @@ async function saveNote(revId) {
     if (rev) rev.fields['Müşteri Notu'] = val;
     renderAllComments();
     showToast('✓ Not güncellendi');
-  } catch(e) { showToast('Hata oluştu.'); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 async function deleteRevize(revId) {
   if (!confirm('Bu revize talebini kaldırmak istediğinize emin misiniz?')) return;
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
       method: 'DELETE', headers: H
     });
     allRevizes = allRevizes.filter(r => r.id !== revId);
@@ -732,7 +740,7 @@ async function deleteRevize(revId) {
     const rev = allRevizes.find(r => r.id === revId);
     renderAllComments();
     showToast('Revize talebi kaldırıldı');
-  } catch(e) { showToast('Hata oluştu.'); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 async function sendReply(revId) {
@@ -740,7 +748,7 @@ async function sendReply(revId) {
   const val = input.value.trim();
   if (!val) return;
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
       method:'PATCH', headers:H,
       body: JSON.stringify({ fields: { 'Ajans Yanıtı': val } })
     });
@@ -748,12 +756,12 @@ async function sendReply(revId) {
     if (rev) rev.fields['Ajans Yanıtı'] = val;
     renderAllComments();
     showToast('✓ Yanıt gönderildi');
-  } catch(e) { showToast('Hata oluştu.'); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 async function toggleSolved(revId, solved) {
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
       method:'PATCH', headers:H,
       body: JSON.stringify({ fields: { 'Durum': solved ? 'çözüldü' : 'açık' } })
     });
@@ -761,7 +769,7 @@ async function toggleSolved(revId, solved) {
     if (rev) rev.fields['Durum'] = solved ? 'çözüldü' : 'açık';
     renderAllComments();
     showToast(solved ? '✓ Çözüldü olarak işaretlendi' : 'Açık olarak işaretlendi');
-  } catch(e) { showToast('Hata.'); }
+  } catch(e) { showToast(e.message || 'Hata.'); console.error(e); }
 }
 
 async function loadRevizes() {
