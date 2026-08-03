@@ -590,41 +590,6 @@ async function uploadToCloudinary(file) {
   throw new Error('Cloudinary hatası: ' + JSON.stringify(data));
 }
 
-// AI CAPTION
-async function generateCaptions() {
-  const markaId = document.getElementById('marka-select').value;
-  if (!markaId) { showToast('Önce marka seçin'); return; }
-  const brand = brands.find(b => b.id === markaId);
-  if (!brand) return;
-  const btn = document.getElementById('ai-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Üretiliyor...';
-  const marka = brand.fields['Marka Adı'] || '';
-  const hashtag = brand.fields['Hashtag Seti'] || '';
-  setTimeout(() => {
-    const sugs = [
-      { label: 'PROFESYONEl', text: marka + ' ile farkı hissedin. Kalite ve konfor bir arada. ✨\n' + hashtag },
-      { label: 'SAMİMİ', text: marka + ' ailesine hoş geldiniz! Sizin için en iyisini sunuyoruz 🙌\n' + hashtag },
-      { label: 'GÜÇLÜ', text: marka + ' — Standartları yeniden belirliyor. Siz de dahil olun. 🚀\n' + hashtag },
-    ];
-    const el = document.getElementById('suggestions');
-    el.style.display = 'flex';
-    el.innerHTML = sugs.map((s, i) => `
-      <div class="suggestion-item" onclick="selectSug(this, ${i})">
-        <div class="sug-label">${s.label}</div>
-        ${s.text.replace(/\n/g, '<br>')}
-      </div>`).join('');
-    window._sugs = sugs;
-    btn.disabled = false;
-    btn.innerHTML = '<span>✨</span> Yenile';
-  }, 700);
-}
-
-function selectSug(el, idx) {
-  document.getElementById('caption-text').value = window._sugs[idx].text;
-  document.querySelectorAll('.suggestion-item').forEach((s, i) => s.classList.toggle('selected', i === idx));
-}
-
 // SUBMIT
 async function submitContent() {
   const markaId = document.getElementById('marka-select').value;
@@ -807,7 +772,7 @@ function renderContents() {
     card.draggable = true;
     card.dataset.id = rec.id;
     card.innerHTML = 
-      '<div class="card-img-wrap" style="aspect-ratio:1/1;">' +
+      '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
         (imgUrl ? '<img class="card-img" src="' + imgUrl + '" alt="">' : '<div class="card-img-placeholder">🖼</div>') +
         '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
@@ -875,7 +840,7 @@ async function reorderCards(srcId, targetId) {
   const updates = newOrder.map((id, i) => {
     const rec = allContents.find(r => r.id === id);
     if (rec) rec.fields['Sıra'] = i + 1;
-    return fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, {
+    return airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, {
       method: 'PATCH', headers: AT_HDR,
       body: JSON.stringify({ fields: { 'Sıra': i + 1 } })
     });
@@ -884,7 +849,7 @@ async function reorderCards(srcId, targetId) {
   try {
     await Promise.all(updates);
     showToast('✓ Sıralama kaydedildi');
-  } catch(e) { showToast('Sıralama kaydedilemedi.'); }
+  } catch(e) { showToast(e.message || 'Sıralama kaydedilemedi.'); console.error(e); }
 }
 
 let allRevizes = [];
