@@ -45,6 +45,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .brand-chip { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
 .brand-chip:hover { border-color: var(--accent); color: var(--text); }
 .brand-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.brand-chip-add { background: transparent; border-style: dashed; color: var(--accent); }
+.brand-chip-add:hover { background: var(--surface2); }
 
 /* UPLOAD PANEL */
 .upload-panel { border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: calc(100vh - 54px); }
@@ -127,8 +129,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .month-all-btn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .month-all-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-.content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .content-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.card-caption { font-size: 11px; color: var(--text2); line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.feed-dot { position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--surface); z-index: 2; }
+.dot-taslak { background: var(--text3); }
+.dot-beklemede { background: var(--amber); }
+.dot-onaylı { background: var(--green); }
+.dot-revize { background: var(--red); }
+.dot-yayında { background: var(--text3); }
 
 /* İÇERİK DETAY MODAL */
 .ac-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
@@ -277,6 +286,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   </div>
 </div>
 
+<!-- YENİ MÜŞTERİ EKLE MODAL -->
+<div class="ac-modal-overlay" id="new-brand-modal" onclick="closeNewBrandOutside(event)">
+  <div class="ac-modal-box" style="max-width:420px;">
+    <button class="modal-close" onclick="closeNewBrandModal()">✕</button>
+    <div style="padding:28px; display:flex; flex-direction:column; gap:14px; width:100%;">
+      <div style="font-size:16px; font-weight:600;">Yeni müşteri ekle</div>
+      <div class="field">
+        <label>Marka Adı *</label>
+        <input type="text" id="nb-name" placeholder="örn: BonAir">
+      </div>
+      <div class="field">
+        <label>Instagram Hesabı</label>
+        <input type="text" id="nb-ig" placeholder="örn: bonairfly">
+      </div>
+      <div class="field">
+        <label>Müşteri E-postası *</label>
+        <input type="text" id="nb-email" placeholder="musteri@ornek.com">
+      </div>
+      <div style="font-size:11px; color:var(--text3);">Müşteri, bu e-posta ile Google hesabından giriş yaptığında kendi içeriklerini görecek.</div>
+      <button class="btn-submit" onclick="saveNewBrand()">Müşteriyi Kaydet</button>
+    </div>
+  </div>
+</div>
+
 <div id="app-screen">
   <div class="toast" id="toast"></div>
   <div class="topbar">
@@ -382,7 +415,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
     <div class="list-panel">
       <div class="list-header">
-        <div class="list-title">Tüm İçerikler</div>
+        <div class="list-title" id="list-title">Tüm İçerikler</div>
         <div class="filter-tabs">
           <button class="filter-tab active" onclick="filterContents('tümü', this)">Tümü</button>
           <button class="filter-tab" onclick="filterContents('Taslak', this)">Taslak</button>
@@ -435,7 +468,7 @@ async function airtableCall(url, options) {
 }
 let currentFilter = 'tümü';
 let currentFormat = { ratio: 0.8, name: 'Feed 4:5' };
-let ajansMonthOffset = null; // null = tüm aylar
+let ajansMonthOffset = 0; // varsayılan: içinde bulunulan ay
 
 function getAjansMonthRange(offset) {
   const d = new Date();
@@ -676,8 +709,9 @@ async function loadBrands() {
     brands.map(b => '<option value="' + b.id + '">' + (b.fields['Marka Adı'] || b.id) + '</option>').join('');
 
   const bar = document.getElementById('brand-bar');
-  bar.innerHTML = '<div class="brand-chip active" data-brand="" onclick="switchBrand(\'\', this)">Tüm markalar</div>' +
-    brands.map(b => '<div class="brand-chip" data-brand="' + b.id + '" onclick="switchBrand(\'' + b.id + '\', this)">' + (b.fields['Marka Adı'] || b.id) + '</div>').join('');
+  bar.innerHTML = '<div class="brand-chip' + (selectedBrandId===''?' active':'') + '" data-brand="" onclick="switchBrand(\'\', this)">Tüm markalar</div>' +
+    brands.map(b => '<div class="brand-chip' + (selectedBrandId===b.id?' active':'') + '" data-brand="' + b.id + '" onclick="switchBrand(\'' + b.id + '\', this)">' + (b.fields['Marka Adı'] || b.id) + '</div>').join('') +
+    '<div class="brand-chip brand-chip-add" onclick="openNewBrandModal()">+ Yeni Müşteri</div>';
 }
 
 let selectedBrandId = '';
@@ -708,6 +742,8 @@ let dragSrcId = null;
 
 function renderContents() {
   const grid = document.getElementById('content-grid');
+  const titleEl = document.getElementById('list-title');
+  if (titleEl) titleEl.textContent = ajansMonthOffset === null ? 'Tüm İçerikler' : getAjansMonthRange(ajansMonthOffset).label + ' içerikleri';
   let filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
 
   // Marka filtresi
@@ -758,14 +794,15 @@ function renderContents() {
     card.innerHTML = 
       '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
         (imgUrl ? '<img class="card-img" src="' + imgUrl + '" alt="">' : '<div class="card-img-placeholder">🖼</div>') +
+        '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
       '<div class="card-body">' +
         '<div class="card-title">' + (f['İçerik Adı'] || '—') + '</div>' +
-        '<div class="card-meta" style="display:flex;align-items:center;gap:4px;">' + date + '<span class="card-date-edit" onclick="editDate(event,\'' + rec.id + '\',\'' + (f['Yayın Tarihi']||'') + '\')">✎</span></div>' +
+        '<div class="card-meta">' + date + '</div>' +
         (captionClean ? '<div class="card-caption">' + captionClean + '</div>' : captionPending ? '<div class="card-caption" style="color:var(--text3);font-style:italic;">⏳ AI caption üretiyor...</div>' : '') +
         '<div class="card-footer">' +
           '<span class="badge badge-' + (bmap[status]||'taslak') + '">' + status + '</span>' +
-          '<span class="card-brand">' + markaAd + '</span>' +
+          (selectedBrandId ? '' : '<span class="card-brand">' + markaAd + '</span>') +
         '</div>' +
       '</div>';
 
@@ -948,7 +985,7 @@ function acCloseOutside(e) {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') acCloseModal();
+  if (e.key === 'Escape') { acCloseModal(); closeNewBrandModal(); }
 });
 
 async function acSaveModal() {
@@ -982,6 +1019,43 @@ async function acDeleteModal() {
     showToast('İçerik silindi');
     acCloseModal();
     renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+function openNewBrandModal() {
+  document.getElementById('nb-name').value = '';
+  document.getElementById('nb-ig').value = '';
+  document.getElementById('nb-email').value = '';
+  document.getElementById('new-brand-modal').classList.add('open');
+}
+
+function closeNewBrandModal() {
+  document.getElementById('new-brand-modal').classList.remove('open');
+}
+
+function closeNewBrandOutside(e) {
+  if (e.target === document.getElementById('new-brand-modal')) closeNewBrandModal();
+}
+
+async function saveNewBrand() {
+  const name = document.getElementById('nb-name').value.trim();
+  const ig = document.getElementById('nb-ig').value.trim().replace(/^@/, '');
+  const email = document.getElementById('nb-email').value.trim();
+  if (!name) { showToast('Marka adı gerekli'); return; }
+  if (!email) { showToast('Müşteri e-postası gerekli'); return; }
+  try {
+    const res = await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', {
+      method: 'POST', headers: AT_HDR,
+      body: JSON.stringify({ fields: { 'Marka Adı': name, 'Instagram Hesabı': ig, 'Müşteri E-postası': email } })
+    });
+    const data = await res.json();
+    showToast('✓ ' + name + ' eklendi');
+    closeNewBrandModal();
+    await loadBrands();
+    if (data.id) {
+      const chip = document.querySelector('.brand-chip[data-brand="' + data.id + '"]');
+      if (chip) switchBrand(data.id, chip);
+    }
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -1045,6 +1119,9 @@ function renderNotifications() {
 window.initApp = async function(email) {
   document.getElementById('user-email').textContent = email;
   await loadBrands();
+  const initRange = getAjansMonthRange(ajansMonthOffset);
+  document.getElementById('ajans-month-display').textContent = initRange.label;
+  document.getElementById('all-months-btn').classList.remove('active');
   await loadContents();
   await loadRevizes();  // içerikler yüklendikten sonra çalışır
   renderNotifications();
