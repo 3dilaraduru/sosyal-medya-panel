@@ -51,9 +51,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .signout-btn { padding: 3px 9px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
 /* MAIN 3-COL LAYOUT */
-.main { display: grid; grid-template-columns: 360px 1fr 300px; flex: 1; overflow: hidden; height: calc(100vh - 50px); }
+.main { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 50px); }
 .col { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
 .col:last-child { border-right: none; }
+.col-left { flex: 0 0 360px; min-width: 220px; max-width: 640px; }
+.col-right { flex: 0 0 300px; min-width: 220px; max-width: 560px; }
+.resize-handle { flex: 0 0 5px; cursor: col-resize; background: transparent; position: relative; z-index: 5; }
+.resize-handle:hover, .resize-handle.dragging { background: var(--accent); }
+.resize-handle::after { content: ''; position: absolute; inset: 0; left: -3px; right: -3px; }
 .col-header { padding: 10px 14px; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
 /* LEFT COL: MOCKUP */
@@ -114,7 +119,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .modal-close:hover { color: var(--text); background: #2a2a2e; }
 
 /* MIDDLE COL: APPROVAL + GRID */
-.col-mid { display: flex; flex-direction: column; overflow: hidden; }
+.col-mid { display: flex; flex-direction: column; overflow: hidden; flex: 1; min-width: 0; }
 
 /* APPROVAL AREA - top 25% */
 .approval-area { flex: 0 0 auto; border-bottom: 1px solid var(--border); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
@@ -149,8 +154,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* FEED GRID - bottom 75% */
 .feed-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 .feed-profile { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.caption-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); cursor: pointer; white-space: nowrap; }
-.caption-toggle input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+.caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
+.caption-toggle:hover { border-color: var(--accent); }
+.caption-toggle input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
 .fp-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
 .fp-name { font-size: 13px; font-weight: 500; }
 .fp-handle { font-size: 11px; color: var(--text2); }
@@ -332,7 +338,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   <div class="main">
 
     <!-- LEFT: MOCKUP -->
-    <div class="col col-left">
+    <div class="col col-left" id="col-left">
       <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Instagram Önizleme</div>
       <div class="phone-wrap">
         <div class="phone-screen">
@@ -360,8 +366,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
     </div>
 
+    <div class="resize-handle" id="resize-handle-left"></div>
+
     <!-- MIDDLE: FEED -->
-    <div class="col col-mid">
+    <div class="col col-mid" id="col-mid">
 
       <!-- FEED -->
       <div class="feed-area" style="flex:1;">
@@ -392,8 +400,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
     </div>
 
+    <div class="resize-handle" id="resize-handle-right"></div>
+
     <!-- RIGHT: COMMENTS -->
-    <div class="col col-right">
+    <div class="col col-right" id="col-right">
       <div class="col-header">Yorumlar & Revizeler</div>
       <div class="comments-list" id="comments-list">
         <div class="no-comments">Henüz yorum yok.</div>
@@ -452,6 +462,45 @@ function getImgUrl(rec) {
 let showCaptions = false;
 try { showCaptions = localStorage.getItem('showCaptions') === 'true'; } catch(e) {}
 document.getElementById('caption-toggle').checked = showCaptions;
+
+// Sürükleyerek boyutlandırma
+function initResizer(handleId, colEl, side) {
+  const handle = document.getElementById(handleId);
+  if (!handle || !colEl) return;
+  const savedWidth = (() => { try { return localStorage.getItem('colWidth_' + handleId); } catch(e) { return null; } })();
+  if (savedWidth) colEl.style.flexBasis = savedWidth;
+
+  let dragging = false, startX = 0, startWidth = 0;
+  const min = parseInt(getComputedStyle(colEl).minWidth) || 220;
+  const max = parseInt(getComputedStyle(colEl).maxWidth) || 640;
+
+  handle.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    startX = e.clientX;
+    startWidth = colEl.getBoundingClientRect().width;
+    handle.classList.add('dragging');
+    if (handle.setPointerCapture) { try { handle.setPointerCapture(e.pointerId); } catch(err) {} }
+    document.body.style.userSelect = 'none';
+  });
+  handle.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    let delta = e.clientX - startX;
+    if (side === 'right') delta = -delta;
+    const newWidth = Math.max(min, Math.min(max, startWidth + delta));
+    colEl.style.flexBasis = newWidth + 'px';
+  });
+  const endDrag = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.userSelect = '';
+    try { localStorage.setItem('colWidth_' + handleId, colEl.style.flexBasis); } catch(err) {}
+  };
+  handle.addEventListener('pointerup', endDrag);
+  handle.addEventListener('pointercancel', endDrag);
+}
+initResizer('resize-handle-left', document.getElementById('col-left'), 'left');
+initResizer('resize-handle-right', document.getElementById('col-right'), 'right');
 
 function toggleCaptions(val) {
   showCaptions = val;
