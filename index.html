@@ -153,8 +153,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .fp-name { font-size: 13px; font-weight: 500; }
 .fp-handle { font-size: 11px; color: var(--text2); }
 .feed-scroll { flex: 1; overflow-y: auto; }
-.feed-month-label { padding: 8px 12px 4px; font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); }
-.feed-month-label.past { opacity: 0.45; }
+.month-summary { display: flex; align-items: baseline; justify-content: space-between; padding: 12px 14px 6px; }
+.feed-month-label { font-size: 15px; font-weight: 600; color: var(--text); text-transform: none; letter-spacing: 0; }
+.month-count { font-size: 11px; color: var(--text3); }
 .feed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 8px 8px; }
 .feed-cell { display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: opacity 0.15s; background: #1a1a2e; border-radius: 8px; border: 1px solid var(--border); }
 .feed-cell-img { aspect-ratio: 4/5; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 18px; }
@@ -281,13 +282,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <div class="modal-caption-label" style="margin-bottom:8px;">Caption</div>
         <div class="modal-caption-text" id="modal-caption">—</div>
       </div>
-      <div>
+      <div id="modal-decision">
         <div class="modal-caption-label" style="margin-bottom:8px;">Karar Ver</div>
         <div class="modal-btn-row">
           <button class="modal-btn modal-btn-approve" onclick="modalAction('Onaylı')">✓ Onayla</button>
           <button class="modal-btn modal-btn-revize" onclick="toggleModalNote()">↩ Revize İste</button>
         </div>
       </div>
+      <div id="modal-readonly-note" style="display:none; font-size:12px; color:var(--text3); background:var(--surface2); border-radius:var(--radius-sm); padding:10px 12px;">Bu içerik yayınlandı, artık onay veya revize verilemez.</div>
       <div class="modal-note-wrap" id="modal-note-wrap">
         <textarea id="modal-note-text" rows="3" placeholder="Revize notunuzu yazın..."></textarea>
         <button class="modal-send-btn" onclick="modalAction('Revize')">Gönder</button>
@@ -364,16 +366,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
         </div>
         <div class="feed-scroll">
-          <div class="feed-month-label" id="current-month-label">—</div>
+          <div class="month-summary">
+            <div class="feed-month-label" id="current-month-label">—</div>
+            <div class="month-count" id="month-count">—</div>
+          </div>
           <div class="feed-grid" id="current-grid"></div>
-          <div class="feed-month-label past" id="prev-month-label">—</div>
-          <div class="feed-grid" id="prev-grid"></div>
         </div>
         <div class="feed-legend">
           <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Onaylı</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Beklemede</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Revize</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#555"></div>Geçmiş</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--text3)"></div>Yayınlandı</div>
         </div>
       </div>
     </div>
@@ -417,7 +420,7 @@ function fmtDate(s) {
   return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'}) + ' · ' + d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
 }
 
-function dc(s) { return s==='Onaylı'?'dot-ok':s==='Revize'?'dot-rev':'dot-wait'; }
+function dc(s) { return s==='Onaylı'?'dot-ok':s==='Revize'?'dot-rev':s==='Yayında'?'dot-past':'dot-wait'; }
 function bc(s) { return s==='Onaylı'?'badge-ok':s==='Revize'?'badge-rev':s==='Yayında'?'badge-past':'badge-wait'; }
 
 function updateStats(recs) {
@@ -435,38 +438,45 @@ function getImgUrl(rec) {
   return f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
 }
 
-function renderGrid(el, recs, past) {
+function renderGrid(el, recs) {
   el.innerHTML = '';
-  if (!recs.length) { el.innerHTML='<div class="no-content">İçerik bulunamadı.</div>'; return; }
+  if (!recs.length) { el.innerHTML='<div class="no-content">Bu ay için içerik yok.</div>'; return; }
   recs.forEach((rec, i) => {
-    const cell = document.createElement('div');
-    cell.className = 'feed-cell' + (past?' past':'') + (rec.id===selectedRecordId?' active':'');
-    const imgUrl = getImgUrl(rec);
     const status = rec.fields['Durum'] || 'Beklemede';
+    const readOnly = status === 'Yayında';
+    const cell = document.createElement('div');
+    cell.className = 'feed-cell' + (readOnly?' past':'') + (rec.id===selectedRecordId?' active':'');
+    const imgUrl = getImgUrl(rec);
 
     const imgDiv = document.createElement('div');
     imgDiv.className = 'feed-cell-img';
     if (imgUrl) {
-      imgDiv.innerHTML = '<img src="' + imgUrl + '" alt=""><div class="feed-dot ' + (past?'dot-past':dc(status)) + '"></div>';
+      imgDiv.innerHTML = '<img src="' + imgUrl + '" alt=""><div class="feed-dot ' + dc(status) + '"></div>';
     } else {
       imgDiv.style.background = BG[i%BG.length];
-      imgDiv.innerHTML = '<span>' + EM[i%EM.length] + '</span><div class="feed-dot ' + (past?'dot-past':dc(status)) + '"></div>';
+      imgDiv.innerHTML = '<span>' + EM[i%EM.length] + '</span><div class="feed-dot ' + dc(status) + '"></div>';
     }
     cell.appendChild(imgDiv);
 
-    if (!past) {
-      // Butonlar
+    if (!readOnly) {
       const btns = document.createElement('div');
       btns.className = 'feed-cell-btns';
       btns.innerHTML = '<button class="feed-btn feed-btn-ok" onclick="quickAction(event,\'' + rec.id + '\',\'Onaylı\')">✓ Onayla</button>' +
                        '<button class="feed-btn feed-btn-rev" onclick="quickRevize(event,\'' + rec.id + '\')">↩ Revize</button>';
       cell.appendChild(btns);
-
-      // Tek tık = mockup güncelle
-      imgDiv.onclick = () => selectRecord(rec, i);
-      // Çift tık = modal aç
-      imgDiv.ondblclick = () => { selectRecord(rec, i); openModal(rec, i); };
+    } else {
+      const tag = document.createElement('div');
+      tag.className = 'feed-cell-btns';
+      tag.style.justifyContent = 'center';
+      tag.style.color = 'var(--text3)';
+      tag.style.fontSize = '10px';
+      tag.textContent = '✓ Yayınlandı';
+      cell.appendChild(tag);
     }
+
+    // Her içerik, durumu ne olursa olsun tek tık + çift tık ile açılabilir
+    imgDiv.onclick = () => selectRecord(rec, i);
+    imgDiv.ondblclick = () => { selectRecord(rec, i); openModal(rec, i); };
 
     el.appendChild(cell);
   });
@@ -502,14 +512,12 @@ function selectRecord(rec, idx) {
 }
 
 function renderCurrentMonth() {
-  const cur = getRange(currentMonthOffset), prev = getRange(currentMonthOffset-1);
+  const cur = getRange(currentMonthOffset);
   const curRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
-  const prevRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=prev.start&&d<=prev.end; });
   document.getElementById('current-month-label').textContent = cur.label;
-  document.getElementById('prev-month-label').textContent = prev.label + ' · Yayınlandı';
   document.getElementById('month-label').textContent = cur.label;
-  renderGrid(document.getElementById('current-grid'), curRecs, false);
-  renderGrid(document.getElementById('prev-grid'), prevRecs, true);
+  document.getElementById('month-count').textContent = curRecs.length + (curRecs.length===1?' içerik':' içerik');
+  renderGrid(document.getElementById('current-grid'), curRecs);
   updateStats(curRecs);
 }
 
@@ -546,6 +554,9 @@ function openModal(rec, idx) {
   sb.textContent = status; sb.className = 'badge ' + bc(status);
   document.getElementById('modal-note-wrap').style.display = 'none';
   document.getElementById('modal-note-text').value = '';
+  const readOnly = status === 'Yayında';
+  document.getElementById('modal-decision').style.display = readOnly ? 'none' : 'block';
+  document.getElementById('modal-readonly-note').style.display = readOnly ? 'block' : 'none';
   document.getElementById('content-modal').classList.add('open');
 }
 

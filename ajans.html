@@ -8,13 +8,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0e0e0f; --surface: #18181b; --surface2: #222226;
-  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f0; --text2: #9a9a9f; --text3: #606065;
-  --accent: #7c6af7; --accent2: #5f50d4;
-  --green: #3ecf8e; --green-bg: rgba(62,207,142,0.1);
-  --amber: #f0a030; --amber-bg: rgba(240,160,48,0.1);
-  --red: #f05060; --red-bg: rgba(240,80,96,0.1);
+  --bg: #F6F5F1; --surface: #FFFFFF; --surface2: #F0EEE7;
+  --border: #E5E2D9; --border2: #D2CEC1;
+  --text: #24231F; --text2: #6E6C61; --text3: #9C988B;
+  --accent: #3B4B6B; --accent2: #2C3A54;
+  --green: #2F7A52; --green-bg: #E3F0E8;
+  --amber: #B5791E; --amber-bg: #FBF0DC;
+  --red: #B23A2E; --red-bg: #FBE7E2;
   --radius: 10px; --radius-sm: 6px;
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -40,6 +40,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .btn-sm:hover { color: var(--text); }
 
 .main { display: grid; grid-template-columns: 380px 1fr 300px; flex: 1; }
+
+.brand-bar { display: flex; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--border); background: var(--surface); overflow-x: auto; align-items: center; }
+.brand-chip { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+.brand-chip:hover { border-color: var(--accent); color: var(--text); }
+.brand-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 /* UPLOAD PANEL */
 .upload-panel { border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: calc(100vh - 54px); }
@@ -124,6 +129,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
 .content-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+/* İÇERİK DETAY MODAL */
+.ac-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
+.ac-modal-overlay.open { display: flex; }
+.ac-modal-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; width: 100%; max-width: 860px; max-height: 88vh; display: flex; position: relative; overflow: hidden; }
+.ac-modal-left { flex: 0 0 340px; background: var(--surface2); display: flex; align-items: center; justify-content: center; padding: 20px; border-right: 1px solid var(--border); }
+.ac-modal-img-wrap { width: 100%; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden; background: var(--surface2); display: flex; align-items: center; justify-content: center; }
+.ac-modal-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.ac-modal-right { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.ac-modal-brand { font-size: 13px; font-weight: 500; padding: 8px 11px; background: var(--surface2); border-radius: var(--radius-sm); color: var(--text2); }
+.ac-modal-btns { display: flex; gap: 10px; margin-top: auto; padding-top: 6px; }
+.modal-close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.modal-close:hover { color: var(--text); }
 .card-img-wrap { width: 100%; background: var(--surface2); overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
 .card-img-placeholder { font-size: 24px; color: var(--text3); padding: 20px; }
@@ -132,7 +150,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .card-meta { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
 .card-footer { display: flex; align-items: center; justify-content: space-between; }
 .badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 500; }
-.badge-taslak { background: rgba(255,255,255,0.06); color: var(--text2); }
+.badge-taslak { background: var(--surface2); color: var(--text2); }
 .badge-beklemede { background: var(--amber-bg); color: var(--amber); }
 .badge-onaylı { background: var(--green-bg); color: var(--green); }
 .badge-revize { background: var(--red-bg); color: var(--red); }
@@ -214,6 +232,51 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   </div>
 </div>
 
+<!-- İÇERİK DETAY / DÜZENLE MODAL -->
+<div class="ac-modal-overlay" id="ac-modal" onclick="acCloseOutside(event)">
+  <div class="ac-modal-box">
+    <button class="modal-close" onclick="acCloseModal()">✕</button>
+    <div class="ac-modal-left">
+      <div class="ac-modal-img-wrap" id="ac-modal-img-wrap">
+        <img id="ac-modal-img" alt="" style="display:none;">
+        <div class="card-img-placeholder" id="ac-modal-placeholder">🖼</div>
+      </div>
+    </div>
+    <div class="ac-modal-right">
+      <div class="field">
+        <label>İçerik Adı</label>
+        <input type="text" id="ac-modal-title">
+      </div>
+      <div class="field">
+        <label>Marka</label>
+        <div class="ac-modal-brand" id="ac-modal-brand">—</div>
+      </div>
+      <div class="field">
+        <label>Yayın Tarihi & Saati</label>
+        <input type="datetime-local" id="ac-modal-date">
+      </div>
+      <div class="field">
+        <label>Durum</label>
+        <select id="ac-modal-status">
+          <option value="Taslak">Taslak</option>
+          <option value="Beklemede">Beklemede</option>
+          <option value="Onaylı">Onaylı</option>
+          <option value="Revize">Revize</option>
+          <option value="Yayında">Yayında</option>
+        </select>
+      </div>
+      <div class="field" style="flex:1;">
+        <label>Caption</label>
+        <textarea id="ac-modal-caption" class="caption-textarea" style="min-height:140px;"></textarea>
+      </div>
+      <div class="ac-modal-btns">
+        <button class="btn-submit" onclick="acSaveModal()" style="flex:1;">Kaydet</button>
+        <button class="btn-sm" style="border-color:var(--red);color:var(--red);" onclick="acDeleteModal()">Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="app-screen">
   <div class="toast" id="toast"></div>
   <div class="topbar">
@@ -233,6 +296,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <span class="user-email" id="user-email"></span>
       <button class="btn-sm" onclick="window.firebaseSignOut()">Çıkış</button>
     </div>
+  </div>
+
+  <div class="brand-bar" id="brand-bar">
+    <div class="brand-chip active" data-brand="" onclick="switchBrand('', this)">Tüm markalar</div>
   </div>
 
   <div class="main">
@@ -298,7 +365,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <!-- CAPTION BİLGİSİ -->
       <div class="field">
         <label>Caption</label>
-        <div style="background:rgba(124,106,247,0.08);border:1px solid rgba(124,106,247,0.25);border-radius:6px;padding:10px 12px;font-size:11px;color:#9a9a9f;line-height:1.6;">
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;">
           ✨ İçerik kaydedildikten sonra AI otomatik olarak Claude, Gemini ve ChatGPT ile caption üretecek. 1-2 dakika içinde hazır olacak.
         </div>
       </div>
@@ -356,6 +423,16 @@ const CLOUD_NAME = 'dc6twehdd';
 const UPLOAD_PRESET = 'sosyal-medya-ajans';
 
 let brands = [], allContents = [], selectedFile = null, uploadedUrl = null;
+
+async function airtableCall(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); detail = j?.error?.message || j?.error?.type || ''; } catch(e) {}
+    throw new Error('Airtable ' + res.status + (detail ? ': ' + detail : ''));
+  }
+  return res;
+}
 let currentFilter = 'tümü';
 let currentFormat = { ratio: 0.8, name: 'Feed 4:5' };
 let ajansMonthOffset = null; // null = tüm aylar
@@ -558,7 +635,7 @@ async function planiIlet() {
   btn.textContent = '⏳ İletiliyor...';
   try {
     for (const rec of taslaklar) {
-      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + rec.id, {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + rec.id, {
         method: 'PATCH', headers: AT_HDR,
         body: JSON.stringify({ fields: { 'Durum': 'Beklemede', 'Mail Gönderildi mi?': false } })
       });
@@ -566,7 +643,7 @@ async function planiIlet() {
     }
     showToast('✓ Plan müşteriye iletildi! Mail gönderiliyor...');
     renderContents();
-  } catch(e) { showToast('Hata: ' + e.message); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
   btn.disabled = false;
   btn.textContent = '📤 Planı Müşteriye İlet';
 }
@@ -578,7 +655,7 @@ async function editDate(e, recId, currentDate) {
   const newDate = new Date(newDateStr);
   if (isNaN(newDate)) { showToast('Geçersiz tarih formatı'); return; }
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + recId, {
       method: 'PATCH', headers: AT_HDR,
       body: JSON.stringify({ fields: { 'Yayın Tarihi': newDate.toISOString() } })
     });
@@ -586,7 +663,7 @@ async function editDate(e, recId, currentDate) {
     if (rec) rec.fields['Yayın Tarihi'] = newDate.toISOString();
     showToast('✓ Tarih güncellendi');
     renderContents();
-  } catch(e) { showToast('Hata: ' + e.message); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 
@@ -597,6 +674,20 @@ async function loadBrands() {
   const sel = document.getElementById('marka-select');
   sel.innerHTML = '<option value="">Marka seçin...</option>' +
     brands.map(b => '<option value="' + b.id + '">' + (b.fields['Marka Adı'] || b.id) + '</option>').join('');
+
+  const bar = document.getElementById('brand-bar');
+  bar.innerHTML = '<div class="brand-chip active" data-brand="" onclick="switchBrand(\'\', this)">Tüm markalar</div>' +
+    brands.map(b => '<div class="brand-chip" data-brand="' + b.id + '" onclick="switchBrand(\'' + b.id + '\', this)">' + (b.fields['Marka Adı'] || b.id) + '</div>').join('');
+}
+
+let selectedBrandId = '';
+function switchBrand(brandId, el) {
+  selectedBrandId = brandId;
+  document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  // Yükleme formunda da aynı markayı önceden seçili yap, tekrar seçmene gerek kalmasın
+  if (brandId) document.getElementById('marka-select').value = brandId;
+  renderContents();
 }
 
 async function loadContents() {
@@ -618,7 +709,16 @@ let dragSrcId = null;
 function renderContents() {
   const grid = document.getElementById('content-grid');
   let filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
-  
+
+  // Marka filtresi
+  if (selectedBrandId) {
+    filtered = filtered.filter(r => {
+      const m = r.fields['Marka'];
+      const id = Array.isArray(m) ? m[0] : m;
+      return id === selectedBrandId;
+    });
+  }
+
   // Month filter
   if (ajansMonthOffset !== null) {
     const range = getAjansMonthRange(ajansMonthOffset);
@@ -690,6 +790,10 @@ function renderContents() {
       card.classList.remove('drag-over');
       if (dragSrcId === rec.id) return;
       reorderCards(dragSrcId, rec.id);
+    });
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.card-date-edit')) return;
+      openAcModal(rec.id);
     });
 
     grid.appendChild(card);
@@ -798,7 +902,7 @@ async function sendRevReply(revId) {
   const val = input.value.trim();
   if (!val) return;
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
       method: 'PATCH', headers: AT_HDR,
       body: JSON.stringify({ fields: { 'Ajans Yanıtı': val } })
     });
@@ -806,12 +910,84 @@ async function sendRevReply(revId) {
     if (rev) rev.fields['Ajans Yanıtı'] = val;
     renderRevizes();
     showToast('✓ Yanıt gönderildi');
-  } catch(e) { showToast('Hata oluştu.'); }
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+let acCurrentId = null;
+
+function openAcModal(recId) {
+  const rec = allContents.find(r => r.id === recId);
+  if (!rec) return;
+  acCurrentId = recId;
+  const f = rec.fields;
+  const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
+  const imgEl = document.getElementById('ac-modal-img');
+  const ph = document.getElementById('ac-modal-placeholder');
+  if (imgUrl) { imgEl.src = imgUrl; imgEl.style.display = 'block'; ph.style.display = 'none'; }
+  else { imgEl.style.display = 'none'; ph.style.display = 'flex'; }
+
+  document.getElementById('ac-modal-title').value = f['İçerik Adı'] || '';
+  const m = f['Marka'];
+  const id = Array.isArray(m) ? m[0] : m;
+  const brandRec = brands.find(b => b.id === id);
+  document.getElementById('ac-modal-brand').textContent = brandRec ? (brandRec.fields['Marka Adı'] || '—') : '—';
+  document.getElementById('ac-modal-date').value = f['Yayın Tarihi'] ? f['Yayın Tarihi'].slice(0,16) : '';
+  document.getElementById('ac-modal-status').value = f['Durum'] || 'Taslak';
+  document.getElementById('ac-modal-caption').value = f['Onaylı Caption'] || f['AI Caption Taslak'] || '';
+
+  document.getElementById('ac-modal').classList.add('open');
+}
+
+function acCloseModal() {
+  document.getElementById('ac-modal').classList.remove('open');
+  acCurrentId = null;
+}
+
+function acCloseOutside(e) {
+  if (e.target === document.getElementById('ac-modal')) acCloseModal();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') acCloseModal();
+});
+
+async function acSaveModal() {
+  if (!acCurrentId) return;
+  const title = document.getElementById('ac-modal-title').value.trim();
+  const dateVal = document.getElementById('ac-modal-date').value;
+  const status = document.getElementById('ac-modal-status').value;
+  const caption = document.getElementById('ac-modal-caption').value;
+  const fields = { 'İçerik Adı': title, 'Durum': status, 'AI Caption Taslak': caption };
+  if (dateVal) fields['Yayın Tarihi'] = new Date(dateVal).toISOString();
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
+      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields })
+    });
+    const rec = allContents.find(r => r.id === acCurrentId);
+    if (rec) Object.assign(rec.fields, fields);
+    showToast('✓ İçerik güncellendi');
+    acCloseModal();
+    renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+async function acDeleteModal() {
+  if (!acCurrentId) return;
+  if (!confirm('Bu içeriği silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) return;
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
+      method: 'DELETE', headers: AT_HDR
+    });
+    allContents = allContents.filter(r => r.id !== acCurrentId);
+    showToast('İçerik silindi');
+    acCloseModal();
+    renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 async function toggleRevSolved(revId, solved) {
   try {
-    await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler/' + revId, {
       method: 'PATCH', headers: AT_HDR,
       body: JSON.stringify({ fields: { 'Durum': solved ? 'çözüldü' : 'Açık' } })
     });
@@ -819,7 +995,7 @@ async function toggleRevSolved(revId, solved) {
     if (rev) rev.fields['Durum'] = solved ? 'çözüldü' : 'Açık';
     renderRevizes();
     showToast(solved ? '✓ Çözüldü' : 'Açık olarak işaretlendi');
-  } catch(e) { showToast('Hata.'); }
+  } catch(e) { showToast(e.message || 'Hata.'); console.error(e); }
 }
 
 function renderNotifications() {
