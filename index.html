@@ -645,6 +645,7 @@ function renderCurrentMonth() {
   document.getElementById('month-count').textContent = curRecs.length + (curRecs.length===1?' içerik':' içerik');
   renderGrid(document.getElementById('current-grid'), curRecs);
   updateStats(curRecs);
+  renderAllComments();
 }
 
 function changeMonth(dir) { currentMonthOffset += dir; renderCurrentMonth(); }
@@ -787,10 +788,18 @@ async function quickRevize(e, recId) {
 // COMMENTS
 function renderAllComments() {
   const list = document.getElementById('comments-list');
-  const revizes = allRevizes;
+  const cur = getRange(currentMonthOffset);
+  const revizes = allRevizes.filter(rev => {
+    const icerikIds = rev.fields['İçerik'];
+    const icerikId = Array.isArray(icerikIds) ? icerikIds[0] : icerikIds;
+    const icerikRec = allRecords.find(r => r.id === icerikId);
+    if (!icerikRec || !icerikRec.fields['Yayın Tarihi']) return false;
+    const d = new Date(icerikRec.fields['Yayın Tarihi']);
+    return d >= cur.start && d <= cur.end;
+  });
 
   if (!revizes.length) {
-    list.innerHTML = '<div class="no-comments">Henüz yorum yok.</div>';
+    list.innerHTML = '<div class="no-comments">Bu ay için yorum yok.</div>';
     return;
   }
 
