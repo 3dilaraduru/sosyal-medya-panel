@@ -334,8 +334,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <input type="text" id="nb-email" placeholder="musteri@ornek.com">
       </div>
       <div class="field">
-        <label>Logo URL</label>
-        <input type="text" id="nb-logo" placeholder="https://... (logo görselinin linki)">
+        <label>Logo</label>
+        <div class="drop-zone-wrap">
+          <div class="drop-zone" id="nb-logo-zone" style="aspect-ratio:1/1; max-width:130px;">
+            <input type="file" id="nb-logo-file" accept="image/*">
+            <div class="drop-placeholder" id="nb-logo-placeholder">
+              <div class="drop-icon">🖼</div>
+              <div class="drop-text" style="font-size:11px;">Sürükle bırak veya tıkla</div>
+              <div class="drop-sub" style="font-size:10px;">JPG, PNG</div>
+            </div>
+            <img class="preview-img" id="nb-logo-preview" alt="" style="display:none;">
+            <button class="change-overlay" id="nb-logo-change-btn" onclick="resetNbLogo(event)" style="display:none;">✕ Değiştir</button>
+          </div>
+        </div>
+        <input type="hidden" id="nb-logo" value="">
       </div>
       <div style="font-size:11px; color:var(--text3);">Müşteri, bu e-posta ile Google hesabından giriş yaptığında kendi içeriklerini ve kendi logosunu görecek.</div>
       <button class="btn-submit" onclick="saveNewBrand()" id="nb-save-btn">Müşteriyi Kaydet</button>
@@ -671,11 +683,11 @@ function resetFile(e) {
 }
 
 // CLOUDINARY
-async function uploadToCloudinary(file) {
+async function uploadToCloudinary(file, folder = 'icerikler') {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
-  fd.append('folder', 'icerikler');
+  fd.append('folder', folder);
   setProgress('Görsel Cloudinary\'ye yükleniyor...', 30);
   const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/auto/upload', { method: 'POST', body: fd });
   const data = await res.json();
@@ -1082,6 +1094,42 @@ async function acDeleteModal() {
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
+// LOGO YÜKLEME (Yeni Müşteri / Düzenle penceresi)
+let nbLogoFile = null;
+const nbLogoZone = document.getElementById('nb-logo-zone');
+const nbLogoFileInput = document.getElementById('nb-logo-file');
+const nbLogoPreview = document.getElementById('nb-logo-preview');
+
+nbLogoZone.addEventListener('dragover', e => { e.preventDefault(); nbLogoZone.classList.add('dragover'); });
+nbLogoZone.addEventListener('dragleave', () => nbLogoZone.classList.remove('dragover'));
+nbLogoZone.addEventListener('drop', e => {
+  e.preventDefault(); nbLogoZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleNbLogoFile(e.dataTransfer.files[0]);
+});
+nbLogoFileInput.addEventListener('change', e => { if (e.target.files[0]) handleNbLogoFile(e.target.files[0]); });
+
+function handleNbLogoFile(file) {
+  nbLogoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    nbLogoPreview.src = e.target.result;
+    nbLogoPreview.style.display = 'block';
+    document.getElementById('nb-logo-placeholder').style.display = 'none';
+    document.getElementById('nb-logo-change-btn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetNbLogo(e) {
+  if (e) e.stopPropagation();
+  nbLogoFile = null;
+  document.getElementById('nb-logo').value = '';
+  nbLogoPreview.style.display = 'none'; nbLogoPreview.src = '';
+  document.getElementById('nb-logo-placeholder').style.display = 'block';
+  document.getElementById('nb-logo-change-btn').style.display = 'none';
+  nbLogoFileInput.value = '';
+}
+
 let editingBrandId = null;
 
 function openNewBrandModal() {
@@ -1091,7 +1139,7 @@ function openNewBrandModal() {
   document.getElementById('nb-name').value = '';
   document.getElementById('nb-ig').value = '';
   document.getElementById('nb-email').value = '';
-  document.getElementById('nb-logo').value = '';
+  resetNbLogo();
   document.getElementById('new-brand-modal').classList.add('open');
 }
 
@@ -1105,7 +1153,15 @@ function openEditBrandModal(brandId) {
   document.getElementById('nb-name').value = f['Marka Adı'] || '';
   document.getElementById('nb-ig').value = f['Instagram Hesabı'] || '';
   document.getElementById('nb-email').value = f['Müşteri E-postası'] || '';
-  document.getElementById('nb-logo').value = f['Logo URL'] || '';
+  resetNbLogo();
+  const existingLogo = f['Logo URL'] || '';
+  document.getElementById('nb-logo').value = existingLogo;
+  if (existingLogo) {
+    nbLogoPreview.src = existingLogo;
+    nbLogoPreview.style.display = 'block';
+    document.getElementById('nb-logo-placeholder').style.display = 'none';
+    document.getElementById('nb-logo-change-btn').style.display = 'block';
+  }
   document.getElementById('new-brand-modal').classList.add('open');
 }
 
@@ -1122,11 +1178,20 @@ async function saveNewBrand() {
   const name = document.getElementById('nb-name').value.trim();
   const ig = document.getElementById('nb-ig').value.trim().replace(/^@/, '');
   const email = document.getElementById('nb-email').value.trim();
-  const logo = document.getElementById('nb-logo').value.trim();
   if (!name) { showToast('Marka adı gerekli'); return; }
   if (!email) { showToast('Müşteri e-postası gerekli'); return; }
-  const fields = { 'Marka Adı': name, 'Instagram Hesabı': ig, 'Müşteri E-postası': email, 'Logo URL': logo };
+  const saveBtn = document.getElementById('nb-save-btn');
+  const originalBtnText = saveBtn.textContent;
   try {
+    let logo = document.getElementById('nb-logo').value.trim();
+    if (nbLogoFile) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Logo yükleniyor...';
+      logo = await uploadToCloudinary(nbLogoFile, 'logolar');
+      document.getElementById('nb-logo').value = logo;
+    }
+    const fields = { 'Marka Adı': name, 'Instagram Hesabı': ig, 'Müşteri E-postası': email, 'Logo URL': logo };
+    saveBtn.textContent = 'Kaydediliyor...';
     if (editingBrandId) {
       await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Markalar/' + editingBrandId, {
         method: 'PATCH', headers: AT_HDR,
@@ -1152,6 +1217,8 @@ async function saveNewBrand() {
       }
     }
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+  saveBtn.disabled = false;
+  saveBtn.textContent = originalBtnText;
 }
 
 async function toggleRevSolved(revId, solved) {
