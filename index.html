@@ -183,8 +183,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .highlight-ring-inner img, .highlight-ring-inner video { width: 100%; height: 100%; object-fit: cover; }
 .highlight-name { font-size: 12px; color: var(--text2); text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .story-progress { display: flex; gap: 4px; margin-bottom: 8px; }
-.story-progress-seg { flex: 1; height: 2.5px; border-radius: 2px; background: rgba(255,255,255,0.3); overflow: hidden; }
-.story-progress-seg.done { background: #fff; }
+.story-progress-seg { flex: 1; height: 2.5px; border-radius: 2px; background: rgba(255,255,255,0.3); overflow: hidden; position: relative; }
+.story-progress-fill { position: absolute; top:0; left:0; bottom:0; width: 0%; background: #fff; }
+.story-progress-fill.animate { transition: width 10s linear; width: 100%; }
 #story-media-slot img, #story-media-slot video { width: 100%; height: 100%; object-fit: cover; }
 .caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
 .caption-toggle:hover { border-color: var(--accent); }
@@ -668,6 +669,8 @@ function toggleCaptions(val) {
 
 let storyViewerItems = [];
 let storyViewerIdx = 0;
+let storyTimer = null;
+const STORY_DURATION = 10000;
 
 function openHighlightViewer(idsCsv) {
   const ids = idsCsv.split(',');
@@ -680,15 +683,30 @@ function openHighlightViewer(idsCsv) {
 }
 function renderStoryProgress() {
   const el = document.getElementById('story-progress');
-  el.innerHTML = storyViewerItems.map((_, i) => '<div class="story-progress-seg' + (i <= storyViewerIdx ? ' done' : '') + '"></div>').join('');
+  el.innerHTML = storyViewerItems.map(() => '<div class="story-progress-seg"><div class="story-progress-fill"></div></div>').join('');
 }
 function showStoryAt(idx) {
+  clearTimeout(storyTimer);
   storyViewerIdx = idx;
   const item = storyViewerItems[idx];
   const imgUrl = getImgUrl(item);
-  document.getElementById('story-media-slot').innerHTML = imgUrl ? mediaTag(imgUrl, '') : '';
+  document.getElementById('story-media-slot').innerHTML = imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : '';
   document.getElementById('story-caption').textContent = item.fields['İçerik Adı'] || '';
-  document.querySelectorAll('.story-progress-seg').forEach((seg, i) => seg.classList.toggle('done', i <= idx));
+
+  const fills = document.querySelectorAll('.story-progress-fill');
+  fills.forEach((fill, i) => {
+    fill.classList.remove('animate');
+    fill.style.transition = 'none';
+    fill.style.width = i < idx ? '100%' : '0%';
+  });
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const cur = fills[idx];
+      if (cur) { cur.style.transition = ''; cur.classList.add('animate'); }
+    });
+  });
+
+  storyTimer = setTimeout(nextStory, STORY_DURATION);
 }
 function nextStory() {
   if (storyViewerIdx < storyViewerItems.length - 1) showStoryAt(storyViewerIdx + 1);
@@ -696,8 +714,10 @@ function nextStory() {
 }
 function prevStory() {
   if (storyViewerIdx > 0) showStoryAt(storyViewerIdx - 1);
+  else showStoryAt(0);
 }
 function closeHighlightViewer() {
+  clearTimeout(storyTimer);
   document.getElementById('story-viewer').classList.remove('open');
   document.getElementById('story-media-slot').innerHTML = '';
   storyViewerItems = [];
