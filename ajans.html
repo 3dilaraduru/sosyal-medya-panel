@@ -42,6 +42,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .team-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface2); border-radius: var(--radius-sm); font-size: 12px; }
 .team-row-name { font-weight: 500; }
 .team-row-email { color: var(--text3); font-size: 11px; }
+.check-list { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; max-height: 150px; overflow-y: auto; }
+.check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); cursor: pointer; }
+.check-item input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
 .btn-sm { padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .btn-sm:hover { color: var(--text); }
 
@@ -56,6 +59,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .brand-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .brand-chip-edit { margin-left: 7px; opacity: 0.5; font-size: 11px; }
 .brand-chip-edit:hover { opacity: 1; }
+.brand-chip-logo { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; margin-right: 6px; vertical-align: middle; }
 .brand-chip-add { background: transparent; border-style: dashed; color: var(--accent); }
 .brand-chip-add:hover { background: var(--surface2); }
 
@@ -130,6 +134,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .list-panel { padding: 20px; overflow-y: auto; max-height: calc(100vh - 54px); flex: 1; min-width: 0; }
 .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .list-title { font-family: var(--font-voice); font-size: 17px; font-weight: 600; }
+.active-brand-banner { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 0 18px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
+.active-brand-logo { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-family: var(--font-voice); font-size: 16px; }
+.active-brand-logo img { width: 100%; height: 100%; object-fit: cover; }
+.active-brand-name { font-family: var(--font-voice); font-size: 26px; font-weight: 600; color: var(--text); }
 .filter-tabs { display: flex; gap: 4px; }
 .caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
 .caption-toggle:hover { border-color: var(--accent); }
@@ -363,6 +371,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </div>
         <input type="hidden" id="nb-logo" value="">
       </div>
+      <div class="field">
+        <label>Marka Rengi</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="color" id="nb-color" value="#1E2D4D" style="width:44px; height:34px; padding:2px; border:1px solid var(--border2); border-radius:var(--radius-sm); cursor:pointer; background:var(--surface);">
+          <span style="font-size:11px; color:var(--text3);">Bu markanın sekmesi ve başlığı bu renkte görünecek.</span>
+        </div>
+      </div>
       <div style="font-size:11px; color:var(--text3);">Müşteri, bu e-posta ile Google hesabından giriş yaptığında kendi içeriklerini ve kendi logosunu görecek.</div>
       <button class="btn-sm" id="nb-copy-link-btn" onclick="copyClientLink()" style="display:none;">🔗 Müşteri Linkini Kopyala</button>
       <button class="btn-submit" onclick="saveNewBrand()" id="nb-save-btn">Müşteriyi Kaydet</button>
@@ -389,12 +404,29 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
       <div class="field">
         <label>Rol</label>
-        <select id="team-role">
-          <option value="Ekip Üyesi">Ekip Üyesi — içerik ekler, müşteriye ileti admin onayından geçer</option>
-          <option value="Admin">Admin — her şeyi yapabilir, müşteriye ileti onaylar</option>
+        <select id="team-role" onchange="toggleTeamPermFields(this.value)">
+          <option value="Ekip Üyesi">Ekip Üyesi — yetkileri aşağıdan seçin</option>
+          <option value="Admin">Admin — her şeyi yapabilir, kısıtlama gerekmez</option>
         </select>
       </div>
+      <div class="field" id="team-brands-field">
+        <label>Atanan Marka(lar)</label>
+        <div class="check-list" id="team-brands-list"></div>
+        <div style="font-size:10px; color:var(--text3);">Hiçbiri seçilmezse tüm markaları görür.</div>
+      </div>
+      <div class="field" id="team-perms-field">
+        <label>Yetkiler</label>
+        <div class="check-list">
+          <label class="check-item"><input type="checkbox" value="İçerik Ekleme" checked> İçerik Ekleme</label>
+          <label class="check-item"><input type="checkbox" value="İçerik Düzenleme"> İçerik Düzenleme</label>
+          <label class="check-item"><input type="checkbox" value="İçerik Silme"> İçerik Silme</label>
+          <label class="check-item"><input type="checkbox" value="Planı Müşteriye İlet"> Planı Müşteriye İlet</label>
+          <label class="check-item"><input type="checkbox" value="Marka Yönetimi"> Marka Yönetimi</label>
+          <label class="check-item"><input type="checkbox" value="Ekip Yönetimi"> Ekip Yönetimi</label>
+        </div>
+      </div>
       <button class="btn-submit" onclick="saveTeamMember()">Ekle</button>
+      <div id="team-perms-msg" style="display:none; font-size:11px; color:var(--text3);">Admin rolü tüm yetkilere otomatik sahiptir.</div>
     </div>
   </div>
 </div>
@@ -507,6 +539,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="resize-handle" id="resize-handle-left"></div>
 
     <div class="list-panel">
+      <div class="active-brand-banner" id="active-brand-banner" style="display:none;">
+        <div class="active-brand-logo" id="active-brand-logo"></div>
+        <div class="active-brand-name" id="active-brand-name">—</div>
+      </div>
       <div class="list-header">
         <div class="list-title" id="list-title">Tüm İçerikler</div>
         <label class="caption-toggle">
@@ -743,6 +779,7 @@ async function uploadToCloudinary(file, folder = 'icerikler') {
 
 // SUBMIT
 async function submitContent() {
+  if (!hasPermission('İçerik Ekleme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   const markaId = document.getElementById('marka-select').value;
   const tarihi = document.getElementById('yayin-tarihi').value;
   const adi = document.getElementById('icerik-adi').value.trim();
@@ -790,7 +827,7 @@ function resetForm() {
 }
 
 async function planiIlet() {
-  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
+  if (!hasPermission('Planı Müşteriye İlet')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   const btn = document.getElementById('ilet-btn');
   // Taslak durumundaki içerikleri Beklemede yap
   const taslaklar = allContents.filter(r => r.fields['Durum'] === 'Taslak');
@@ -817,29 +854,71 @@ async function planiIlet() {
 async function loadBrands() {
   const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
   const data = await res.json();
-  brands = data.records || [];
+  let allBrands = data.records || [];
+  if (currentUserRole !== 'Admin' && currentUserBrands.length > 0) {
+    allBrands = allBrands.filter(b => currentUserBrands.includes(b.fields['Marka Adı']));
+  }
+  brands = allBrands;
   const sel = document.getElementById('marka-select');
   sel.innerHTML = '<option value="">Marka seçin...</option>' +
     brands.map(b => '<option value="' + b.id + '">' + (b.fields['Marka Adı'] || b.id) + '</option>').join('');
 
-  const isAdmin = currentUserRole === 'Admin';
+  const isAdmin = hasPermission('Marka Yönetimi');
+  const restricted = currentUserRole !== 'Admin' && currentUserBrands.length > 0;
   const bar = document.getElementById('brand-bar');
-  bar.innerHTML = '<div class="brand-chip' + (selectedBrandId===''?' active':'') + '" data-brand="" onclick="switchBrand(\'\', this)">Tüm markalar</div>' +
-    brands.map(b => '<div class="brand-chip' + (selectedBrandId===b.id?' active':'') + '" data-brand="' + b.id + '" onclick="switchBrand(\'' + b.id + '\', this)">' +
-      (b.fields['Marka Adı'] || b.id) +
-      (isAdmin ? '<span class="brand-chip-edit" title="Marka ayarları" onclick="event.stopPropagation(); openEditBrandModal(\'' + b.id + '\')">✎</span>' : '') +
-    '</div>').join('') +
+  bar.innerHTML = (restricted ? '' : '<div class="brand-chip' + (selectedBrandId===''?' active':'') + '" data-brand="" onclick="switchBrand(\'\', this)">Tüm markalar</div>') +
+    brands.map(b => {
+      const active = selectedBrandId === b.id;
+      const color = b.fields['Marka Rengi'] || '';
+      const style = active && color ? ' style="background:' + color + ';border-color:' + color + ';"' : '';
+      const logoUrl = b.fields['Logo URL'] || '';
+      const logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="" class="brand-chip-logo">' : '';
+      return '<div class="brand-chip' + (active?' active':'') + '" data-brand="' + b.id + '"' + style + ' onclick="switchBrand(\'' + b.id + '\', this)">' +
+        logoHtml + (b.fields['Marka Adı'] || b.id) +
+        (isAdmin ? '<span class="brand-chip-edit" title="Marka ayarları" onclick="event.stopPropagation(); openEditBrandModal(\'' + b.id + '\')">✎</span>' : '') +
+      '</div>';
+    }).join('') +
     (isAdmin ? '<div class="brand-chip brand-chip-add" onclick="openNewBrandModal()">+ Yeni Müşteri</div>' : '');
+  if (restricted && !selectedBrandId && brands.length) {
+    selectedBrandId = brands[0].id;
+    const chip = document.querySelector('.brand-chip[data-brand="' + selectedBrandId + '"]');
+    if (chip) chip.classList.add('active');
+  }
+  renderActiveBrandBanner();
 }
 
 let selectedBrandId = '';
 function switchBrand(brandId, el) {
   selectedBrandId = brandId;
-  document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.brand-chip').forEach(c => { c.classList.remove('active'); c.style.background = ''; c.style.borderColor = ''; });
   el.classList.add('active');
+  const brand = brands.find(b => b.id === brandId);
+  if (brand && brand.fields['Marka Rengi']) {
+    el.style.background = brand.fields['Marka Rengi'];
+    el.style.borderColor = brand.fields['Marka Rengi'];
+  }
   // Yükleme formunda da aynı markayı önceden seçili yap, tekrar seçmene gerek kalmasın
   if (brandId) document.getElementById('marka-select').value = brandId;
   renderContents();
+  renderActiveBrandBanner();
+}
+
+function renderActiveBrandBanner() {
+  const banner = document.getElementById('active-brand-banner');
+  if (!selectedBrandId) { banner.style.display = 'none'; return; }
+  const brand = brands.find(b => b.id === selectedBrandId);
+  if (!brand) { banner.style.display = 'none'; return; }
+  const f = brand.fields;
+  const color = f['Marka Rengi'] || '';
+  banner.style.display = 'flex';
+  const logoEl = document.getElementById('active-brand-logo');
+  const logoUrl = f['Logo URL'] || '';
+  if (logoUrl) { logoEl.innerHTML = '<img src="' + logoUrl + '" alt="">'; }
+  else { logoEl.textContent = (f['Marka Adı'] || '?')[0].toUpperCase(); }
+  logoEl.style.background = color || '';
+  const nameEl = document.getElementById('active-brand-name');
+  nameEl.textContent = f['Marka Adı'] || '—';
+  nameEl.style.color = color || '';
 }
 
 async function loadContents() {
@@ -1110,6 +1189,7 @@ document.addEventListener('keydown', function(e) {
 
 async function acSaveModal() {
   if (!acCurrentId) return;
+  if (!hasPermission('İçerik Düzenleme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   const title = document.getElementById('ac-modal-title').value.trim();
   const dateVal = document.getElementById('ac-modal-date').value;
   const status = document.getElementById('ac-modal-status').value;
@@ -1130,6 +1210,7 @@ async function acSaveModal() {
 
 async function acDeleteModal() {
   if (!acCurrentId) return;
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   if (!(await showConfirm('Bu içeriği silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', { okText: 'Sil' }))) return;
   try {
     await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
@@ -1181,11 +1262,9 @@ function resetNbLogo(e) {
 let editingBrandId = null;
 
 function copyClientLink() {
-  const name = document.getElementById('nb-name').value.trim() || 'Marka';
   const url = window.location.origin + window.location.pathname.replace(/ajans\.html$/, '');
-  const text = name + ' için içerik onay paneliniz hazır!\n' + url + '\nGoogle hesabınızla giriş yapabilirsiniz.';
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(url).then(() => {
       showToast('✓ Link panoya kopyalandı');
     }).catch(() => {
       showToast('Kopyalanamadı: ' + url);
@@ -1196,7 +1275,7 @@ function copyClientLink() {
 }
 
 function openNewBrandModal() {
-  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
+  if (!hasPermission('Marka Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   editingBrandId = null;
   document.getElementById('nb-modal-title').textContent = 'Yeni müşteri ekle';
   document.getElementById('nb-save-btn').textContent = 'Müşteriyi Kaydet';
@@ -1204,12 +1283,13 @@ function openNewBrandModal() {
   document.getElementById('nb-name').value = '';
   document.getElementById('nb-ig').value = '';
   document.getElementById('nb-email').value = '';
+  document.getElementById('nb-color').value = '#1E2D4D';
   resetNbLogo();
   document.getElementById('new-brand-modal').classList.add('open');
 }
 
 function openEditBrandModal(brandId) {
-  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
+  if (!hasPermission('Marka Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   const brand = brands.find(b => b.id === brandId);
   if (!brand) return;
   editingBrandId = brandId;
@@ -1220,6 +1300,7 @@ function openEditBrandModal(brandId) {
   document.getElementById('nb-name').value = f['Marka Adı'] || '';
   document.getElementById('nb-ig').value = f['Instagram Hesabı'] || '';
   document.getElementById('nb-email').value = f['Müşteri E-postası'] || '';
+  document.getElementById('nb-color').value = f['Marka Rengi'] || '#1E2D4D';
   resetNbLogo();
   const existingLogo = f['Logo URL'] || '';
   document.getElementById('nb-logo').value = existingLogo;
@@ -1242,7 +1323,7 @@ function closeNewBrandOutside(e) {
 }
 
 async function saveNewBrand() {
-  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
+  if (!hasPermission('Marka Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   const name = document.getElementById('nb-name').value.trim();
   const ig = document.getElementById('nb-ig').value.trim().replace(/^@/, '');
   const email = document.getElementById('nb-email').value.trim();
@@ -1258,7 +1339,7 @@ async function saveNewBrand() {
       logo = await uploadToCloudinary(nbLogoFile, 'logolar');
       document.getElementById('nb-logo').value = logo;
     }
-    const fields = { 'Marka Adı': name, 'Instagram Hesabı': ig, 'Müşteri E-postası': email, 'Logo URL': logo };
+    const fields = { 'Marka Adı': name, 'Instagram Hesabı': ig, 'Müşteri E-postası': email, 'Logo URL': logo, 'Marka Rengi': document.getElementById('nb-color').value };
     saveBtn.textContent = 'Kaydediliyor...';
     if (editingBrandId) {
       await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Markalar/' + editingBrandId, {
@@ -1348,29 +1429,38 @@ function renderNotifications() {
 
 let currentUserRole = null;
 
-async function checkUserRole(email) {
+let currentUserBrands = [];
+let currentUserPermissions = [];
+
+function hasPermission(perm) {
+  if (currentUserRole === 'Admin') return true;
+  return currentUserPermissions.includes(perm);
+}
+
+async function checkUserAccess(email) {
   try {
     const formula = encodeURIComponent('{E-posta} = "' + email + '"');
     const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar?filterByFormula=' + formula, { headers: AT_HDR });
     if (!res.ok) {
       // Kullanıcılar tablosu henüz yok / erişilemiyor -> kilitlenmeyi önlemek için Admin say
-      return 'Admin';
+      return { role: 'Admin', brands: [], permissions: [] };
     }
     const data = await res.json();
     if (data.records && data.records.length > 0) {
-      return data.records[0].fields['Rol'] || 'Ekip Üyesi';
+      const f = data.records[0].fields;
+      return { role: f['Rol'] || 'Ekip Üyesi', brands: f['Atanan Markalar'] || [], permissions: f['Yetkiler'] || [] };
     }
     return null; // tablo var ama bu e-posta kayıtlı değil -> erişim yok
   } catch(e) {
     console.error(e);
-    return 'Admin';
+    return { role: 'Admin', brands: [], permissions: [] };
   }
 }
 
 function applyRolePermissions(role) {
   const isAdmin = role === 'Admin';
-  document.getElementById('team-btn').style.display = isAdmin ? 'inline-flex' : 'none';
-  document.getElementById('ilet-btn').style.display = isAdmin ? 'inline-flex' : 'none';
+  document.getElementById('team-btn').style.display = hasPermission('Ekip Yönetimi') ? 'inline-flex' : 'none';
+  document.getElementById('ilet-btn').style.display = hasPermission('Planı Müşteriye İlet') ? 'inline-flex' : 'none';
   const badge = document.getElementById('user-role-badge');
   badge.textContent = role;
   badge.className = 'role-badge' + (isAdmin ? ' admin' : '');
@@ -1393,11 +1483,27 @@ function renderTeamList() {
 }
 
 let teamMembers = [];
+function toggleTeamPermFields(role) {
+  const show = role !== 'Admin';
+  document.getElementById('team-brands-field').style.display = show ? 'flex' : 'none';
+  document.getElementById('team-perms-field').style.display = show ? 'flex' : 'none';
+  document.getElementById('team-perms-msg').style.display = show ? 'none' : 'block';
+}
+
+function renderTeamBrandsList() {
+  const el = document.getElementById('team-brands-list');
+  if (!brands.length) { el.innerHTML = '<div style="font-size:11px;color:var(--text3);">Henüz marka eklenmedi.</div>'; return; }
+  el.innerHTML = brands.map(b => '<label class="check-item"><input type="checkbox" value="' + (b.fields['Marka Adı']||b.id) + '"> ' + (b.fields['Marka Adı']||b.id) + '</label>').join('');
+}
+
 function openTeamModal() {
-  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
+  if (!hasPermission('Ekip Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   document.getElementById('team-name').value = '';
   document.getElementById('team-email').value = '';
   document.getElementById('team-role').value = 'Ekip Üyesi';
+  renderTeamBrandsList();
+  toggleTeamPermFields('Ekip Üyesi');
+  document.querySelectorAll('#team-perms-field input[type=checkbox]').forEach(cb => cb.checked = cb.value === 'İçerik Ekleme');
   renderTeamList();
   document.getElementById('team-modal').classList.add('open');
 }
@@ -1409,10 +1515,12 @@ async function saveTeamMember() {
   const email = document.getElementById('team-email').value.trim();
   const role = document.getElementById('team-role').value;
   if (!email) { showToast('E-posta gerekli'); return; }
+  const assignedBrands = [...document.querySelectorAll('#team-brands-list input:checked')].map(cb => cb.value);
+  const permissions = [...document.querySelectorAll('#team-perms-field input:checked')].map(cb => cb.value);
   try {
     await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', {
       method: 'POST', headers: AT_HDR,
-      body: JSON.stringify({ fields: { 'Ad': name, 'E-posta': email, 'Rol': role } })
+      body: JSON.stringify({ typecast: true, fields: { 'Ad': name, 'E-posta': email, 'Rol': role, 'Atanan Markalar': assignedBrands, 'Yetkiler': permissions } })
     });
     showToast('✓ ' + (name || email) + ' eklendi');
     await loadTeam();
@@ -1423,18 +1531,20 @@ async function saveTeamMember() {
 }
 
 window.initApp = async function(email) {
-  const role = await checkUserRole(email);
-  if (!role) {
+  const access = await checkUserAccess(email);
+  if (!access) {
     document.getElementById('access-denied-email').textContent = email;
     document.getElementById('access-denied-screen').style.display = 'flex';
     document.getElementById('app-screen').style.display = 'none';
     return;
   }
-  currentUserRole = role;
+  currentUserRole = access.role;
+  currentUserBrands = access.brands;
+  currentUserPermissions = access.permissions;
   document.getElementById('access-denied-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'flex';
   document.getElementById('user-email').textContent = email;
-  applyRolePermissions(role);
+  applyRolePermissions(access.role);
   await loadTeam();
   document.getElementById('caption-toggle').checked = showAcCaptions;
   await loadBrands();
