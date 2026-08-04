@@ -145,8 +145,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .list-panel { padding: 20px; overflow-y: auto; max-height: calc(100vh - 54px); flex: 1; min-width: 0; }
 .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
 .bulk-bar { display: flex; align-items: center; gap: 10px; padding: 8px 0 14px; font-size: 12px; color: var(--text2); }
+.undo-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--surface2); border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 12px; }
+.search-row { margin-bottom: 12px; }
+.search-row input { width: 100%; max-width: 320px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+.search-row input:focus { outline: none; border-color: var(--accent); }
 .card-select-check { position: absolute; top: 6px; left: 6px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; z-index: 3; cursor: pointer; }
 .format-badge { position: absolute; top: 6px; right: 6px; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+.revize-count-badge { position: absolute; bottom: 6px; left: 6px; z-index: 2; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 17px; height: 17px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
 .carousel-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .carousel-thumb { position: relative; width: 52px; height: 52px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border2); }
 .carousel-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -163,7 +168,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .highlights-row { display: flex; gap: 16px; padding: 4px 0 18px; overflow-x: auto; }
 .highlight-bubble { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; width: 62px; }
 .highlight-ring { width: 58px; height: 58px; border-radius: 50%; padding: 2.5px; background: linear-gradient(45deg, #d6a13a, #b23a2e, #7c5a9e); }
-.highlight-ring-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid var(--surface); background: var(--surface2); display: flex; align-items: center; justify-content: center; }
+.highlight-ring-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid var(--surface); background: var(--surface2); display: flex; align-items: center; justify-content: center; position: relative; }
 .highlight-ring-inner img, .highlight-ring-inner video { width: 100%; height: 100%; object-fit: cover; }
 .highlight-name { font-size: 11px; color: var(--text2); text-align: center; max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .highlight-add-tile { width: 58px; height: 58px; border-radius: 50%; border: 1.5px dashed var(--border2); display: flex; align-items: center; justify-content: center; color: var(--text3); }
@@ -301,6 +306,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .content-card { cursor: grab; transition: transform 0.15s, opacity 0.15s; }
 .content-card.dragging { opacity: 0.4; cursor: grabbing; transform: scale(0.97); }
 .content-card.drag-over { border-color: var(--accent); border-width: 2px; }
+@media (max-width: 900px) {
+  .main { flex-direction: column; height: auto; }
+  .upload-panel, .list-panel, .comments-col { flex: 1 1 auto !important; max-width: 100% !important; width: 100% !important; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+  .resize-handle { display: none; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
+  .topbar-right { flex-wrap: wrap; gap: 6px; }
+  .brand-bar { flex-wrap: wrap; }
+  .content-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .ac-modal-box, .confirm-box { max-width: 94vw !important; }
+  .ac-modal-box { flex-direction: column; max-height: 92vh; overflow-y: auto; }
+  .ac-modal-left { flex: none !important; }
+}
 </style>
 </head>
 <body>
@@ -386,6 +403,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
       <div class="ac-modal-btns">
         <button class="btn-submit" onclick="acSaveModal()" style="flex:1;">Kaydet</button>
+        <button class="btn-sm" onclick="acDuplicateModal()">Kopyala</button>
         <button class="btn-sm" style="border-color:var(--red);color:var(--red);" onclick="acDeleteModal()">Sil</button>
       </div>
     </div>
@@ -677,7 +695,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="bulk-bar" id="bulk-bar" style="display:none;">
         <span id="bulk-count">0 seçili</span>
         <button class="btn-sm" onclick="bulkSelectAll()">Tümünü Seç</button>
+        <button class="btn-sm" onclick="bulkMarkPublished()">Yayında İşaretle</button>
         <button class="btn-sm" style="color:var(--red);border-color:var(--red);" onclick="bulkDeleteSelected()">Seçilenleri Sil</button>
+      </div>
+      <div class="undo-bar" id="undo-bar" style="display:none;">
+        <span id="undo-text">—</span>
+        <button class="btn-sm" onclick="undoBulkDelete()">Geri Al</button>
+      </div>
+      <div class="search-row">
+        <input type="text" id="content-search" placeholder="İçerik adına göre ara..." oninput="renderContents()">
       </div>
       <div class="content-grid" id="content-grid">
         <div class="empty-state">Yükleniyor...</div>
@@ -754,6 +780,10 @@ async function airtableCall(url, options) {
   if (!res.ok) {
     let detail = '';
     try { const j = await res.json(); detail = j?.error?.message || j?.error?.type || ''; } catch(e) {}
+    const fieldMatch = detail.match(/Unknown field name: "([^"]+)"/);
+    if (fieldMatch) {
+      throw new Error('Airtable tablosunda "' + fieldMatch[1] + '" adında bir alan yok. Lütfen İçerikler veya Markalar tablosuna bu alanı (tek satır metin olarak) ekleyip tekrar deneyin.');
+    }
     throw new Error('Airtable ' + res.status + (detail ? ': ' + detail : ''));
   }
   return res;
@@ -1175,7 +1205,14 @@ async function loadBrands() {
 }
 
 let selectedBrandId = '';
-function switchBrand(brandId, el) {
+function hasPendingUploadFiles() {
+  return !!selectedFile || carouselFiles.length > 0 || !!coverFile;
+}
+
+async function switchBrand(brandId, el) {
+  if (brandId !== selectedBrandId && hasPendingUploadFiles()) {
+    if (!(await showConfirm('Yükleme formunda seçili dosyalar var. Marka değiştirirsen bu dosyalar kaybolacak. Devam edilsin mi?', { okText: 'Devam Et' }))) return;
+  }
   selectedBrandId = brandId;
   document.querySelectorAll('.brand-chip').forEach(c => { c.classList.remove('active'); c.style.background = ''; c.style.borderColor = ''; });
   el.classList.add('active');
@@ -1186,6 +1223,7 @@ function switchBrand(brandId, el) {
   }
   // Yükleme formunda da aynı markayı önceden seçili yap, tekrar seçmene gerek kalmasın
   if (brandId) document.getElementById('marka-select').value = brandId;
+  resetFile(); carouselFiles = []; carouselUrls = []; renderCarouselStrip(); resetCoverFile();
   renderContents();
   renderActiveBrandBanner();
 }
@@ -1230,6 +1268,11 @@ function renderContents() {
   if (titleEl) titleEl.textContent = ajansMonthOffset === null ? 'Tüm İçerikler' : getAjansMonthRange(ajansMonthOffset).label + ' içerikleri';
   let filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
   filtered = filtered.filter(r => r.fields['Format'] !== 'Story');
+  const searchInput = document.getElementById('content-search');
+  const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  if (searchTerm) {
+    filtered = filtered.filter(r => (r.fields['İçerik Adı'] || '').toLowerCase().includes(searchTerm));
+  }
   renderHighlights();
 
   // Marka filtresi
@@ -1283,11 +1326,20 @@ function renderContents() {
     card.className = 'content-card' + (bulkSelected.has(rec.id) ? ' bulk-selected' : '');
     card.draggable = !bulkMode;
     card.dataset.id = rec.id;
+    const openRevizeCount = allRevizes.filter(r => {
+      const rf = r.fields;
+      const solved = rf['Durum'] === 'çözüldü' || rf['Durum'] === 'Çözüldü';
+      const ids = rf['İçerik'];
+      const id = Array.isArray(ids) ? ids[0] : ids;
+      return !solved && id === rec.id;
+    }).length;
+
     card.innerHTML = 
       '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
         (bulkMode ? '<div class="card-select-check' + (bulkSelected.has(rec.id)?' checked':'') + '">' + (bulkSelected.has(rec.id) ? ICONS.check : '') + '</div>' : '') +
         (imgUrl ? mediaTag(imgUrl, 'card-img', {noControls:true}) : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
         (fmt === 'Reels 9:16' ? '<div class="format-badge">' + ICONS.reels + '</div>' : fmt === 'Carousel' ? '<div class="format-badge">' + ICONS.carousel + '</div>' : '') +
+        (openRevizeCount > 0 ? '<div class="revize-count-badge">' + openRevizeCount + '</div>' : '') +
         '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
       (showAcCaptions ? (
@@ -1536,7 +1588,16 @@ function acCloseOutside(e) {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { acCloseModal(); closeNewBrandModal(); }
+  if (e.key === 'Escape') { acCloseModal(); closeNewBrandModal(); closeHighlightViewer(); }
+  if (document.getElementById('story-viewer').classList.contains('open')) {
+    if (e.key === 'ArrowRight') nextStory();
+    if (e.key === 'ArrowLeft') prevStory();
+    return;
+  }
+  if (document.getElementById('ac-modal').classList.contains('open') && acCarouselImages.length > 1) {
+    if (e.key === 'ArrowRight') acCarouselNav(1);
+    if (e.key === 'ArrowLeft') acCarouselNav(-1);
+  }
 });
 
 async function acSaveModal() {
@@ -1576,6 +1637,35 @@ async function acDeleteModal() {
     showToast('İçerik silindi');
     acCloseModal();
     renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+async function acDuplicateModal() {
+  if (!acCurrentId) return;
+  if (!hasPermission('İçerik Ekleme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  const rec = allContents.find(r => r.id === acCurrentId);
+  if (!rec) return;
+  const f = rec.fields;
+  const fields = {
+    'İçerik Adı': (f['İçerik Adı'] || 'İçerik') + ' (kopya)',
+    'AI Caption Taslak': f['AI Caption Taslak'] || '',
+    'Yayın Tarihi': f['Yayın Tarihi'] || new Date().toISOString(),
+    'Sıra': Date.now(),
+    'Durum': 'Taslak',
+    'Görsel URL': f['Görsel URL'] || '',
+    'Format': f['Format'] || 'Feed 4:5',
+  };
+  if (f['Marka']) fields['Marka'] = f['Marka'];
+  if (f['Carousel Görselleri']) fields['Carousel Görselleri'] = f['Carousel Görselleri'];
+  if (f['Kapak Görseli URL']) fields['Kapak Görseli URL'] = f['Kapak Görseli URL'];
+  if (f['Öne Çıkan Adı']) fields['Öne Çıkan Adı'] = f['Öne Çıkan Adı'];
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
+      method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
+    });
+    showToast('İçerik kopyalandı, en üste eklendi.');
+    acCloseModal();
+    await loadContents();
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -1766,8 +1856,11 @@ function renderHighlights() {
     const imgUrl = first.fields['Görsel URL'] || (first.fields['Görsel/Video'] && first.fields['Görsel/Video'][0] ? first.fields['Görsel/Video'][0].url : '');
     const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : name;
     const idsAttr = items.map(i => i.id).join(',');
+    const hasRevize = items.some(i => i.fields['Durum'] === 'Revize');
+    const allApproved = items.every(i => i.fields['Durum'] === 'Onaylı');
+    const dotClass = hasRevize ? 'dot-revize' : allApproved ? 'dot-onaylı' : 'dot-beklemede';
     return '<div class="highlight-bubble" onclick="openHighlightViewer(\'' + idsAttr + '\')">' +
-      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div></div>' +
+      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '<div class="feed-dot ' + dotClass + '" style="position:absolute;top:2px;right:2px;"></div></div></div>' +
       '<div class="highlight-name">' + displayName + '</div>' +
     '</div>';
   }).join('');
@@ -1805,21 +1898,65 @@ function updateBulkBar() {
   document.getElementById('bulk-count').textContent = bulkSelected.size + ' seçili';
 }
 
+let pendingDeleteItems = [];
+let pendingDeleteTimer = null;
+
 async function bulkDeleteSelected() {
   if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
-  if (!(await showConfirm(bulkSelected.size + ' içerik silinecek. Bu işlem geri alınamaz. Emin misiniz?', { okText: 'Sil' }))) return;
+  if (!(await showConfirm(bulkSelected.size + ' içerik silinecek. Emin misiniz? (6 saniye içinde geri alabilirsiniz)', { okText: 'Sil' }))) return;
   const ids = [...bulkSelected];
+  // Optimistik: hemen listeden kaldır, gerçek silme işlemini 6sn ertele (geri alınabilsin diye)
+  pendingDeleteItems = allContents.filter(r => ids.includes(r.id));
+  allContents = allContents.filter(r => !ids.includes(r.id));
+  bulkSelected.clear();
+  toggleBulkMode();
+  document.getElementById('undo-bar').style.display = 'flex';
+  document.getElementById('undo-text').textContent = ids.length + ' içerik silindi.';
+  clearTimeout(pendingDeleteTimer);
+  pendingDeleteTimer = setTimeout(commitPendingDelete, 6000);
+}
+
+async function commitPendingDelete() {
+  const items = pendingDeleteItems;
+  pendingDeleteItems = [];
+  document.getElementById('undo-bar').style.display = 'none';
+  let failed = 0;
+  for (const rec of items) {
+    try {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + rec.id, { method: 'DELETE', headers: AT_HDR });
+    } catch(e) { failed++; console.error(e); }
+  }
+  if (failed) showToast(failed + ' içerik silinemedi, tekrar deneyin.');
+}
+
+function undoBulkDelete() {
+  clearTimeout(pendingDeleteTimer);
+  allContents = allContents.concat(pendingDeleteItems);
+  pendingDeleteItems = [];
+  document.getElementById('undo-bar').style.display = 'none';
+  showToast('Silme geri alındı.');
+  renderContents();
+}
+
+async function bulkMarkPublished() {
+  if (!hasPermission('İçerik Düzenleme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
+  const ids = [...bulkSelected];
+  if (!(await showConfirm(ids.length + ' içerik "Yayında" olarak işaretlenecek. Emin misiniz?', { okText: 'İşaretle', danger: false }))) return;
   let failed = 0;
   for (const id of ids) {
     try {
-      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, { method: 'DELETE', headers: AT_HDR });
-      allContents = allContents.filter(r => r.id !== id);
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, {
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Yayında' } })
+      });
+      const rec = allContents.find(r => r.id === id);
+      if (rec) rec.fields['Durum'] = 'Yayında';
     } catch(e) { failed++; console.error(e); }
   }
   bulkSelected.clear();
   toggleBulkMode();
-  showToast(failed ? (ids.length - failed) + ' içerik silindi, ' + failed + ' tanesi başarısız oldu.' : ids.length + ' içerik silindi.');
+  showToast(failed ? (ids.length - failed) + ' işaretlendi, ' + failed + ' başarısız oldu.' : ids.length + ' içerik Yayında olarak işaretlendi.');
 }
 
 function applyThemeIcon(theme) {
@@ -1840,6 +1977,13 @@ function toggleTheme() {
   try { localStorage.setItem('vitrinTheme', next); } catch(e) {}
 }
 initTheme();
+
+window.addEventListener('beforeunload', (e) => {
+  if (typeof hasPendingUploadFiles === 'function' && hasPendingUploadFiles()) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 
 function copyClientLink() {
   const url = window.location.origin + window.location.pathname.replace(/ajans\.html$/, '');
@@ -2133,6 +2277,7 @@ window.initApp = async function(email) {
   document.getElementById('all-months-btn').classList.remove('active');
   await loadContents();
   await loadRevizes();  // içerikler yüklendikten sonra çalışır
+  renderContents(); // revize sayıları rozetlere yansısın diye ızgarayı tazele
   renderNotifications();
   const now = new Date(); now.setHours(now.getHours() + 2, 0, 0, 0);
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);

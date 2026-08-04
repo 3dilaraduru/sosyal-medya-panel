@@ -187,7 +187,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .highlights-row { display: flex; gap: 20px; padding: 16px 14px; overflow-x: auto; border-bottom: 1px solid var(--border); flex-shrink: 0; justify-content: center; }
 .highlight-bubble { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; width: 100px; }
 .highlight-ring { width: 92px; height: 92px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #d6a13a, #b23a2e, #7c5a9e); }
-.highlight-ring-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 3px solid var(--surface); background: var(--surface2); display: flex; align-items: center; justify-content: center; }
+.highlight-ring-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 3px solid var(--surface); background: var(--surface2); display: flex; align-items: center; justify-content: center; position: relative; }
 .highlight-ring-inner img, .highlight-ring-inner video { width: 100%; height: 100%; object-fit: cover; }
 .highlight-name { font-size: 12px; color: var(--text2); text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .story-progress { display: flex; gap: 4px; margin-bottom: 8px; }
@@ -214,6 +214,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .feed-cell { display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: opacity 0.15s; background: #1a1a2e; border-radius: 2px; border: 1px solid var(--border); }
 .feed-cell-img { aspect-ratio: 4/5; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 .format-badge { position: absolute; top: 6px; right: 6px; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+.revize-count-badge { position: absolute; bottom: 6px; left: 6px; z-index: 2; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 17px; height: 17px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
 .feed-cell-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
 .feed-cell:hover .feed-cell-img { opacity: 0.85; }
 .feed-cell.active { border-color: var(--accent); border-width: 2px; }
@@ -289,6 +290,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+@media (max-width: 900px) {
+  .main { flex-direction: column; height: auto; }
+  .col-left, .col-mid, .col-right { flex: 1 1 auto !important; max-width: 100% !important; width: 100% !important; border-right: none; border-bottom: 1px solid var(--border); }
+  .resize-handle { display: none; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
+  .topbar-right { flex-wrap: wrap; gap: 6px; }
+  .feed-grid { grid-template-columns: repeat(3, 1fr); max-width: 100%; }
+  .modal-box { flex-direction: column; max-height: 92vh; overflow-y: auto; }
+  .modal-left { flex: none !important; }
+  .modal-right { flex: none !important; }
+}
 </style>
 </head>
 <body>
@@ -341,6 +353,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
     </div>
     <div id="story-caption" style="color:#fff;font-size:12px;margin-top:10px;text-align:center;opacity:0.85;"></div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;">
+      <span class="badge" id="story-status-badge" style="font-size:11px;">—</span>
+    </div>
+    <div class="modal-btn-row" id="story-decision" style="margin-top:8px; gap:8px;">
+      <button class="modal-btn modal-btn-approve" onclick="storyQuickAction('Onaylı')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Onayla</button>
+      <button class="modal-btn modal-btn-revize" onclick="storyQuickRevize()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg> Revize İste</button>
+    </div>
   </div>
 </div>
 
@@ -728,6 +747,12 @@ function showStoryAt(idx) {
   document.getElementById('story-header-name').textContent = brandName;
   document.getElementById('story-header-time').textContent = item.fields['Yayın Tarihi'] ? new Date(item.fields['Yayın Tarihi']).toLocaleDateString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
 
+  const status = item.fields['Durum'] || 'Beklemede';
+  const statusBadge = document.getElementById('story-status-badge');
+  statusBadge.textContent = status;
+  statusBadge.className = 'badge ' + bc(status);
+  document.getElementById('story-decision').style.display = (status === 'Yayında') ? 'none' : 'flex';
+
   const fills = document.querySelectorAll('.story-progress-fill');
   fills.forEach((fill, i) => {
     fill.classList.remove('animate');
@@ -761,6 +786,31 @@ function closeHighlightOutside(e) {
   if (e.target === document.getElementById('story-viewer')) closeHighlightViewer();
 }
 
+async function storyQuickAction(newStatus) {
+  const item = storyViewerItems[storyViewerIdx];
+  if (!item) return;
+  clearTimeout(storyTimer);
+  await quickAction({stopPropagation(){}}, item.id, newStatus);
+  item.fields['Durum'] = newStatus;
+  const statusBadge = document.getElementById('story-status-badge');
+  statusBadge.textContent = newStatus;
+  statusBadge.className = 'badge ' + bc(newStatus);
+  document.getElementById('story-decision').style.display = (newStatus === 'Yayında') ? 'none' : 'flex';
+  storyTimer = setTimeout(nextStory, STORY_DURATION);
+}
+
+async function storyQuickRevize() {
+  const item = storyViewerItems[storyViewerIdx];
+  if (!item) return;
+  clearTimeout(storyTimer);
+  await quickRevize({stopPropagation(){}}, item.id);
+  item.fields['Durum'] = 'Revize';
+  const statusBadge = document.getElementById('story-status-badge');
+  statusBadge.textContent = 'Revize';
+  statusBadge.className = 'badge ' + bc('Revize');
+  storyTimer = setTimeout(nextStory, STORY_DURATION);
+}
+
 function renderHighlights() {
   const row = document.getElementById('highlights-row');
   const stories = allRecords.filter(r => r.fields['Format'] === 'Story');
@@ -780,8 +830,11 @@ function renderHighlights() {
     const imgUrl = getImgUrl(first);
     const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : name;
     const idsAttr = items.map(i => i.id).join(',');
+    const hasRevize = items.some(i => i.fields['Durum'] === 'Revize');
+    const allApproved = items.every(i => i.fields['Durum'] === 'Onaylı');
+    const dotClass = hasRevize ? 'dot-rev' : allApproved ? 'dot-ok' : 'dot-wait';
     return '<div class="highlight-bubble" onclick="openHighlightViewer(\'' + idsAttr + '\')">' +
-      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div></div>' +
+      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '<div class="feed-dot ' + dotClass + '" style="position:absolute;top:2px;right:2px;"></div></div></div>' +
       '<div class="highlight-name">' + displayName + '</div>' +
     '</div>';
   }).join('');
@@ -800,11 +853,19 @@ function renderGrid(el, recs) {
 
     const imgDiv = document.createElement('div');
     imgDiv.className = 'feed-cell-img';
+    const openRevizeCount = allRevizes.filter(r => {
+      const rf = r.fields;
+      const solved = rf['Durum'] === 'çözüldü' || rf['Durum'] === 'Çözüldü';
+      const ids = rf['İçerik'];
+      const id = Array.isArray(ids) ? ids[0] : ids;
+      return !solved && id === rec.id;
+    }).length;
+    const revizeBadgeHtml = openRevizeCount > 0 ? '<div class="revize-count-badge">' + openRevizeCount + '</div>' : '';
     if (imgUrl) {
-      imgDiv.innerHTML = mediaTag(imgUrl, '', {noControls:true}) + '<div class="feed-dot ' + dc(status) + '"></div>';
+      imgDiv.innerHTML = mediaTag(imgUrl, '', {noControls:true}) + '<div class="feed-dot ' + dc(status) + '"></div>' + revizeBadgeHtml;
     } else {
       imgDiv.style.background = BG[i%BG.length];
-      imgDiv.innerHTML = '<span style="opacity:0.55;">' + ICONS.image + '</span><div class="feed-dot ' + dc(status) + '"></div>';
+      imgDiv.innerHTML = '<span style="opacity:0.55;">' + ICONS.image + '</span><div class="feed-dot ' + dc(status) + '"></div>' + revizeBadgeHtml;
     }
     if (fmt === 'Reels 9:16') { const b = document.createElement('div'); b.className = 'format-badge'; b.innerHTML = ICONS.reels; imgDiv.appendChild(b); }
     else if (fmt === 'Carousel') { const b = document.createElement('div'); b.className = 'format-badge'; b.innerHTML = ICONS.carousel; imgDiv.appendChild(b); }
@@ -985,7 +1046,16 @@ function closeModalOutside(e) {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') { closeModal(); closeHighlightViewer(); }
+  if (document.getElementById('story-viewer').classList.contains('open')) {
+    if (e.key === 'ArrowRight') nextStory();
+    if (e.key === 'ArrowLeft') prevStory();
+    return;
+  }
+  if (document.getElementById('content-modal').classList.contains('open') && modalCarouselImages.length > 1) {
+    if (e.key === 'ArrowRight') modalCarouselNav(1);
+    if (e.key === 'ArrowLeft') modalCarouselNav(-1);
+  }
 });
 
 function toggleModalNote() {
@@ -998,6 +1068,10 @@ async function airtableCall(url, options) {
   if (!res.ok) {
     let detail = '';
     try { const j = await res.json(); detail = j?.error?.message || j?.error?.type || ''; } catch(e) {}
+    const fieldMatch = detail.match(/Unknown field name: "([^"]+)"/);
+    if (fieldMatch) {
+      throw new Error('Airtable tablosunda "' + fieldMatch[1] + '" adında bir alan yok. Lütfen İçerikler veya Markalar tablosuna bu alanı (tek satır metin olarak) ekleyip tekrar deneyin.');
+    }
     throw new Error('Airtable ' + res.status + (detail ? ': ' + detail : ''));
   }
   return res;
