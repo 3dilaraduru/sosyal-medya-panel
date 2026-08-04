@@ -45,7 +45,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .check-list { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; max-height: 150px; overflow-y: auto; }
 .check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); cursor: pointer; }
 .check-item input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
-.btn-sm { padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-sm { padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
 .btn-sm:hover { color: var(--text); }
 
 .main { display: flex; flex: 1; }
@@ -85,7 +85,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 }
 .format-btn:hover { border-color: var(--accent); color: var(--text); }
 .format-btn.active { border-color: var(--accent); background: rgba(124,106,247,0.15); color: var(--accent); }
-.format-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+.format-icon { display: flex; justify-content: center; margin-bottom: 3px; color: var(--text2); }
 .format-name { font-size: 10px; }
 
 /* DROP ZONE */
@@ -100,11 +100,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(124,106,247,0.05); }
 .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .drop-placeholder { text-align: center; padding: 20px; pointer-events: none; }
-.drop-icon { font-size: 28px; margin-bottom: 8px; }
+.drop-icon { display: flex; justify-content: center; margin-bottom: 8px; color: var(--text3); }
 .drop-text { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
 .drop-sub { font-size: 11px; color: var(--text3); }
 .preview-img { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; inset: 0; }
-.change-overlay { position: absolute; bottom: 8px; right: 8px; padding: 5px 10px; background: rgba(0,0,0,0.75); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 11px; color: #fff; cursor: pointer; z-index: 2; display: none; font-family: 'DM Sans', sans-serif; }
+.change-overlay { position: absolute; bottom: 8px; right: 8px; padding: 5px 10px; background: rgba(0,0,0,0.75); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 11px; color: #fff; cursor: pointer; z-index: 2; display: none; align-items: center; gap: 5px; font-family: 'DM Sans', sans-serif; }
 
 /* CAPTION */
 .btn-ai { width: 100%; padding: 9px; border-radius: var(--radius-sm); border: 1px solid rgba(124,106,247,0.4); background: rgba(124,106,247,0.1); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -183,7 +183,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .confirm-btns .btn-sm { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
 .card-img-wrap { width: 100%; background: var(--surface2); overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
-.card-img-placeholder { font-size: 24px; color: var(--text3); padding: 20px; }
+.card-img-placeholder { color: var(--text3); padding: 20px; display: flex; align-items: center; justify-content: center; height: 100%; }
 .card-body { padding: 9px 11px; }
 .card-title { font-size: 12px; font-weight: 500; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-meta { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
@@ -247,7 +247,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .notif-status-rev { font-size: 10px; color: var(--red); font-weight: 600; }
 .notif-time { font-size: 10px; color: var(--text3); }
 .no-notif { text-align: center; padding: 20px 16px; font-size: 11px; color: var(--text3); }
-.btn-ilet { padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(62,207,142,0.4); background: rgba(62,207,142,0.1); color: var(--green); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-ilet { padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(62,207,142,0.4); background: rgba(62,207,142,0.1); color: var(--green); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: inline-flex; align-items: center; gap: 7px; }
 .btn-ilet:hover { background: rgba(62,207,142,0.2); }
 .btn-ilet:disabled { opacity: 0.5; cursor: default; }
 .card-date-edit { font-size: 10px; color: var(--accent); cursor: pointer; margin-left: 4px; }
@@ -274,7 +274,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 <div id="access-denied-screen" style="display:none; align-items: center; justify-content: center; height: 100vh;">
   <div class="login-card">
-    <div class="login-logo" style="background:var(--red);">✕</div>
+    <div class="login-logo" style="background:var(--red);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
     <div class="login-title">Erişim yok</div>
     <div class="login-sub"><span id="access-denied-email">—</span> hesabının ajans paneline erişim yetkisi yok. Yöneticinizle iletişime geçin.</div>
     <button class="btn-sm" style="width:100%;" onclick="window.firebaseSignOut()">Çıkış Yap</button>
@@ -295,11 +295,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <!-- İÇERİK DETAY / DÜZENLE MODAL -->
 <div class="ac-modal-overlay" id="ac-modal" onclick="acCloseOutside(event)">
   <div class="ac-modal-box">
-    <button class="modal-close" onclick="acCloseModal()">✕</button>
+    <button class="modal-close" onclick="acCloseModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="ac-modal-left">
       <div class="ac-modal-img-wrap" id="ac-modal-img-wrap">
         <img id="ac-modal-img" alt="" style="display:none;">
-        <div class="card-img-placeholder" id="ac-modal-placeholder">🖼</div>
+        <div class="card-img-placeholder" id="ac-modal-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
       </div>
     </div>
     <div class="ac-modal-right">
@@ -340,7 +340,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <!-- YENİ MÜŞTERİ EKLE / DÜZENLE MODAL -->
 <div class="ac-modal-overlay" id="new-brand-modal" onclick="closeNewBrandOutside(event)">
   <div class="ac-modal-box" style="max-width:420px;">
-    <button class="modal-close" onclick="closeNewBrandModal()">✕</button>
+    <button class="modal-close" onclick="closeNewBrandModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div style="padding:28px; display:flex; flex-direction:column; gap:14px; width:100%;">
       <div style="font-size:16px; font-weight:600;" id="nb-modal-title">Yeni müşteri ekle</div>
       <div class="field">
@@ -361,12 +361,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <div class="drop-zone" id="nb-logo-zone" style="aspect-ratio:1/1; max-width:130px;">
             <input type="file" id="nb-logo-file" accept="image/*">
             <div class="drop-placeholder" id="nb-logo-placeholder">
-              <div class="drop-icon">🖼</div>
+              <div class="drop-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
               <div class="drop-text" style="font-size:11px;">Sürükle bırak veya tıkla</div>
               <div class="drop-sub" style="font-size:10px;">JPG, PNG</div>
             </div>
             <img class="preview-img" id="nb-logo-preview" alt="" style="display:none;">
-            <button class="change-overlay" id="nb-logo-change-btn" onclick="resetNbLogo(event)" style="display:none;">✕ Değiştir</button>
+            <button class="change-overlay" id="nb-logo-change-btn" onclick="resetNbLogo(event)" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Değiştir</button>
           </div>
         </div>
         <input type="hidden" id="nb-logo" value="">
@@ -379,7 +379,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </div>
       </div>
       <div style="font-size:11px; color:var(--text3);">Müşteri, bu e-posta ile Google hesabından giriş yaptığında kendi içeriklerini ve kendi logosunu görecek.</div>
-      <button class="btn-sm" id="nb-copy-link-btn" onclick="copyClientLink()" style="display:none;">🔗 Müşteri Linkini Kopyala</button>
+      <button class="btn-sm" id="nb-copy-link-btn" onclick="copyClientLink()" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg> Müşteri Linkini Kopyala</button>
       <button class="btn-submit" onclick="saveNewBrand()" id="nb-save-btn">Müşteriyi Kaydet</button>
     </div>
   </div>
@@ -388,7 +388,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <!-- EKİP YÖNETİMİ MODAL -->
 <div class="ac-modal-overlay" id="team-modal" onclick="closeTeamOutside(event)">
   <div class="ac-modal-box" style="max-width:460px;">
-    <button class="modal-close" onclick="closeTeamModal()">✕</button>
+    <button class="modal-close" onclick="closeTeamModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div style="padding:28px; display:flex; flex-direction:column; gap:14px; width:100%; max-height:80vh; overflow-y:auto;">
       <div style="font-size:16px; font-weight:600;">Ekip yönetimi</div>
       <div id="team-list" style="display:flex; flex-direction:column; gap:8px;"></div>
@@ -446,8 +446,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <button class="month-all-btn active" id="all-months-btn" onclick="showAllMonths()">Tümü</button>
     </div>
     <div class="topbar-right">
-      <button class="btn-sm" onclick="openTeamModal()" id="team-btn" style="display:none;">👥 Ekip</button>
-      <button class="btn-ilet" onclick="planiIlet()" id="ilet-btn">📤 Planı Müşteriye İlet</button>
+      <button class="btn-sm" onclick="openTeamModal()" id="team-btn" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Ekip</button>
+      <button class="btn-ilet" onclick="planiIlet()" id="ilet-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Planı Müşteriye İlet</button>
       <span class="role-badge" id="user-role-badge">—</span>
       <span class="user-email" id="user-email"></span>
       <button class="btn-sm" onclick="window.firebaseSignOut()">Çıkış</button>
@@ -467,11 +467,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <label>Format</label>
         <div class="format-btns">
           <button class="format-btn active" data-ratio="0.8" data-name="Feed 4:5" onclick="setFormat(this)">
-            <span class="format-icon">📷</span>
+            <span class="format-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
             <span class="format-name">Feed 4:5</span>
           </button>
           <button class="format-btn" data-ratio="0.5625" data-name="Reels 9:16" onclick="setFormat(this)">
-            <span class="format-icon">🎬</span>
+            <span class="format-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span>
             <span class="format-name">Reels 9:16</span>
           </button>
           <button class="format-btn" data-ratio="1" data-name="Kare 1:1" onclick="setFormat(this)">
@@ -488,12 +488,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <div class="drop-zone" id="drop-zone" style="aspect-ratio: 4/5;">
             <input type="file" id="file-input" accept="image/*,video/*">
             <div class="drop-placeholder" id="drop-placeholder">
-              <div class="drop-icon">🖼</div>
+              <div class="drop-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
               <div class="drop-text">Sürükle bırak veya tıkla</div>
               <div class="drop-sub" id="drop-sub">Feed 4:5 — JPG, PNG, MP4</div>
             </div>
             <img class="preview-img" id="preview-img" alt="">
-            <button class="change-overlay" id="change-btn" onclick="resetFile(event)">✕ Değiştir</button>
+            <button class="change-overlay" id="change-btn" onclick="resetFile(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Değiştir</button>
           </div>
         </div>
       </div>
@@ -522,7 +522,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="field">
         <label>Caption</label>
         <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;">
-          ✨ İçerik kaydedildikten sonra AI otomatik olarak Claude, Gemini ve ChatGPT ile caption üretecek. 1-2 dakika içinde hazır olacak.
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> İçerik kaydedildikten sonra AI otomatik olarak Claude, Gemini ve ChatGPT ile caption üretecek. 1-2 dakika içinde hazır olacak.
         </div>
       </div>
 
@@ -589,6 +589,22 @@ const BASE_ID = 'appZTgya9zX9uZ9nN';
 const AT_HDR = { 'Authorization': 'Bearer ' + AT_TOKEN, 'Content-Type': 'application/json' };
 const CLOUD_NAME = 'dc6twehdd';
 const UPLOAD_PRESET = 'sosyal-medya-ajans';
+
+const ICONS = {
+  check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  x: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  undo: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
+  edit: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  trash: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  image: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+  users: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  send: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  link: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg>',
+  camera: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  video: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  square: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>',
+  sparkle: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>',
+};
 
 let brands = [], allContents = [], selectedFile = null, uploadedUrl = null;
 
@@ -745,7 +761,7 @@ function handleFile(file) {
     previewImg.src = e.target.result;
     previewImg.style.display = 'block';
     document.getElementById('drop-placeholder').style.display = 'none';
-    document.getElementById('change-btn').style.display = 'block';
+    document.getElementById('change-btn').style.display = 'flex';
     fileInput.style.pointerEvents = 'none';
   };
   reader.readAsDataURL(file);
@@ -809,7 +825,7 @@ async function submitContent() {
     const data = await res.json();
     if (data.id) {
       setProgress('Tamamlandı!', 100);
-      showToast('✓ İçerik kaydedildi!');
+      showToast('İçerik kaydedildi.');
       resetForm();
       setTimeout(loadContents, 800);
     } else { throw new Error(JSON.stringify(data)); }
@@ -843,11 +859,11 @@ async function planiIlet() {
       });
       rec.fields['Durum'] = 'Beklemede';
     }
-    showToast('✓ Plan müşteriye iletildi! Mail gönderiliyor...');
+    showToast('Plan müşteriye iletildi. Mail gönderiliyor...');
     renderContents();
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
   btn.disabled = false;
-  btn.textContent = '📤 Planı Müşteriye İlet';
+  btn.innerHTML = ICONS.send + ' Planı Müşteriye İlet';
 }
 
 
@@ -875,7 +891,7 @@ async function loadBrands() {
       const logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="" class="brand-chip-logo">' : '';
       return '<div class="brand-chip' + (active?' active':'') + '" data-brand="' + b.id + '"' + style + ' onclick="switchBrand(\'' + b.id + '\', this)">' +
         logoHtml + (b.fields['Marka Adı'] || b.id) +
-        (isAdmin ? '<span class="brand-chip-edit" title="Marka ayarları" onclick="event.stopPropagation(); openEditBrandModal(\'' + b.id + '\')">✎</span>' : '') +
+        (isAdmin ? '<span class="brand-chip-edit" title="Marka ayarları" onclick="event.stopPropagation(); openEditBrandModal(\'' + b.id + '\')">' + ICONS.edit + '</span>' : '') +
       '</div>';
     }).join('') +
     (isAdmin ? '<div class="brand-chip brand-chip-add" onclick="openNewBrandModal()">+ Yeni Müşteri</div>' : '');
@@ -990,7 +1006,7 @@ function renderContents() {
     card.dataset.id = rec.id;
     card.innerHTML = 
       '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
-        (imgUrl ? '<img class="card-img" src="' + imgUrl + '" alt="">' : '<div class="card-img-placeholder">🖼</div>') +
+        (imgUrl ? '<img class="card-img" src="' + imgUrl + '" alt="">' : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
         '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
       (showAcCaptions ? (
@@ -1065,7 +1081,7 @@ async function reorderCards(srcId, targetId) {
   
   try {
     await Promise.all(updates);
-    showToast('✓ Sıralama kaydedildi');
+    showToast('Sıralama kaydedildi.');
   } catch(e) { showToast(e.message || 'Sıralama kaydedilemedi.'); console.error(e); }
 }
 
@@ -1110,7 +1126,7 @@ function renderRevizes() {
 
     return '<div class="rev-card">' +
       '<div class="rev-card-top">' +
-        '<div class="rev-thumb">' + (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '🖼') + '</div>' +
+        '<div class="rev-thumb">' + (imgUrl ? '<img src="' + imgUrl + '" alt="">' : ICONS.image) + '</div>' +
         '<div class="rev-meta">' +
           '<div class="rev-title">' + icerikAdi + '</div>' +
           '<div class="rev-date">' + fmtDate(f['Tarih']) + '</div>' +
@@ -1126,7 +1142,7 @@ function renderRevizes() {
         '</div>' +
         '<div class="rev-solved-row">' +
           '<label class="rev-solved-label"><input type="checkbox" ' + (solved ? 'checked' : '') + ' onchange="toggleRevSolved(\'' + rev.id + '\', this.checked)"> Çözüldü</label>' +
-          '<span class="rev-status ' + (solved ? 'rev-solved' : 'rev-open') + '">' + (solved ? '✓ Çözüldü' : '● Açık') + '</span>' +
+          '<span class="rev-status ' + (solved ? 'rev-solved' : 'rev-open') + '">' + (solved ? ICONS.check + ' Çözüldü' : 'Açık') + '</span>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -1145,7 +1161,7 @@ async function sendRevReply(revId) {
     const rev = allRevizes.find(r => r.id === revId);
     if (rev) rev.fields['Ajans Yanıtı'] = val;
     renderRevizes();
-    showToast('✓ Yanıt gönderildi');
+    showToast('Yanıt gönderildi.');
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -1202,7 +1218,7 @@ async function acSaveModal() {
     });
     const rec = allContents.find(r => r.id === acCurrentId);
     if (rec) Object.assign(rec.fields, fields);
-    showToast('✓ İçerik güncellendi');
+    showToast('İçerik güncellendi.');
     acCloseModal();
     renderContents();
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
@@ -1244,7 +1260,7 @@ function handleNbLogoFile(file) {
     nbLogoPreview.src = e.target.result;
     nbLogoPreview.style.display = 'block';
     document.getElementById('nb-logo-placeholder').style.display = 'none';
-    document.getElementById('nb-logo-change-btn').style.display = 'block';
+    document.getElementById('nb-logo-change-btn').style.display = 'flex';
   };
   reader.readAsDataURL(file);
 }
@@ -1265,7 +1281,7 @@ function copyClientLink() {
   const url = window.location.origin + window.location.pathname.replace(/ajans\.html$/, '');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => {
-      showToast('✓ Link panoya kopyalandı');
+      showToast('Link panoya kopyalandı.');
     }).catch(() => {
       showToast('Kopyalanamadı: ' + url);
     });
@@ -1308,7 +1324,7 @@ function openEditBrandModal(brandId) {
     nbLogoPreview.src = existingLogo;
     nbLogoPreview.style.display = 'block';
     document.getElementById('nb-logo-placeholder').style.display = 'none';
-    document.getElementById('nb-logo-change-btn').style.display = 'block';
+    document.getElementById('nb-logo-change-btn').style.display = 'flex';
   }
   document.getElementById('new-brand-modal').classList.add('open');
 }
@@ -1346,7 +1362,7 @@ async function saveNewBrand() {
         method: 'PATCH', headers: AT_HDR,
         body: JSON.stringify({ fields })
       });
-      showToast('✓ ' + name + ' güncellendi');
+      showToast(name + ' güncellendi.');
       closeNewBrandModal();
       await loadBrands();
       const chip = document.querySelector('.brand-chip[data-brand="' + editingBrandId + '"]');
@@ -1357,7 +1373,7 @@ async function saveNewBrand() {
         body: JSON.stringify({ fields })
       });
       const data = await res.json();
-      showToast('✓ ' + name + ' eklendi');
+      showToast(name + ' eklendi.');
       closeNewBrandModal();
       await loadBrands();
       if (data.id) {
@@ -1379,7 +1395,7 @@ async function toggleRevSolved(revId, solved) {
     const rev = allRevizes.find(r => r.id === revId);
     if (rev) rev.fields['Durum'] = solved ? 'çözüldü' : 'Açık';
     renderRevizes();
-    showToast(solved ? '✓ Çözüldü' : 'Açık olarak işaretlendi');
+    showToast(solved ? 'Çözüldü' : 'Açık olarak işaretlendi');
   } catch(e) { showToast(e.message || 'Hata.'); console.error(e); }
 }
 
@@ -1417,10 +1433,10 @@ function renderNotifications() {
     const isOk = status === 'Onaylı';
 
     return '<div class="notif-card ' + (isOk ? 'onaylı' : 'revize') + '">' +
-      '<div class="notif-thumb">' + (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '🖼') + '</div>' +
+      '<div class="notif-thumb">' + (imgUrl ? '<img src="' + imgUrl + '" alt="">' : ICONS.image) + '</div>' +
       '<div class="notif-body">' +
         '<div class="notif-title">' + name + '</div>' +
-        '<div class="' + (isOk ? 'notif-status-ok' : 'notif-status-rev') + '">' + (isOk ? '✓ Onaylandı' : '↩ Revize İstendi') + '</div>' +
+        '<div class="' + (isOk ? 'notif-status-ok' : 'notif-status-rev') + '">' + (isOk ? 'Onaylandı' : 'Revize istendi') + '</div>' +
         (dateStr ? '<div class="notif-time">' + dateStr + '</div>' : '') +
       '</div>' +
     '</div>';
@@ -1522,7 +1538,7 @@ async function saveTeamMember() {
       method: 'POST', headers: AT_HDR,
       body: JSON.stringify({ typecast: true, fields: { 'Ad': name, 'E-posta': email, 'Rol': role, 'Atanan Markalar': assignedBrands, 'Yetkiler': permissions } })
     });
-    showToast('✓ ' + (name || email) + ' eklendi');
+    showToast((name || email) + ' eklendi.');
     await loadTeam();
     renderTeamList();
     document.getElementById('team-name').value = '';

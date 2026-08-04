@@ -104,7 +104,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .modal-caption-text { font-size: 14px; line-height: 1.75; color: var(--text); background: var(--surface2); border-radius: var(--radius); padding: 16px; white-space: pre-wrap; flex: 1; overflow-y: auto; }
 .modal-status-row { display: flex; align-items: center; gap: 10px; }
 .modal-btn-row { display: flex; gap: 10px; }
-.modal-btn { flex: 1; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border2); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.modal-btn { flex: 1; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border2); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 7px; }
 .modal-btn-approve { background: var(--green-bg); color: var(--green); border-color: rgba(62,207,142,0.3); }
 .modal-btn-approve:hover { background: rgba(62,207,142,0.2); }
 .modal-btn-revize { background: var(--red-bg); color: var(--red); border-color: rgba(240,80,96,0.3); }
@@ -136,7 +136,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .approval-title { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
 .approval-status { }
 .btn-row { display: flex; gap: 7px; }
-.btn { flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn { flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .btn-approve { background: var(--green-bg); color: var(--green); border-color: rgba(62,207,142,0.25); }
 .btn-approve:hover { background: rgba(62,207,142,0.18); }
 .btn-revize { background: var(--red-bg); color: var(--red); border-color: rgba(240,80,96,0.25); }
@@ -286,11 +286,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <!-- CONTENT DETAIL MODAL -->
 <div class="modal-overlay" id="content-modal" onclick="closeModalOutside(event)">
   <div class="modal-box" style="position:relative;">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <!-- Sol: Orijinal boyutlu görsel -->
     <div class="modal-left" id="modal-left">
       <img id="modal-hero-img" alt="" style="display:none;">
-      <span id="modal-hero-emoji" style="font-size:48px;">✈</span>
+      <span id="modal-hero-emoji" style="color:var(--text3);"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
     </div>
     <!-- Sağ: Instagram gönderisi gibi + onay alanı -->
     <div class="modal-right">
@@ -299,7 +299,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <span class="ig-post-handle" id="modal-ig-handle">—</span>
       </div>
       <div class="ig-post-caption"><strong id="modal-ph-handle">—</strong><span id="modal-ph-caption"> —</span></div>
-      <div class="ig-post-icons">♡ &nbsp; 💬 &nbsp; ↗</div>
+      <div class="ig-post-icons"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg></div>
       <div class="ig-post-date" id="modal-ph-date">—</div>
 
       <div class="modal-divider"></div>
@@ -319,8 +319,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div id="modal-decision">
         <div class="modal-caption-label" style="margin-bottom:8px;">Karar Ver</div>
         <div class="modal-btn-row">
-          <button class="modal-btn modal-btn-approve" onclick="modalAction('Onaylı')">✓ Onayla</button>
-          <button class="modal-btn modal-btn-revize" onclick="toggleModalNote()">↩ Revize İste</button>
+          <button class="modal-btn modal-btn-approve" onclick="modalAction('Onaylı')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Onayla</button>
+          <button class="modal-btn modal-btn-revize" onclick="toggleModalNote()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg> Revize İste</button>
         </div>
       </div>
       <div id="modal-readonly-note" style="display:none; font-size:12px; color:var(--text3); background:var(--surface2); border-radius:var(--radius-sm); padding:10px 12px;">Bu içerik yayınlandı, artık onay veya revize verilemez.</div>
@@ -373,9 +373,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="phone-img" id="phone-img">
             <img id="phone-img-el" alt="">
-            <span class="phone-img-emoji" id="phone-img-emoji">✈</span>
+            <span class="phone-img-emoji" id="phone-img-emoji" style="color:var(--text3);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
           </div>
-          <div class="phone-actions">♡ &nbsp; 💬 &nbsp; ↗</div>
+          <div class="phone-actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg></div>
           <div class="phone-caption"><strong id="ph-handle2">—</strong><span id="ph-caption"> —</span></div>
           <div class="phone-date" id="ph-date">—</div>
         </div>
@@ -385,8 +385,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <div class="sel-info-title" id="msb-title">—</div>
         <div class="sel-info-date" id="msb-date">—</div>
         <div class="sel-info-btns" id="sel-info-btns" style="display:none; gap:7px; margin-top:8px;">
-          <button class="btn btn-approve" style="flex:1;" onclick="selectedRecordId && quickAction(event, selectedRecordId, 'Onaylı')">✓ Onayla</button>
-          <button class="btn btn-revize" style="flex:1;" onclick="selectedRecordId && quickRevize(event, selectedRecordId)">↩ Revize</button>
+          <button class="btn btn-approve" style="flex:1;" onclick="selectedRecordId && quickAction(event, selectedRecordId, 'Onaylı')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Onayla</button>
+          <button class="btn btn-revize" style="flex:1;" onclick="selectedRecordId && quickRevize(event, selectedRecordId)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg> Revize</button>
         </div>
       </div>
       <div style="font-size:10px; color:var(--text3); text-align:center; margin-top:auto; padding-top:20px;">Vitrin ile yönetiliyor</div>
@@ -442,8 +442,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 const TOKEN = 'patSGTs0lm7hWoWhg.28d46ae2190d2222c507488c25c957414959e803f1fac9ab89f3f77ac8559bf1';
 const BASE_ID = 'appZTgya9zX9uZ9nN';
 const H = { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
-const BG = ['linear-gradient(135deg,#1a1a2e,#0f3460)','linear-gradient(135deg,#0d3b2e,#1a6b4e)','linear-gradient(135deg,#3b1a2e,#6b1a4a)','linear-gradient(135deg,#2e1a0d,#6b3d1a)','linear-gradient(135deg,#1a2e3b,#1a4a6b)','linear-gradient(135deg,#2e2a0d,#6b5e1a)','linear-gradient(135deg,#1a2e1a,#3b6b3b)','linear-gradient(135deg,#2e0d3b,#5e1a6b)'];
-const EM = ['✈','🌍','🌸','🧳','💺','⭐','🏖','🛫','🌅','🗺','💫','🎯'];
+const ICONS = {
+  check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  undo: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
+  edit: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  trash: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  image: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+  heart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
+  message: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  share: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>',
+};
+
+const BG = ['#2A2E3B','#2B332C','#332A2E','#332C24','#242C33','#302E24','#242F27','#2E2433'];
 
 let allRecords = [], allRevizes = [], brandRecord = null, selectedRecordId = null, currentMonthOffset = 0;
 
@@ -592,7 +603,7 @@ function renderGrid(el, recs) {
       imgDiv.innerHTML = '<img src="' + imgUrl + '" alt=""><div class="feed-dot ' + dc(status) + '"></div>';
     } else {
       imgDiv.style.background = BG[i%BG.length];
-      imgDiv.innerHTML = '<span>' + EM[i%EM.length] + '</span><div class="feed-dot ' + dc(status) + '"></div>';
+      imgDiv.innerHTML = '<span style="opacity:0.55;">' + ICONS.image + '</span><div class="feed-dot ' + dc(status) + '"></div>';
     }
     cell.appendChild(imgDiv);
 
@@ -741,7 +752,7 @@ async function modalAction(newStatus) {
     renderCurrentMonth();
     await loadRevizes();
     renderAllComments();
-    showToast(newStatus==='Onaylı'?'✓ İçerik onaylandı':'↩ Revize talebi gönderildi');
+    showToast(newStatus==='Onaylı'?'İçerik onaylandı':'Revize talebi gönderildi');
     if (newStatus === 'Onaylı') closeModal();
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
@@ -759,7 +770,7 @@ async function quickAction(e, recId, newStatus) {
     renderCurrentMonth();
     await loadRevizes();
     renderAllComments();
-    showToast(newStatus === 'Onaylı' ? '✓ İçerik onaylandı' : '↩ Revize talebi gönderildi');
+    showToast(newStatus === 'Onaylı' ? 'İçerik onaylandı' : 'Revize talebi gönderildi');
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -785,7 +796,7 @@ async function quickRevize(e, recId) {
     renderCurrentMonth();
     await loadRevizes();
     renderAllComments();
-    showToast('↩ Revize talebi gönderildi');
+    showToast('Revize talebi gönderildi');
   } catch(err) { showToast(err.message || 'Hata oluştu.'); console.error(err); }
 }
 
@@ -824,11 +835,11 @@ function renderAllComments() {
       <div class="comment-card" id="rev-${rev.id}">
         <div class="comment-card-top">
           <div class="comment-icon-btns">
-            <button class="comment-icon-btn" title="Notu düzenle" onclick="startEdit('${rev.id}')">✎</button>
-            <button class="comment-icon-btn danger" title="Talebi kaldır" onclick="deleteRevize('${rev.id}')">🗑</button>
+            <button class="comment-icon-btn" title="Notu düzenle" onclick="startEdit('${rev.id}')">${ICONS.edit}</button>
+            <button class="comment-icon-btn danger" title="Talebi kaldır" onclick="deleteRevize('${rev.id}')">${ICONS.trash}</button>
           </div>
           <div class="comment-thumb">
-            ${imgUrl ? '<img src="' + imgUrl + '" alt="">' : '🖼'}
+            ${imgUrl ? '<img src="' + imgUrl + '" alt="">' : ICONS.image}
           </div>
           <div class="comment-meta">
             <div class="comment-title">${contentName}</div>
@@ -879,7 +890,7 @@ async function saveNote(revId) {
     const rev = allRevizes.find(r => r.id === revId);
     if (rev) rev.fields['Müşteri Notu'] = val;
     renderAllComments();
-    showToast('✓ Not güncellendi');
+    showToast('Not güncellendi');
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -909,7 +920,7 @@ async function sendReply(revId) {
     const rev = allRevizes.find(r=>r.id===revId);
     if (rev) rev.fields['Ajans Yanıtı'] = val;
     renderAllComments();
-    showToast('✓ Yanıt gönderildi');
+    showToast('Yanıt gönderildi');
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -922,7 +933,7 @@ async function toggleSolved(revId, solved) {
     const rev = allRevizes.find(r=>r.id===revId);
     if (rev) rev.fields['Durum'] = solved ? 'çözüldü' : 'açık';
     renderAllComments();
-    showToast(solved ? '✓ Çözüldü olarak işaretlendi' : 'Açık olarak işaretlendi');
+    showToast(solved ? 'Çözüldü olarak işaretlendi' : 'Açık olarak işaretlendi');
   } catch(e) { showToast(e.message || 'Hata.'); console.error(e); }
 }
 
