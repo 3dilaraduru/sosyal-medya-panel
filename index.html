@@ -176,6 +176,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* FEED GRID - bottom 75% */
 .feed-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 .feed-profile { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.highlights-row { display: flex; gap: 14px; padding: 10px 14px; overflow-x: auto; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.highlight-bubble { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; width: 56px; }
+.highlight-ring { width: 52px; height: 52px; border-radius: 50%; padding: 2.5px; background: linear-gradient(45deg, #d6a13a, #b23a2e, #7c5a9e); }
+.highlight-ring-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid var(--surface); background: var(--surface2); display: flex; align-items: center; justify-content: center; }
+.highlight-ring-inner img, .highlight-ring-inner video { width: 100%; height: 100%; object-fit: cover; }
+.highlight-name { font-size: 10px; color: var(--text2); text-align: center; max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.story-progress { display: flex; gap: 4px; margin-bottom: 8px; }
+.story-progress-seg { flex: 1; height: 2.5px; border-radius: 2px; background: rgba(255,255,255,0.3); overflow: hidden; }
+.story-progress-seg.done { background: #fff; }
+#story-media-slot img, #story-media-slot video { width: 100%; height: 100%; object-fit: cover; }
 .caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
 .caption-toggle:hover { border-color: var(--accent); }
 .caption-toggle input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
@@ -189,6 +199,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .feed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 8px 8px; width: 100%; max-width: 495px; }
 .feed-cell { display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: opacity 0.15s; background: #1a1a2e; border-radius: 2px; border: 1px solid var(--border); }
 .feed-cell-img { aspect-ratio: 4/5; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.format-badge { position: absolute; top: 6px; right: 6px; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
 .feed-cell-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
 .feed-cell:hover .feed-cell-img { opacity: 0.85; }
 .feed-cell.active { border-color: var(--accent); border-width: 2px; }
@@ -293,6 +304,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <button class="btn-cancel-note" onclick="confirmCancel()" id="confirm-cancel-btn">Vazgeç</button>
       <button class="btn-delete-rev" onclick="confirmOk()" id="confirm-ok-btn">Onayla</button>
     </div>
+  </div>
+</div>
+
+<!-- STORY / ÖNE ÇIKAN GÖRÜNTÜLEYİCİ -->
+<div class="modal-overlay" id="story-viewer" onclick="closeHighlightOutside(event)" style="background:rgba(0,0,0,0.85);">
+  <div style="position:relative; width:100%; max-width:340px;" onclick="event.stopPropagation();">
+    <button class="modal-close" style="top:-44px;right:0;background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3);" onclick="closeHighlightViewer()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="story-progress" id="story-progress"></div>
+    <div style="aspect-ratio:9/16; border-radius:14px; overflow:hidden; background:#111; position:relative;">
+      <div id="story-media-slot" style="width:100%;height:100%;"></div>
+      <div style="position:absolute; inset:0; display:flex;">
+        <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); prevStory();"></div>
+        <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); nextStory();"></div>
+      </div>
+    </div>
+    <div id="story-caption" style="color:#fff;font-size:12px;margin-top:10px;text-align:center;opacity:0.85;"></div>
   </div>
 </div>
 
@@ -426,6 +453,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
             Caption'ları göster
           </label>
         </div>
+        <div class="highlights-row" id="highlights-row" style="display:none;"></div>
         <div class="feed-scroll">
           <div class="month-summary">
             <div class="feed-month-label" id="current-month-label">—</div>
@@ -470,6 +498,8 @@ const ICONS = {
   share: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>',
   sun: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   moon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>',
+  reels: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  carousel: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 13V5a2 2 0 0 1 2-2h8"/></svg>',
 };
 
 const BG = ['#2A2E3B','#2B332C','#332A2E','#332C24','#242C33','#302E24','#242F27','#2E2433'];
@@ -632,15 +662,82 @@ function toggleCaptions(val) {
   renderCurrentMonth();
 }
 
+let storyViewerItems = [];
+let storyViewerIdx = 0;
+
+function openHighlightViewer(idsCsv) {
+  const ids = idsCsv.split(',');
+  storyViewerItems = ids.map(id => allRecords.find(r => r.id === id)).filter(Boolean);
+  if (!storyViewerItems.length) return;
+  storyViewerIdx = 0;
+  document.getElementById('story-viewer').classList.add('open');
+  renderStoryProgress();
+  showStoryAt(0);
+}
+function renderStoryProgress() {
+  const el = document.getElementById('story-progress');
+  el.innerHTML = storyViewerItems.map((_, i) => '<div class="story-progress-seg' + (i <= storyViewerIdx ? ' done' : '') + '"></div>').join('');
+}
+function showStoryAt(idx) {
+  storyViewerIdx = idx;
+  const item = storyViewerItems[idx];
+  const imgUrl = getImgUrl(item);
+  document.getElementById('story-media-slot').innerHTML = imgUrl ? mediaTag(imgUrl, '') : '';
+  document.getElementById('story-caption').textContent = item.fields['İçerik Adı'] || '';
+  document.querySelectorAll('.story-progress-seg').forEach((seg, i) => seg.classList.toggle('done', i <= idx));
+}
+function nextStory() {
+  if (storyViewerIdx < storyViewerItems.length - 1) showStoryAt(storyViewerIdx + 1);
+  else closeHighlightViewer();
+}
+function prevStory() {
+  if (storyViewerIdx > 0) showStoryAt(storyViewerIdx - 1);
+}
+function closeHighlightViewer() {
+  document.getElementById('story-viewer').classList.remove('open');
+  document.getElementById('story-media-slot').innerHTML = '';
+  storyViewerItems = [];
+}
+function closeHighlightOutside(e) {
+  if (e.target === document.getElementById('story-viewer')) closeHighlightViewer();
+}
+
+function renderHighlights() {
+  const row = document.getElementById('highlights-row');
+  const stories = allRecords.filter(r => r.fields['Format'] === 'Story');
+  if (!stories.length) { row.style.display = 'none'; row.innerHTML = ''; return; }
+  stories.sort((a, b) => (b.fields['Sıra'] || 0) - (a.fields['Sıra'] || 0));
+  const groups = {};
+  const order = [];
+  stories.forEach(s => {
+    const name = s.fields['Öne Çıkan Adı'] || ('__single__' + s.id);
+    if (!groups[name]) { groups[name] = []; order.push(name); }
+    groups[name].push(s);
+  });
+  row.style.display = 'flex';
+  row.innerHTML = order.map(name => {
+    const items = groups[name];
+    const first = items[0];
+    const imgUrl = getImgUrl(first);
+    const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : name;
+    const idsAttr = items.map(i => i.id).join(',');
+    return '<div class="highlight-bubble" onclick="openHighlightViewer(\'' + idsAttr + '\')">' +
+      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '') : ICONS.image) + '</div></div>' +
+      '<div class="highlight-name">' + displayName + '</div>' +
+    '</div>';
+  }).join('');
+}
+
 function renderGrid(el, recs) {
   el.innerHTML = '';
   if (!recs.length) { el.innerHTML='<div class="no-content">Bu ay için içerik yok.</div>'; return; }
   recs.forEach((rec, i) => {
     const status = rec.fields['Durum'] || 'Beklemede';
     const readOnly = status === 'Yayında';
+    const fmt = rec.fields['Format'] || 'Feed 4:5';
     const cell = document.createElement('div');
     cell.className = 'feed-cell' + (readOnly?' past':'') + (rec.id===selectedRecordId?' active':'');
-    const imgUrl = getImgUrl(rec);
+    const imgUrl = (fmt === 'Reels 9:16' && rec.fields['Kapak Görseli URL']) ? rec.fields['Kapak Görseli URL'] : getImgUrl(rec);
 
     const imgDiv = document.createElement('div');
     imgDiv.className = 'feed-cell-img';
@@ -650,6 +747,8 @@ function renderGrid(el, recs) {
       imgDiv.style.background = BG[i%BG.length];
       imgDiv.innerHTML = '<span style="opacity:0.55;">' + ICONS.image + '</span><div class="feed-dot ' + dc(status) + '"></div>';
     }
+    if (fmt === 'Reels 9:16') { const b = document.createElement('div'); b.className = 'format-badge'; b.innerHTML = ICONS.reels; imgDiv.appendChild(b); }
+    else if (fmt === 'Carousel') { const b = document.createElement('div'); b.className = 'format-badge'; b.innerHTML = ICONS.carousel; imgDiv.appendChild(b); }
     cell.appendChild(imgDiv);
 
     if (showCaptions) {
@@ -709,7 +808,7 @@ function selectRecord(rec, idx) {
 
 function renderCurrentMonth() {
   const cur = getRange(currentMonthOffset);
-  const curRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
+  const curRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; if (r.fields['Format'] === 'Story') return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
   curRecs.sort((a, b) => {
     const sa = a.fields['Sıra'], sb = b.fields['Sıra'];
     if (sa != null && sb != null) return sb - sa;
@@ -723,6 +822,7 @@ function renderCurrentMonth() {
   renderGrid(document.getElementById('current-grid'), curRecs);
   updateStats(curRecs);
   renderAllComments();
+  renderHighlights();
 }
 
 function changeMonth(dir) { currentMonthOffset += dir; renderCurrentMonth(); }
@@ -1058,7 +1158,7 @@ window.initApp = async function(email) {
     renderCurrentMonth();
 
     const cur = getRange(0);
-    const curRecs = records.filter(r => { if (!r.fields['Yayın Tarihi']) return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
+    const curRecs = records.filter(r => { if (!r.fields['Yayın Tarihi']) return false; if (r.fields['Format'] === 'Story') return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
     curRecs.sort((a, b) => {
       const sa = a.fields['Sıra'], sb = b.fields['Sıra'];
       if (sa != null && sb != null) return sb - sa;

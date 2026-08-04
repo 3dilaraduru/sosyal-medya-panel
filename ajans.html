@@ -87,9 +87,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .field select:focus, .field input:focus { outline: none; border-color: var(--accent); }
 
 /* FORMAT BTNS */
-.format-btns { display: flex; gap: 6px; }
+.format-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 .format-btn {
-  flex: 1; padding: 8px 6px; border-radius: var(--radius-sm);
+  flex: 1 1 30%; padding: 8px 6px; border-radius: var(--radius-sm);
   border: 1px solid var(--border2); background: var(--surface2);
   color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 11px;
   font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center;
@@ -143,12 +143,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 /* LIST PANEL */
 .list-panel { padding: 20px; overflow-y: auto; max-height: calc(100vh - 54px); flex: 1; min-width: 0; }
-.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+.bulk-bar { display: flex; align-items: center; gap: 10px; padding: 8px 0 14px; font-size: 12px; color: var(--text2); }
+.card-select-check { position: absolute; top: 6px; left: 6px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; z-index: 3; cursor: pointer; }
+.format-badge { position: absolute; top: 6px; right: 6px; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+.carousel-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.carousel-thumb { position: relative; width: 52px; height: 52px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border2); }
+.carousel-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.carousel-thumb .remove-thumb { position: absolute; top: 1px; right: 1px; width: 15px; height: 15px; border-radius: 50%; background: rgba(0,0,0,0.7); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 9px; }
+.carousel-add-tile { width: 52px; height: 52px; border-radius: 6px; border: 1px dashed var(--border2); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text3); }
+.carousel-add-tile:hover { border-color: var(--accent); color: var(--accent); }
+.card-select-check.checked { background: var(--accent); }
+.content-card.bulk-selected { outline: 2px solid var(--accent); outline-offset: 2px; }
 .list-title { font-family: var(--font-voice); font-size: 17px; font-weight: 600; }
 .active-brand-banner { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 0 18px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
 .active-brand-logo { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-family: var(--font-voice); font-size: 16px; }
 .active-brand-logo img { width: 100%; height: 100%; object-fit: cover; }
 .active-brand-name { font-family: var(--font-voice); font-size: 26px; font-weight: 600; color: var(--text); }
+.highlights-row { display: flex; gap: 16px; padding: 4px 0 18px; overflow-x: auto; }
+.highlight-bubble { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; width: 62px; }
+.highlight-ring { width: 58px; height: 58px; border-radius: 50%; padding: 2.5px; background: linear-gradient(45deg, #d6a13a, #b23a2e, #7c5a9e); }
+.highlight-ring-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid var(--surface); background: var(--surface2); display: flex; align-items: center; justify-content: center; }
+.highlight-ring-inner img, .highlight-ring-inner video { width: 100%; height: 100%; object-fit: cover; }
+.highlight-name { font-size: 11px; color: var(--text2); text-align: center; max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.highlight-add-tile { width: 58px; height: 58px; border-radius: 50%; border: 1.5px dashed var(--border2); display: flex; align-items: center; justify-content: center; color: var(--text3); }
+.story-progress { display: flex; gap: 4px; margin-bottom: 8px; }
+.story-progress-seg { flex: 1; height: 2.5px; border-radius: 2px; background: rgba(255,255,255,0.3); overflow: hidden; }
+.story-progress-seg.done { background: #fff; }
+#story-media-slot img, #story-media-slot video { width: 100%; height: 100%; object-fit: cover; }
 .filter-tabs { display: flex; gap: 4px; }
 .caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
 .caption-toggle:hover { border-color: var(--accent); }
@@ -442,6 +464,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   </div>
 </div>
 
+<!-- STORY / ÖNE ÇIKAN GÖRÜNTÜLEYİCİ -->
+<div class="ac-modal-overlay" id="story-viewer" onclick="closeHighlightOutside(event)" style="background:rgba(0,0,0,0.85);">
+  <div style="position:relative; width:100%; max-width:340px;" onclick="event.stopPropagation();">
+    <button class="modal-close" style="top:-44px;right:0;background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3);" onclick="closeHighlightViewer()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="story-progress" id="story-progress"></div>
+    <div style="aspect-ratio:9/16; border-radius:14px; overflow:hidden; background:#111; position:relative;">
+      <div id="story-media-slot" style="width:100%;height:100%;"></div>
+      <div style="position:absolute; inset:0; display:flex;">
+        <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); prevStory();"></div>
+        <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); nextStory();"></div>
+      </div>
+    </div>
+    <div id="story-caption" style="color:#fff;font-size:12px;margin-top:10px;text-align:center;opacity:0.85;"></div>
+  </div>
+</div>
+
 <div id="app-screen">
   <div class="toast" id="toast"></div>
   <div class="topbar">
@@ -487,15 +525,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
             <span class="format-name">Reels 9:16</span>
           </button>
           <button class="format-btn" data-ratio="1" data-name="Kare 1:1" onclick="setFormat(this)">
-            <span class="format-icon">⬜</span>
+            <span class="format-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></span>
             <span class="format-name">Kare 1:1</span>
+          </button>
+          <button class="format-btn" data-ratio="0.8" data-name="Carousel" onclick="setFormat(this)">
+            <span class="format-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 13V5a2 2 0 0 1 2-2h8"/></svg></span>
+            <span class="format-name">Carousel</span>
+          </button>
+          <button class="format-btn" data-ratio="0.5625" data-name="Story" onclick="setFormat(this)">
+            <span class="format-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9" stroke-dasharray="4 3"/></svg></span>
+            <span class="format-name">Story</span>
           </button>
         </div>
       </div>
 
       <!-- DROP ZONE -->
       <div class="field">
-        <label>Görsel / Video</label>
+        <label id="dropzone-label">Görsel / Video</label>
         <div class="drop-zone-wrap">
           <div class="drop-zone" id="drop-zone" style="aspect-ratio: 4/5;">
             <input type="file" id="file-input" accept="image/*,video/*">
@@ -508,6 +554,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
             <button class="change-overlay" id="change-btn" onclick="resetFile(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Değiştir</button>
           </div>
         </div>
+        <div class="carousel-strip" id="carousel-strip" style="display:none;"></div>
+      </div>
+
+      <!-- REELS KAPAK GÖRSELİ (opsiyonel) -->
+      <div class="field" id="cover-field" style="display:none;">
+        <label>Kapak Görseli <span style="font-weight:400;color:var(--text3);">(opsiyonel)</span></label>
+        <div class="drop-zone-wrap">
+          <div class="drop-zone" id="cover-zone" style="aspect-ratio: 4/5; max-width:130px;">
+            <input type="file" id="cover-file-input" accept="image/*">
+            <div class="drop-placeholder" id="cover-placeholder">
+              <div class="drop-icon" style="margin-bottom:4px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+              <div class="drop-text" style="font-size:10px;">Kapak seç</div>
+            </div>
+            <img class="preview-img" id="cover-preview" alt="">
+            <button class="change-overlay" id="cover-change-btn" onclick="resetCoverFile(event)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;">Feed'de videonun ilk karesi yerine bu görsel gösterilir.</div>
+      </div>
+
+      <!-- STORY: ÖNE ÇIKAN ADI (opsiyonel) -->
+      <div class="field" id="highlight-field" style="display:none;">
+        <label>Öne Çıkan Adı <span style="font-weight:400;color:var(--text3);">(opsiyonel)</span></label>
+        <input type="text" id="highlight-name" placeholder="örn: Sık Sorulanlar — boş bırakırsan tekil story olur">
       </div>
 
       <!-- MARKA -->
@@ -554,6 +624,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <div class="active-brand-logo" id="active-brand-logo"></div>
         <div class="active-brand-name" id="active-brand-name">—</div>
       </div>
+      <div class="highlights-row" id="highlights-row" style="display:none;"></div>
       <div class="list-header">
         <div class="list-title" id="list-title">Tüm İçerikler</div>
         <label class="caption-toggle">
@@ -567,6 +638,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <button class="filter-tab" onclick="filterContents('Onaylı', this)">Onaylı</button>
           <button class="filter-tab" onclick="filterContents('Revize', this)">Revize</button>
         </div>
+        <button class="btn-sm" id="bulk-toggle-btn" onclick="toggleBulkMode()">Seç</button>
+      </div>
+      <div class="bulk-bar" id="bulk-bar" style="display:none;">
+        <span id="bulk-count">0 seçili</span>
+        <button class="btn-sm" onclick="bulkSelectAll()">Tümünü Seç</button>
+        <button class="btn-sm" style="color:var(--red);border-color:var(--red);" onclick="bulkDeleteSelected()">Seçilenleri Sil</button>
       </div>
       <div class="content-grid" id="content-grid">
         <div class="empty-state">Yükleniyor...</div>
@@ -617,6 +694,8 @@ const ICONS = {
   sparkle: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>',
   sun: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   moon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>',
+  reels: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  carousel: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 13V5a2 2 0 0 1 2-2h8"/></svg>',
 };
 
 function isVideoUrl(url) {
@@ -761,6 +840,19 @@ function setFormat(btn) {
   const ratioMap = { 0.8: '4/5', 0.5625: '9/16', 1: '1/1' };
   dz.style.aspectRatio = ratioMap[ratio] || '4/5';
   document.getElementById('drop-sub').textContent = currentFormat.name + ' — JPG, PNG, MP4';
+
+  const isCarousel = currentFormat.name === 'Carousel';
+  const isReels = currentFormat.name === 'Reels 9:16';
+  const isStory = currentFormat.name === 'Story';
+
+  document.getElementById('dropzone-label').textContent = isCarousel ? 'Görseller (2 veya daha fazla)' : 'Görsel / Video';
+  fileInput.multiple = isCarousel;
+  document.getElementById('carousel-strip').style.display = isCarousel ? 'flex' : 'none';
+  document.getElementById('cover-field').style.display = isReels ? 'block' : 'none';
+  document.getElementById('highlight-field').style.display = isStory ? 'block' : 'none';
+  if (!isCarousel) { carouselFiles = []; carouselUrls = []; renderCarouselStrip(); }
+  if (!isReels) resetCoverFile();
+  if (!isStory) document.getElementById('highlight-name').value = '';
 }
 
 // FILE
@@ -772,9 +864,15 @@ dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classL
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault(); dropZone.classList.remove('dragover');
-  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  if (!e.dataTransfer.files.length) return;
+  if (currentFormat.name === 'Carousel') handleCarouselFiles(e.dataTransfer.files);
+  else if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+fileInput.addEventListener('change', e => {
+  if (!e.target.files.length) return;
+  if (currentFormat.name === 'Carousel') handleCarouselFiles(e.target.files);
+  else if (e.target.files[0]) handleFile(e.target.files[0]);
+});
 
 function handleFile(file) {
   selectedFile = file; uploadedUrl = null;
@@ -802,6 +900,55 @@ function resetFile(e) {
   fileInput.value = '';
 }
 
+// CAROUSEL (birden fazla görsel)
+let carouselFiles = [];
+let carouselUrls = [];
+function handleCarouselFiles(fileList) {
+  [...fileList].forEach(file => carouselFiles.push(file));
+  renderCarouselStrip();
+}
+function removeCarouselFile(idx) {
+  carouselFiles.splice(idx, 1);
+  renderCarouselStrip();
+}
+function renderCarouselStrip() {
+  const strip = document.getElementById('carousel-strip');
+  strip.innerHTML = carouselFiles.map((f, i) => {
+    const url = URL.createObjectURL(f);
+    return '<div class="carousel-thumb"><img src="' + url + '"><span class="remove-thumb" onclick="removeCarouselFile(' + i + ')">' + ICONS.x + '</span></div>';
+  }).join('') + '<div class="carousel-add-tile" onclick="document.getElementById(\'file-input\').click()">+</div>';
+}
+
+// REELS KAPAK GÖRSELİ
+let coverFile = null, coverUrl = null;
+const coverZone = document.getElementById('cover-zone');
+const coverFileInput = document.getElementById('cover-file-input');
+const coverPreview = document.getElementById('cover-preview');
+coverZone.addEventListener('dragover', e => { e.preventDefault(); coverZone.classList.add('dragover'); });
+coverZone.addEventListener('dragleave', () => coverZone.classList.remove('dragover'));
+coverZone.addEventListener('drop', e => { e.preventDefault(); coverZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleCoverFile(e.dataTransfer.files[0]); });
+coverFileInput.addEventListener('change', e => { if (e.target.files[0]) handleCoverFile(e.target.files[0]); });
+
+function handleCoverFile(file) {
+  coverFile = file; coverUrl = null;
+  const reader = new FileReader();
+  reader.onload = e => {
+    coverPreview.src = e.target.result;
+    coverPreview.style.display = 'block';
+    document.getElementById('cover-placeholder').style.display = 'none';
+    document.getElementById('cover-change-btn').style.display = 'flex';
+  };
+  reader.readAsDataURL(file);
+}
+function resetCoverFile(e) {
+  if (e) e.stopPropagation();
+  coverFile = null; coverUrl = null;
+  coverPreview.style.display = 'none'; coverPreview.src = '';
+  document.getElementById('cover-placeholder').style.display = 'block';
+  document.getElementById('cover-change-btn').style.display = 'none';
+  coverFileInput.value = '';
+}
+
 // CLOUDINARY
 async function uploadToCloudinary(file, folder = 'icerikler') {
   const fd = new FormData();
@@ -822,7 +969,10 @@ async function submitContent() {
   const tarihi = document.getElementById('yayin-tarihi').value;
   const adi = document.getElementById('icerik-adi').value.trim();
   const caption = document.getElementById('icerik-caption').value.trim();
-  if (!selectedFile && !uploadedUrl) { showToast('Görsel yükleyin'); return; }
+  const isCarousel = currentFormat.name === 'Carousel';
+  if (isCarousel) {
+    if (carouselFiles.length < 2) { showToast('Carousel için en az 2 görsel seçin'); return; }
+  } else if (!selectedFile && !uploadedUrl) { showToast('Görsel yükleyin'); return; }
   if (!markaId) { showToast('Marka seçin'); return; }
   if (!tarihi) { showToast('Yayın tarihi seçin'); return; }
   if (!adi) { showToast('İçerik adı girin'); return; }
@@ -830,7 +980,21 @@ async function submitContent() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Kaydediliyor...';
   try {
-    if (!uploadedUrl && selectedFile) uploadedUrl = await uploadToCloudinary(selectedFile);
+    let carouselJoined = '';
+    if (isCarousel) {
+      setProgress('Görseller yükleniyor...', 40);
+      carouselUrls = [];
+      for (const f of carouselFiles) carouselUrls.push(await uploadToCloudinary(f));
+      uploadedUrl = carouselUrls[0];
+      carouselJoined = carouselUrls.join(',');
+    } else if (!uploadedUrl && selectedFile) {
+      uploadedUrl = await uploadToCloudinary(selectedFile);
+    }
+    let coverUploaded = '';
+    if (currentFormat.name === 'Reels 9:16' && coverFile) {
+      setProgress('Kapak görseli yükleniyor...', 60);
+      coverUploaded = await uploadToCloudinary(coverFile);
+    }
     setProgress('Airtable\'a kaydediliyor...', 70);
     const yeniSira = Date.now();
     const fields = {
@@ -843,8 +1007,14 @@ async function submitContent() {
       'Format': currentFormat.name,
     };
     if (markaId) fields['Marka'] = [markaId];
+    if (carouselJoined) fields['Carousel Görselleri'] = carouselJoined;
+    if (coverUploaded) fields['Kapak Görseli URL'] = coverUploaded;
+    if (currentFormat.name === 'Story') {
+      const hName = document.getElementById('highlight-name').value.trim();
+      if (hName) fields['Öne Çıkan Adı'] = hName;
+    }
     const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
-      method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields })
+      method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
     });
     const data = await res.json();
     if (data.id) {
@@ -860,6 +1030,9 @@ async function submitContent() {
 
 function resetForm() {
   resetFile();
+  carouselFiles = []; carouselUrls = []; renderCarouselStrip();
+  resetCoverFile();
+  document.getElementById('highlight-name').value = '';
   document.getElementById('icerik-adi').value = '';
   document.getElementById('icerik-caption').value = '';
   uploadedUrl = null;
@@ -983,6 +1156,8 @@ function renderContents() {
   const titleEl = document.getElementById('list-title');
   if (titleEl) titleEl.textContent = ajansMonthOffset === null ? 'Tüm İçerikler' : getAjansMonthRange(ajansMonthOffset).label + ' içerikleri';
   let filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
+  filtered = filtered.filter(r => r.fields['Format'] !== 'Story');
+  renderHighlights();
 
   // Marka filtresi
   if (selectedBrandId) {
@@ -1014,30 +1189,32 @@ function renderContents() {
   });
   
   const bmap = { 'Taslak': 'taslak', 'Beklemede': 'beklemede', 'Onaylı': 'onaylı', 'Revize': 'revize', 'Yayında': 'yayında' };
-  const ratioMap = { 'Feed 4:5': '4/5', 'Reels 9:16': '9/16', 'Kare 1:1': '1/1' };
+  const ratioMap = { 'Feed 4:5': '4/5', 'Reels 9:16': '9/16', 'Kare 1:1': '1/1', 'Carousel': '4/5', 'Story': '9/16' };
   
   grid.innerHTML = '';
   filtered.forEach(rec => {
     const f = rec.fields;
     const status = f['Durum'] || 'Taslak';
-    const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
+    const fmt = f['Format'] || 'Feed 4:5';
+    const imgUrl = (fmt === 'Reels 9:16' && f['Kapak Görseli URL']) ? f['Kapak Görseli URL'] : (f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : ''));
     const date = f['Yayın Tarihi'] ? new Date(f['Yayın Tarihi']).toLocaleDateString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
     const markaAdArr = f['Marka'];
     const markaRec = markaAdArr && brands.find(b => b.id === (Array.isArray(markaAdArr) ? markaAdArr[0] : markaAdArr));
     const markaAd = markaRec ? markaRec.fields['Marka Adı'] : '—';
-    const fmt = f['Format'] || 'Feed 4:5';
     const ar = ratioMap[fmt] || '4/5';
     const caption = f['Onaylı Caption'] || f['AI Caption Taslak'] || '';
     const captionClean = caption.replace(/\*\*/g, '').replace(/#+/g, '').trim();
     const captionPending = !caption && (status === 'Taslak' || status === 'Beklemede');
 
     const card = document.createElement('div');
-    card.className = 'content-card';
-    card.draggable = true;
+    card.className = 'content-card' + (bulkSelected.has(rec.id) ? ' bulk-selected' : '');
+    card.draggable = !bulkMode;
     card.dataset.id = rec.id;
     card.innerHTML = 
       '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
+        (bulkMode ? '<div class="card-select-check' + (bulkSelected.has(rec.id)?' checked':'') + '">' + (bulkSelected.has(rec.id) ? ICONS.check : '') + '</div>' : '') +
         (imgUrl ? mediaTag(imgUrl, 'card-img') : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
+        (fmt === 'Reels 9:16' ? '<div class="format-badge">' + ICONS.reels + '</div>' : fmt === 'Carousel' ? '<div class="format-badge">' + ICONS.carousel + '</div>' : '') +
         '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
       (showAcCaptions ? (
@@ -1076,6 +1253,7 @@ function renderContents() {
     });
     card.addEventListener('click', (e) => {
       if (e.target.closest('.card-date-edit')) return;
+      if (bulkMode) { toggleBulkSelect(rec.id, card); return; }
       openAcModal(rec.id);
     });
 
@@ -1306,7 +1484,145 @@ function resetNbLogo(e) {
   nbLogoFileInput.value = '';
 }
 
+let bulkMode = false;
+let bulkSelected = new Set();
 let editingBrandId = null;
+
+let storyViewerItems = [];
+let storyViewerIdx = 0;
+
+function openHighlightViewer(idsCsv) {
+  const ids = idsCsv.split(',');
+  storyViewerItems = ids.map(id => allContents.find(r => r.id === id)).filter(Boolean);
+  if (!storyViewerItems.length) return;
+  storyViewerIdx = 0;
+  document.getElementById('story-viewer').classList.add('open');
+  renderStoryProgress();
+  showStoryAt(0);
+}
+
+function renderStoryProgress() {
+  const el = document.getElementById('story-progress');
+  el.innerHTML = storyViewerItems.map((_, i) => '<div class="story-progress-seg' + (i <= storyViewerIdx ? ' done' : '') + '" data-i="' + i + '"></div>').join('');
+}
+
+function showStoryAt(idx) {
+  storyViewerIdx = idx;
+  const item = storyViewerItems[idx];
+  const f = item.fields;
+  const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
+  document.getElementById('story-media-slot').innerHTML = imgUrl ? mediaTag(imgUrl, '') : '';
+  document.getElementById('story-caption').textContent = f['İçerik Adı'] || '';
+  document.querySelectorAll('.story-progress-seg').forEach((seg, i) => seg.classList.toggle('done', i <= idx));
+}
+
+function nextStory() {
+  if (storyViewerIdx < storyViewerItems.length - 1) showStoryAt(storyViewerIdx + 1);
+  else closeHighlightViewer();
+}
+function prevStory() {
+  if (storyViewerIdx > 0) showStoryAt(storyViewerIdx - 1);
+}
+function closeHighlightViewer() {
+  document.getElementById('story-viewer').classList.remove('open');
+  document.getElementById('story-media-slot').innerHTML = '';
+  storyViewerItems = [];
+}
+function closeHighlightOutside(e) {
+  if (e.target === document.getElementById('story-viewer')) closeHighlightViewer();
+}
+
+function renderHighlights() {
+  const row = document.getElementById('highlights-row');
+  let stories = allContents.filter(r => r.fields['Format'] === 'Story');
+  if (selectedBrandId) {
+    stories = stories.filter(r => {
+      const m = r.fields['Marka'];
+      const id = Array.isArray(m) ? m[0] : m;
+      return id === selectedBrandId;
+    });
+  }
+  if (ajansMonthOffset !== null) {
+    const range = getAjansMonthRange(ajansMonthOffset);
+    stories = stories.filter(r => {
+      if (!r.fields['Yayın Tarihi']) return false;
+      const d = new Date(r.fields['Yayın Tarihi']);
+      return d >= range.start && d <= range.end;
+    });
+  }
+  if (!stories.length) { row.style.display = 'none'; row.innerHTML = ''; return; }
+  stories.sort((a, b) => (b.fields['Sıra'] || 0) - (a.fields['Sıra'] || 0));
+
+  const groups = {};
+  const order = [];
+  stories.forEach(s => {
+    const name = s.fields['Öne Çıkan Adı'] || ('__single__' + s.id);
+    if (!groups[name]) { groups[name] = []; order.push(name); }
+    groups[name].push(s);
+  });
+
+  row.style.display = 'flex';
+  row.innerHTML = order.map(name => {
+    const items = groups[name];
+    const first = items[0];
+    const imgUrl = first.fields['Görsel URL'] || (first.fields['Görsel/Video'] && first.fields['Görsel/Video'][0] ? first.fields['Görsel/Video'][0].url : '');
+    const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : name;
+    const idsAttr = items.map(i => i.id).join(',');
+    return '<div class="highlight-bubble" onclick="openHighlightViewer(\'' + idsAttr + '\')">' +
+      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '') : ICONS.image) + '</div></div>' +
+      '<div class="highlight-name">' + displayName + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  bulkSelected.clear();
+  document.getElementById('bulk-toggle-btn').textContent = bulkMode ? 'Vazgeç' : 'Seç';
+  document.getElementById('bulk-bar').style.display = bulkMode ? 'flex' : 'none';
+  updateBulkBar();
+  renderContents();
+}
+
+function toggleBulkSelect(id, cardEl) {
+  if (bulkSelected.has(id)) bulkSelected.delete(id);
+  else bulkSelected.add(id);
+  cardEl.classList.toggle('bulk-selected', bulkSelected.has(id));
+  const check = cardEl.querySelector('.card-select-check');
+  if (check) {
+    check.classList.toggle('checked', bulkSelected.has(id));
+    check.innerHTML = bulkSelected.has(id) ? ICONS.check : '';
+  }
+  updateBulkBar();
+}
+
+function bulkSelectAll() {
+  document.querySelectorAll('.content-card').forEach(card => {
+    bulkSelected.add(card.dataset.id);
+  });
+  renderContents();
+}
+
+function updateBulkBar() {
+  document.getElementById('bulk-count').textContent = bulkSelected.size + ' seçili';
+}
+
+async function bulkDeleteSelected() {
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
+  if (!(await showConfirm(bulkSelected.size + ' içerik silinecek. Bu işlem geri alınamaz. Emin misiniz?', { okText: 'Sil' }))) return;
+  const ids = [...bulkSelected];
+  let failed = 0;
+  for (const id of ids) {
+    try {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, { method: 'DELETE', headers: AT_HDR });
+      allContents = allContents.filter(r => r.id !== id);
+    } catch(e) { failed++; console.error(e); }
+  }
+  bulkSelected.clear();
+  toggleBulkMode();
+  showToast(failed ? (ids.length - failed) + ' içerik silindi, ' + failed + ' tanesi başarısız oldu.' : ids.length + ' içerik silindi.');
+}
 
 function applyThemeIcon(theme) {
   document.getElementById('theme-toggle').innerHTML = theme === 'dark' ? ICONS.sun : ICONS.moon;
