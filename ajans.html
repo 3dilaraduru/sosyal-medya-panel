@@ -358,6 +358,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <option value="Yayında">Yayında</option>
         </select>
       </div>
+      <div class="field" id="ac-modal-highlight-field" style="display:none;">
+        <label>Öne Çıkan Adı</label>
+        <input type="text" id="ac-modal-highlight" placeholder="örn: Sık Sorulanlar">
+      </div>
       <div class="field" style="flex:1;">
         <label>Caption</label>
         <textarea id="ac-modal-caption" class="caption-textarea" style="min-height:140px;"></textarea>
@@ -701,9 +705,13 @@ const ICONS = {
 function isVideoUrl(url) {
   return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url || '');
 }
-function mediaTag(url, cls) {
+function mediaTag(url, cls, opts) {
   if (!url) return '';
-  if (isVideoUrl(url)) return '<video class="' + cls + '" src="' + url + '" muted playsinline preload="metadata"></video>';
+  opts = opts || {};
+  if (isVideoUrl(url)) {
+    const controls = opts.noControls ? '' : 'controls';
+    return '<video class="' + cls + '" src="' + url + '" ' + controls + ' playsinline preload="metadata"></video>';
+  }
   return '<img class="' + cls + '" src="' + url + '" alt="">';
 }
 
@@ -844,13 +852,14 @@ function setFormat(btn) {
   const isCarousel = currentFormat.name === 'Carousel';
   const isReels = currentFormat.name === 'Reels 9:16';
   const isStory = currentFormat.name === 'Story';
+  const isMultiFile = isCarousel || isStory;
 
-  document.getElementById('dropzone-label').textContent = isCarousel ? 'Görseller (2 veya daha fazla)' : 'Görsel / Video';
-  fileInput.multiple = isCarousel;
-  document.getElementById('carousel-strip').style.display = isCarousel ? 'flex' : 'none';
+  document.getElementById('dropzone-label').textContent = isCarousel ? 'Görseller (2 veya daha fazla)' : isStory ? 'Story\'ler (bir veya daha fazla)' : 'Görsel / Video';
+  fileInput.multiple = isMultiFile;
+  document.getElementById('carousel-strip').style.display = isMultiFile ? 'flex' : 'none';
   document.getElementById('cover-field').style.display = isReels ? 'block' : 'none';
   document.getElementById('highlight-field').style.display = isStory ? 'block' : 'none';
-  if (!isCarousel) { carouselFiles = []; carouselUrls = []; renderCarouselStrip(); }
+  if (!isMultiFile) { carouselFiles = []; carouselUrls = []; renderCarouselStrip(); }
   if (!isReels) resetCoverFile();
   if (!isStory) document.getElementById('highlight-name').value = '';
 }
@@ -865,12 +874,12 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover
 dropZone.addEventListener('drop', e => {
   e.preventDefault(); dropZone.classList.remove('dragover');
   if (!e.dataTransfer.files.length) return;
-  if (currentFormat.name === 'Carousel') handleCarouselFiles(e.dataTransfer.files);
+  if (currentFormat.name === 'Carousel' || currentFormat.name === 'Story') handleCarouselFiles(e.dataTransfer.files);
   else if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
 fileInput.addEventListener('change', e => {
   if (!e.target.files.length) return;
-  if (currentFormat.name === 'Carousel') handleCarouselFiles(e.target.files);
+  if (currentFormat.name === 'Carousel' || currentFormat.name === 'Story') handleCarouselFiles(e.target.files);
   else if (e.target.files[0]) handleFile(e.target.files[0]);
 });
 
@@ -970,8 +979,11 @@ async function submitContent() {
   const adi = document.getElementById('icerik-adi').value.trim();
   const caption = document.getElementById('icerik-caption').value.trim();
   const isCarousel = currentFormat.name === 'Carousel';
+  const isStory = currentFormat.name === 'Story';
   if (isCarousel) {
     if (carouselFiles.length < 2) { showToast('Carousel için en az 2 görsel seçin'); return; }
+  } else if (isStory) {
+    if (carouselFiles.length < 1) { showToast('En az bir story görseli/videosu seçin'); return; }
   } else if (!selectedFile && !uploadedUrl) { showToast('Görsel yükleyin'); return; }
   if (!markaId) { showToast('Marka seçin'); return; }
   if (!tarihi) { showToast('Yayın tarihi seçin'); return; }
@@ -980,6 +992,39 @@ async function submitContent() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Kaydediliyor...';
   try {
+    if (isStory) {
+      // Her dosya ayrı bir story kaydı olur, hepsi aynı Öne Çıkan Adı'na bağlanır
+      const hName = document.getElementById('highlight-name').value.trim();
+      const baseSira = Date.now();
+      for (let i = 0; i < carouselFiles.length; i++) {
+        setProgress((i+1) + '/' + carouselFiles.length + ' story yükleniyor...', Math.round(((i+1)/carouselFiles.length)*80));
+        const url = await uploadToCloudinary(carouselFiles[i]);
+        const fields = {
+          'İçerik Adı': carouselFiles.length > 1 ? adi + ' ' + (i+1) : adi,
+          'AI Caption Taslak': caption || '',
+          'Yayın Tarihi': new Date(tarihi).toISOString(),
+          'Sıra': baseSira + i,
+          'Durum': 'Taslak',
+          'Görsel URL': url,
+          'Format': 'Story',
+        };
+        if (markaId) fields['Marka'] = [markaId];
+        if (hName) fields['Öne Çıkan Adı'] = hName;
+        const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
+          method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
+        });
+        const data = await res.json();
+        if (!data.id) throw new Error(JSON.stringify(data));
+      }
+      setProgress('Tamamlandı!', 100);
+      showToast(carouselFiles.length + ' story kaydedildi.');
+      resetForm();
+      setTimeout(loadContents, 800);
+      btn.disabled = false;
+      btn.innerHTML = 'İçeriği Kaydet';
+      return;
+    }
+
     let carouselJoined = '';
     if (isCarousel) {
       setProgress('Görseller yükleniyor...', 40);
@@ -1009,10 +1054,6 @@ async function submitContent() {
     if (markaId) fields['Marka'] = [markaId];
     if (carouselJoined) fields['Carousel Görselleri'] = carouselJoined;
     if (coverUploaded) fields['Kapak Görseli URL'] = coverUploaded;
-    if (currentFormat.name === 'Story') {
-      const hName = document.getElementById('highlight-name').value.trim();
-      if (hName) fields['Öne Çıkan Adı'] = hName;
-    }
     const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
       method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
     });
@@ -1213,7 +1254,7 @@ function renderContents() {
     card.innerHTML = 
       '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
         (bulkMode ? '<div class="card-select-check' + (bulkSelected.has(rec.id)?' checked':'') + '">' + (bulkSelected.has(rec.id) ? ICONS.check : '') + '</div>' : '') +
-        (imgUrl ? mediaTag(imgUrl, 'card-img') : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
+        (imgUrl ? mediaTag(imgUrl, 'card-img', {noControls:true}) : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
         (fmt === 'Reels 9:16' ? '<div class="format-badge">' + ICONS.reels + '</div>' : fmt === 'Carousel' ? '<div class="format-badge">' + ICONS.carousel + '</div>' : '') +
         '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
@@ -1335,7 +1376,7 @@ function renderRevizes() {
 
     return '<div class="rev-card">' +
       '<div class="rev-card-top">' +
-        '<div class="rev-thumb">' + (imgUrl ? mediaTag(imgUrl, '') : ICONS.image) + '</div>' +
+        '<div class="rev-thumb">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div>' +
         '<div class="rev-meta">' +
           '<div class="rev-title">' + icerikAdi + '</div>' +
           '<div class="rev-date">' + fmtDate(f['Tarih']) + '</div>' +
@@ -1396,6 +1437,14 @@ function openAcModal(recId) {
   document.getElementById('ac-modal-status').value = f['Durum'] || 'Taslak';
   document.getElementById('ac-modal-caption').value = f['Onaylı Caption'] || f['AI Caption Taslak'] || '';
 
+  const highlightField = document.getElementById('ac-modal-highlight-field');
+  if (f['Format'] === 'Story') {
+    highlightField.style.display = 'block';
+    document.getElementById('ac-modal-highlight').value = f['Öne Çıkan Adı'] || '';
+  } else {
+    highlightField.style.display = 'none';
+  }
+
   document.getElementById('ac-modal').classList.add('open');
 }
 
@@ -1421,9 +1470,13 @@ async function acSaveModal() {
   const caption = document.getElementById('ac-modal-caption').value;
   const fields = { 'İçerik Adı': title, 'Durum': status, 'AI Caption Taslak': caption };
   if (dateVal) fields['Yayın Tarihi'] = new Date(dateVal).toISOString();
+  const rec0 = allContents.find(r => r.id === acCurrentId);
+  if (rec0 && rec0.fields['Format'] === 'Story') {
+    fields['Öne Çıkan Adı'] = document.getElementById('ac-modal-highlight').value.trim();
+  }
   try {
     await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
-      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields })
+      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
     });
     const rec = allContents.find(r => r.id === acCurrentId);
     if (rec) Object.assign(rec.fields, fields);
@@ -1569,7 +1622,7 @@ function renderHighlights() {
     const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : name;
     const idsAttr = items.map(i => i.id).join(',');
     return '<div class="highlight-bubble" onclick="openHighlightViewer(\'' + idsAttr + '\')">' +
-      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '') : ICONS.image) + '</div></div>' +
+      '<div class="highlight-ring"><div class="highlight-ring-inner">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div></div>' +
       '<div class="highlight-name">' + displayName + '</div>' +
     '</div>';
   }).join('');
@@ -1799,7 +1852,7 @@ function renderNotifications() {
     const isOk = status === 'Onaylı';
 
     return '<div class="notif-card ' + (isOk ? 'onaylı' : 'revize') + '">' +
-      '<div class="notif-thumb">' + (imgUrl ? mediaTag(imgUrl, '') : ICONS.image) + '</div>' +
+      '<div class="notif-thumb">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div>' +
       '<div class="notif-body">' +
         '<div class="notif-title">' + name + '</div>' +
         '<div class="' + (isOk ? 'notif-status-ok' : 'notif-status-rev') + '">' + (isOk ? 'Onaylandı' : 'Revize istendi') + '</div>' +
