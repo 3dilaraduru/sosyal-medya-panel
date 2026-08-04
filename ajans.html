@@ -37,6 +37,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .topbar-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--accent); color: #fff; font-weight: 500; }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 .user-email { font-size: 12px; color: var(--text2); }
+.role-badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; background: var(--surface2); color: var(--text2); font-weight: 600; }
+.role-badge.admin { background: var(--accent); color: #fff; }
+.team-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface2); border-radius: var(--radius-sm); font-size: 12px; }
+.team-row-name { font-weight: 500; }
+.team-row-email { color: var(--text3); font-size: 11px; }
 .btn-sm { padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .btn-sm:hover { color: var(--text); }
 
@@ -259,6 +264,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   </div>
 </div>
 
+<div id="access-denied-screen" style="display:none; align-items: center; justify-content: center; height: 100vh;">
+  <div class="login-card">
+    <div class="login-logo" style="background:var(--red);">✕</div>
+    <div class="login-title">Erişim yok</div>
+    <div class="login-sub"><span id="access-denied-email">—</span> hesabının ajans paneline erişim yetkisi yok. Yöneticinizle iletişime geçin.</div>
+    <button class="btn-sm" style="width:100%;" onclick="window.firebaseSignOut()">Çıkış Yap</button>
+  </div>
+</div>
+
 <!-- GENEL AMAÇLI ONAY PENCERESİ (tarayıcı confirm yerine) -->
 <div class="confirm-overlay" id="confirm-modal">
   <div class="confirm-box">
@@ -350,7 +364,37 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <input type="hidden" id="nb-logo" value="">
       </div>
       <div style="font-size:11px; color:var(--text3);">Müşteri, bu e-posta ile Google hesabından giriş yaptığında kendi içeriklerini ve kendi logosunu görecek.</div>
+      <button class="btn-sm" id="nb-copy-link-btn" onclick="copyClientLink()" style="display:none;">🔗 Müşteri Linkini Kopyala</button>
       <button class="btn-submit" onclick="saveNewBrand()" id="nb-save-btn">Müşteriyi Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- EKİP YÖNETİMİ MODAL -->
+<div class="ac-modal-overlay" id="team-modal" onclick="closeTeamOutside(event)">
+  <div class="ac-modal-box" style="max-width:460px;">
+    <button class="modal-close" onclick="closeTeamModal()">✕</button>
+    <div style="padding:28px; display:flex; flex-direction:column; gap:14px; width:100%; max-height:80vh; overflow-y:auto;">
+      <div style="font-size:16px; font-weight:600;">Ekip yönetimi</div>
+      <div id="team-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <div class="modal-divider"></div>
+      <div style="font-size:13px; font-weight:600;">Yeni ekip üyesi ekle</div>
+      <div class="field">
+        <label>Ad</label>
+        <input type="text" id="team-name" placeholder="örn: Ayşe Yılmaz">
+      </div>
+      <div class="field">
+        <label>E-posta *</label>
+        <input type="text" id="team-email" placeholder="ekip.uyesi@ornek.com">
+      </div>
+      <div class="field">
+        <label>Rol</label>
+        <select id="team-role">
+          <option value="Ekip Üyesi">Ekip Üyesi — içerik ekler, müşteriye ileti admin onayından geçer</option>
+          <option value="Admin">Admin — her şeyi yapabilir, müşteriye ileti onaylar</option>
+        </select>
+      </div>
+      <button class="btn-submit" onclick="saveTeamMember()">Ekle</button>
     </div>
   </div>
 </div>
@@ -370,7 +414,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <button class="month-all-btn active" id="all-months-btn" onclick="showAllMonths()">Tümü</button>
     </div>
     <div class="topbar-right">
+      <button class="btn-sm" onclick="openTeamModal()" id="team-btn" style="display:none;">👥 Ekip</button>
       <button class="btn-ilet" onclick="planiIlet()" id="ilet-btn">📤 Planı Müşteriye İlet</button>
+      <span class="role-badge" id="user-role-badge">—</span>
       <span class="user-email" id="user-email"></span>
       <button class="btn-sm" onclick="window.firebaseSignOut()">Çıkış</button>
     </div>
@@ -744,6 +790,7 @@ function resetForm() {
 }
 
 async function planiIlet() {
+  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
   const btn = document.getElementById('ilet-btn');
   // Taslak durumundaki içerikleri Beklemede yap
   const taslaklar = allContents.filter(r => r.fields['Durum'] === 'Taslak');
@@ -775,13 +822,14 @@ async function loadBrands() {
   sel.innerHTML = '<option value="">Marka seçin...</option>' +
     brands.map(b => '<option value="' + b.id + '">' + (b.fields['Marka Adı'] || b.id) + '</option>').join('');
 
+  const isAdmin = currentUserRole === 'Admin';
   const bar = document.getElementById('brand-bar');
   bar.innerHTML = '<div class="brand-chip' + (selectedBrandId===''?' active':'') + '" data-brand="" onclick="switchBrand(\'\', this)">Tüm markalar</div>' +
     brands.map(b => '<div class="brand-chip' + (selectedBrandId===b.id?' active':'') + '" data-brand="' + b.id + '" onclick="switchBrand(\'' + b.id + '\', this)">' +
       (b.fields['Marka Adı'] || b.id) +
-      '<span class="brand-chip-edit" title="Marka ayarları" onclick="event.stopPropagation(); openEditBrandModal(\'' + b.id + '\')">✎</span>' +
+      (isAdmin ? '<span class="brand-chip-edit" title="Marka ayarları" onclick="event.stopPropagation(); openEditBrandModal(\'' + b.id + '\')">✎</span>' : '') +
     '</div>').join('') +
-    '<div class="brand-chip brand-chip-add" onclick="openNewBrandModal()">+ Yeni Müşteri</div>';
+    (isAdmin ? '<div class="brand-chip brand-chip-add" onclick="openNewBrandModal()">+ Yeni Müşteri</div>' : '');
 }
 
 let selectedBrandId = '';
@@ -1132,10 +1180,27 @@ function resetNbLogo(e) {
 
 let editingBrandId = null;
 
+function copyClientLink() {
+  const name = document.getElementById('nb-name').value.trim() || 'Marka';
+  const url = window.location.origin + window.location.pathname.replace(/ajans\.html$/, '');
+  const text = name + ' için içerik onay paneliniz hazır!\n' + url + '\nGoogle hesabınızla giriş yapabilirsiniz.';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✓ Link panoya kopyalandı');
+    }).catch(() => {
+      showToast('Kopyalanamadı: ' + url);
+    });
+  } else {
+    showToast('Link: ' + url);
+  }
+}
+
 function openNewBrandModal() {
+  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
   editingBrandId = null;
   document.getElementById('nb-modal-title').textContent = 'Yeni müşteri ekle';
   document.getElementById('nb-save-btn').textContent = 'Müşteriyi Kaydet';
+  document.getElementById('nb-copy-link-btn').style.display = 'none';
   document.getElementById('nb-name').value = '';
   document.getElementById('nb-ig').value = '';
   document.getElementById('nb-email').value = '';
@@ -1144,12 +1209,14 @@ function openNewBrandModal() {
 }
 
 function openEditBrandModal(brandId) {
+  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
   const brand = brands.find(b => b.id === brandId);
   if (!brand) return;
   editingBrandId = brandId;
   const f = brand.fields;
   document.getElementById('nb-modal-title').textContent = f['Marka Adı'] + ' — düzenle';
   document.getElementById('nb-save-btn').textContent = 'Kaydet';
+  document.getElementById('nb-copy-link-btn').style.display = 'block';
   document.getElementById('nb-name').value = f['Marka Adı'] || '';
   document.getElementById('nb-ig').value = f['Instagram Hesabı'] || '';
   document.getElementById('nb-email').value = f['Müşteri E-postası'] || '';
@@ -1175,6 +1242,7 @@ function closeNewBrandOutside(e) {
 }
 
 async function saveNewBrand() {
+  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
   const name = document.getElementById('nb-name').value.trim();
   const ig = document.getElementById('nb-ig').value.trim().replace(/^@/, '');
   const email = document.getElementById('nb-email').value.trim();
@@ -1278,8 +1346,96 @@ function renderNotifications() {
   }).join('');
 }
 
+let currentUserRole = null;
+
+async function checkUserRole(email) {
+  try {
+    const formula = encodeURIComponent('{E-posta} = "' + email + '"');
+    const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar?filterByFormula=' + formula, { headers: AT_HDR });
+    if (!res.ok) {
+      // Kullanıcılar tablosu henüz yok / erişilemiyor -> kilitlenmeyi önlemek için Admin say
+      return 'Admin';
+    }
+    const data = await res.json();
+    if (data.records && data.records.length > 0) {
+      return data.records[0].fields['Rol'] || 'Ekip Üyesi';
+    }
+    return null; // tablo var ama bu e-posta kayıtlı değil -> erişim yok
+  } catch(e) {
+    console.error(e);
+    return 'Admin';
+  }
+}
+
+function applyRolePermissions(role) {
+  const isAdmin = role === 'Admin';
+  document.getElementById('team-btn').style.display = isAdmin ? 'inline-flex' : 'none';
+  document.getElementById('ilet-btn').style.display = isAdmin ? 'inline-flex' : 'none';
+  const badge = document.getElementById('user-role-badge');
+  badge.textContent = role;
+  badge.className = 'role-badge' + (isAdmin ? ' admin' : '');
+}
+
+async function loadTeam() {
+  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', { headers: AT_HDR });
+  if (!res.ok) { teamMembers = []; return; }
+  const data = await res.json();
+  teamMembers = data.records || [];
+}
+
+function renderTeamList() {
+  const list = document.getElementById('team-list');
+  if (!teamMembers.length) { list.innerHTML = '<div style="font-size:12px;color:var(--text3);">Henüz ekip üyesi yok.</div>'; return; }
+  list.innerHTML = teamMembers.map(m => {
+    const f = m.fields;
+    return '<div class="team-row"><div><div class="team-row-name">' + (f['Ad'] || f['E-posta']) + '</div><div class="team-row-email">' + f['E-posta'] + '</div></div><span class="role-badge' + (f['Rol']==='Admin'?' admin':'') + '">' + (f['Rol']||'Ekip Üyesi') + '</span></div>';
+  }).join('');
+}
+
+let teamMembers = [];
+function openTeamModal() {
+  if (currentUserRole !== 'Admin') { showToast('Bu işlem için admin yetkisi gerekiyor.'); return; }
+  document.getElementById('team-name').value = '';
+  document.getElementById('team-email').value = '';
+  document.getElementById('team-role').value = 'Ekip Üyesi';
+  renderTeamList();
+  document.getElementById('team-modal').classList.add('open');
+}
+function closeTeamModal() { document.getElementById('team-modal').classList.remove('open'); }
+function closeTeamOutside(e) { if (e.target === document.getElementById('team-modal')) closeTeamModal(); }
+
+async function saveTeamMember() {
+  const name = document.getElementById('team-name').value.trim();
+  const email = document.getElementById('team-email').value.trim();
+  const role = document.getElementById('team-role').value;
+  if (!email) { showToast('E-posta gerekli'); return; }
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', {
+      method: 'POST', headers: AT_HDR,
+      body: JSON.stringify({ fields: { 'Ad': name, 'E-posta': email, 'Rol': role } })
+    });
+    showToast('✓ ' + (name || email) + ' eklendi');
+    await loadTeam();
+    renderTeamList();
+    document.getElementById('team-name').value = '';
+    document.getElementById('team-email').value = '';
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
 window.initApp = async function(email) {
+  const role = await checkUserRole(email);
+  if (!role) {
+    document.getElementById('access-denied-email').textContent = email;
+    document.getElementById('access-denied-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+    return;
+  }
+  currentUserRole = role;
+  document.getElementById('access-denied-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'flex';
   document.getElementById('user-email').textContent = email;
+  applyRolePermissions(role);
+  await loadTeam();
   document.getElementById('caption-toggle').checked = showAcCaptions;
   await loadBrands();
   const initRange = getAjansMonthRange(ajansMonthOffset);
@@ -1313,11 +1469,11 @@ window.firebaseSignOut = async () => { await signOut(auth); };
 onAuthStateChanged(auth, user => {
   if (user) {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'flex';
     window.initApp(user.email);
   } else {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('access-denied-screen').style.display = 'none';
   }
 });
 </script>
