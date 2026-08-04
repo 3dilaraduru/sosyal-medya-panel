@@ -533,9 +533,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <!-- CAPTION BİLGİSİ -->
       <div class="field">
         <label>Caption</label>
-        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> İçerik kaydedildikten sonra AI otomatik olarak Claude, Gemini ve ChatGPT ile caption üretecek. 1-2 dakika içinde hazır olacak.
-        </div>
+        <textarea id="icerik-caption" class="caption-textarea" style="min-height:100px;" placeholder="İsterseniz caption'ı şimdi kendiniz yazın..."></textarea>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;">Boş bırakırsanız AI otomatik caption üretmeyi dener (n8n bağlantısına bağlı). Siz yazarsanız o kullanılır.</div>
       </div>
 
       <div class="upload-progress" id="upload-progress">
@@ -822,7 +821,7 @@ async function submitContent() {
   const markaId = document.getElementById('marka-select').value;
   const tarihi = document.getElementById('yayin-tarihi').value;
   const adi = document.getElementById('icerik-adi').value.trim();
-  const caption = '';
+  const caption = document.getElementById('icerik-caption').value.trim();
   if (!selectedFile && !uploadedUrl) { showToast('Görsel yükleyin'); return; }
   if (!markaId) { showToast('Marka seçin'); return; }
   if (!tarihi) { showToast('Yayın tarihi seçin'); return; }
@@ -862,6 +861,7 @@ async function submitContent() {
 function resetForm() {
   resetFile();
   document.getElementById('icerik-adi').value = '';
+  document.getElementById('icerik-caption').value = '';
   uploadedUrl = null;
   const now = new Date(); now.setHours(now.getHours() + 2, 0, 0, 0);
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);
