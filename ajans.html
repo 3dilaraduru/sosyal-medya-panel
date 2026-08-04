@@ -172,6 +172,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .story-progress-fill { position: absolute; top:0; left:0; bottom:0; width: 0%; background: #fff; }
 .story-progress-fill.animate { transition: width 10s linear; width: 100%; }
 #story-media-slot img, #story-media-slot video { width: 100%; height: 100%; object-fit: cover; }
+.story-header-overlay { position: absolute; top: 0; left: 0; right: 0; padding: 16px 12px 24px; display: flex; align-items: center; gap: 8px; background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent); z-index: 2; }
+.story-header-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--accent); flex-shrink: 0; }
+.story-header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.story-header-name { font-size: 12px; font-weight: 600; color: #fff; }
+.story-header-time { font-size: 10px; color: rgba(255,255,255,0.75); }
+.story-header-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.story-action-btn { width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.4); border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.story-action-btn:hover { background: rgba(0,0,0,0.65); }
 .filter-tabs { display: flex; gap: 4px; }
 .caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
 .caption-toggle:hover { border-color: var(--accent); }
@@ -202,6 +210,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .ac-modal-left { flex: 0 0 340px; background: var(--surface2); display: flex; align-items: center; justify-content: center; padding: 20px; border-right: 1px solid var(--border); }
 .ac-modal-img-wrap { width: 100%; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden; background: var(--surface2); display: flex; align-items: center; justify-content: center; }
 .ac-modal-img-wrap img, .ac-modal-img-wrap video { width: 100%; height: 100%; object-fit: cover; }
+.carousel-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 3; }
+.carousel-nav-btn:hover { background: rgba(0,0,0,0.75); }
+.carousel-counter { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; padding: 3px 9px; border-radius: 20px; z-index: 3; }
+.carousel-thumb.active { border-color: var(--accent); border-width: 2px; }
 .ac-modal-right { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
 .ac-modal-brand { font-size: 13px; font-weight: 500; padding: 8px 11px; background: var(--surface2); border-radius: var(--radius-sm); color: var(--text2); }
 .ac-modal-btns { display: flex; gap: 10px; margin-top: auto; padding-top: 6px; }
@@ -331,9 +343,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   <div class="ac-modal-box">
     <button class="modal-close" onclick="acCloseModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="ac-modal-left">
-      <div class="ac-modal-img-wrap" id="ac-modal-img-wrap">
+      <div class="ac-modal-img-wrap" id="ac-modal-img-wrap" style="position:relative;">
         <span id="ac-modal-media"></span>
         <div class="card-img-placeholder" id="ac-modal-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        <button class="carousel-nav-btn" id="ac-carousel-prev" style="display:none;left:6px;" onclick="acCarouselNav(-1)"></button>
+        <button class="carousel-nav-btn" id="ac-carousel-next" style="display:none;right:6px;" onclick="acCarouselNav(1)"></button>
+        <div class="carousel-counter" id="ac-carousel-counter" style="display:none;"></div>
+      </div>
+      <div class="carousel-strip" id="ac-carousel-strip" style="display:none;"></div>
       </div>
     </div>
     <div class="ac-modal-right">
@@ -360,7 +377,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </select>
       </div>
       <div class="field" id="ac-modal-highlight-field" style="display:none;">
-        <label>Öne Çıkan Adı</label>
+        <label>Öne Çıkan Adı <span style="font-weight:400;color:var(--text3);">(aynı isimdeki story'ler birlikte gruplanır)</span></label>
         <input type="text" id="ac-modal-highlight" placeholder="örn: Sık Sorulanlar">
       </div>
       <div class="field" style="flex:1;">
@@ -476,6 +493,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="story-progress" id="story-progress"></div>
     <div style="aspect-ratio:9/16; border-radius:14px; overflow:hidden; background:#111; position:relative;">
       <div id="story-media-slot" style="width:100%;height:100%;"></div>
+      <div class="story-header-overlay" id="story-header-overlay">
+        <div class="story-header-avatar" id="story-header-avatar"></div>
+        <div class="story-header-text" style="flex:1;">
+          <div class="story-header-name" id="story-header-name">—</div>
+          <div class="story-header-time" id="story-header-time">—</div>
+        </div>
+        <div class="story-header-actions" id="story-header-actions">
+          <button class="story-action-btn" onclick="event.stopPropagation(); editCurrentStory();" title="Düzenle"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+          <button class="story-action-btn" onclick="event.stopPropagation(); deleteCurrentStory();" title="Sil"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        </div>
+      </div>
       <div style="position:absolute; inset:0; display:flex;">
         <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); prevStory();"></div>
         <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); nextStory();"></div>
@@ -581,8 +609,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
       <!-- STORY: ÖNE ÇIKAN ADI (opsiyonel) -->
       <div class="field" id="highlight-field" style="display:none;">
-        <label>Öne Çıkan Adı <span style="font-weight:400;color:var(--text3);">(opsiyonel)</span></label>
-        <input type="text" id="highlight-name" placeholder="örn: Sık Sorulanlar — boş bırakırsan tekil story olur">
+        <label>Öne Çıkan Adı <span style="font-weight:400;color:var(--text3);">(opsiyonel — boş bırakırsan İçerik Adı kullanılır)</span></label>
+        <input type="text" id="highlight-name" placeholder="Farklı bir grup ismi vermek istersen yaz">
+        <div style="font-size:10px;color:var(--text3);margin-top:6px;">Birden fazla dosya seçersen hepsi aynı isim altında tek bir "öne çıkan" grubunda birleşir.</div>
       </div>
 
       <!-- MARKA -->
@@ -701,6 +730,8 @@ const ICONS = {
   moon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>',
   reels: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
   carousel: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 13V5a2 2 0 0 1 2-2h8"/></svg>',
+  chevronLeft: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevronRight: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
 };
 
 function isVideoUrl(url) {
@@ -994,8 +1025,8 @@ async function submitContent() {
   btn.innerHTML = '<span class="spinner"></span> Kaydediliyor...';
   try {
     if (isStory) {
-      // Her dosya ayrı bir story kaydı olur, hepsi aynı Öne Çıkan Adı'na bağlanır
-      const hName = document.getElementById('highlight-name').value.trim();
+      // Her dosya ayrı bir story kaydı olur; hepsi aynı isimle (Öne Çıkan Adı boşsa İçerik Adı) gruplanır
+      const hName = document.getElementById('highlight-name').value.trim() || adi;
       const baseSira = Date.now();
       for (let i = 0; i < carouselFiles.length; i++) {
         setProgress((i+1) + '/' + carouselFiles.length + ' story yükleniyor...', Math.round(((i+1)/carouselFiles.length)*80));
@@ -1008,9 +1039,9 @@ async function submitContent() {
           'Durum': 'Taslak',
           'Görsel URL': url,
           'Format': 'Story',
+          'Öne Çıkan Adı': hName,
         };
         if (markaId) fields['Marka'] = [markaId];
-        if (hName) fields['Öne Çıkan Adı'] = hName;
         const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
           method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
         });
@@ -1418,16 +1449,44 @@ async function sendRevReply(revId) {
 
 let acCurrentId = null;
 
+let acCarouselImages = [];
+let acCarouselIdx = 0;
+
 function openAcModal(recId) {
   const rec = allContents.find(r => r.id === recId);
   if (!rec) return;
   acCurrentId = recId;
   const f = rec.fields;
-  const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
   const mediaEl = document.getElementById('ac-modal-media');
   const ph = document.getElementById('ac-modal-placeholder');
-  if (imgUrl) { mediaEl.innerHTML = mediaTag(imgUrl, ''); mediaEl.style.display = 'block'; ph.style.display = 'none'; }
-  else { mediaEl.innerHTML = ''; mediaEl.style.display = 'none'; ph.style.display = 'flex'; }
+  const prevBtn = document.getElementById('ac-carousel-prev');
+  const nextBtn = document.getElementById('ac-carousel-next');
+  const counter = document.getElementById('ac-carousel-counter');
+  const strip = document.getElementById('ac-carousel-strip');
+
+  if (f['Format'] === 'Carousel' && f['Carousel Görselleri']) {
+    acCarouselImages = f['Carousel Görselleri'].split(',').map(s => s.trim()).filter(Boolean);
+  } else {
+    acCarouselImages = [];
+  }
+
+  if (acCarouselImages.length > 1) {
+    acCarouselIdx = 0;
+    showAcCarouselImage(0);
+    prevBtn.style.display = 'flex'; prevBtn.innerHTML = ICONS.chevronLeft;
+    nextBtn.style.display = 'flex'; nextBtn.innerHTML = ICONS.chevronRight;
+    counter.style.display = 'block';
+    strip.style.display = 'flex';
+    strip.innerHTML = acCarouselImages.map((url, i) =>
+      '<div class="carousel-thumb' + (i===0?' active':'') + '" onclick="showAcCarouselImage(' + i + ')"><img src="' + url + '"></div>'
+    ).join('');
+  } else {
+    const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
+    if (imgUrl) { mediaEl.innerHTML = mediaTag(imgUrl, ''); mediaEl.style.display = 'block'; ph.style.display = 'none'; }
+    else { mediaEl.innerHTML = ''; mediaEl.style.display = 'none'; ph.style.display = 'flex'; }
+    prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; counter.style.display = 'none';
+    strip.style.display = 'none'; strip.innerHTML = '';
+  }
 
   document.getElementById('ac-modal-title').value = f['İçerik Adı'] || '';
   const m = f['Marka'];
@@ -1447,6 +1506,24 @@ function openAcModal(recId) {
   }
 
   document.getElementById('ac-modal').classList.add('open');
+}
+
+function showAcCarouselImage(i) {
+  acCarouselIdx = i;
+  const mediaEl = document.getElementById('ac-modal-media');
+  const ph = document.getElementById('ac-modal-placeholder');
+  mediaEl.innerHTML = mediaTag(acCarouselImages[i], '');
+  mediaEl.style.display = 'block';
+  ph.style.display = 'none';
+  document.getElementById('ac-carousel-counter').textContent = (i+1) + ' / ' + acCarouselImages.length;
+  document.querySelectorAll('#ac-carousel-strip .carousel-thumb').forEach((t, ti) => t.classList.toggle('active', ti === i));
+}
+function acCarouselNav(dir) {
+  if (!acCarouselImages.length) return;
+  let next = acCarouselIdx + dir;
+  if (next < 0) next = acCarouselImages.length - 1;
+  if (next >= acCarouselImages.length) next = 0;
+  showAcCarouselImage(next);
 }
 
 function acCloseModal() {
@@ -1571,6 +1648,20 @@ function showStoryAt(idx) {
   document.getElementById('story-media-slot').innerHTML = imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : '';
   document.getElementById('story-caption').textContent = f['İçerik Adı'] || '';
 
+  const m = f['Marka'];
+  const brandId = Array.isArray(m) ? m[0] : m;
+  const brandRec = brands.find(b => b.id === brandId);
+  const logoUrl = brandRec ? brandRec.fields['Logo URL'] : '';
+  const brandName = brandRec ? (brandRec.fields['Marka Adı'] || '—') : '—';
+  const avatarEl = document.getElementById('story-header-avatar');
+  avatarEl.innerHTML = logoUrl ? '<img src="' + logoUrl + '" alt="">' : '';
+  document.getElementById('story-header-name').textContent = brandName;
+  document.getElementById('story-header-time').textContent = f['Yayın Tarihi'] ? new Date(f['Yayın Tarihi']).toLocaleDateString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+
+  const actions = document.getElementById('story-header-actions');
+  actions.children[0].style.display = hasPermission('İçerik Düzenleme') ? 'flex' : 'none';
+  actions.children[1].style.display = hasPermission('İçerik Silme') ? 'flex' : 'none';
+
   const fills = document.querySelectorAll('.story-progress-fill');
   fills.forEach((fill, i) => {
     fill.classList.remove('animate');
@@ -1604,6 +1695,39 @@ function closeHighlightViewer() {
 }
 function closeHighlightOutside(e) {
   if (e.target === document.getElementById('story-viewer')) closeHighlightViewer();
+}
+
+function editCurrentStory() {
+  if (!hasPermission('İçerik Düzenleme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  const item = storyViewerItems[storyViewerIdx];
+  if (!item) return;
+  closeHighlightViewer();
+  openAcModal(item.id);
+}
+
+async function deleteCurrentStory() {
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  const item = storyViewerItems[storyViewerIdx];
+  if (!item) return;
+  clearTimeout(storyTimer);
+  if (!(await showConfirm('Bu story\'yi silmek istediğinize emin misiniz?', { okText: 'Sil' }))) {
+    storyTimer = setTimeout(nextStory, STORY_DURATION);
+    return;
+  }
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + item.id, { method: 'DELETE', headers: AT_HDR });
+    allContents = allContents.filter(r => r.id !== item.id);
+    storyViewerItems.splice(storyViewerIdx, 1);
+    showToast('Story silindi.');
+    if (!storyViewerItems.length) {
+      closeHighlightViewer();
+    } else {
+      renderStoryProgress();
+      showStoryAt(Math.min(storyViewerIdx, storyViewerItems.length - 1));
+    }
+    renderHighlights();
+    renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
 function renderHighlights() {

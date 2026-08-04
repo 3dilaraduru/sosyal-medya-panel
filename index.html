@@ -99,9 +99,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; width: 100%; max-width: 980px; height: 90vh; display: flex; gap: 0; position: relative; overflow: hidden; box-shadow: 0 24px 60px rgba(30,45,77,0.18); }
-.modal-left { flex: 1 1 55%; background: var(--surface2); display: flex; align-items: center; justify-content: center; padding: 0; border-right: 1px solid var(--border); overflow: hidden; min-width: 0; }
-.modal-left img { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; display: block; }
-.modal-left video { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; display: block; }
+.modal-left { flex: 1 1 55%; background: var(--surface2); display: flex; flex-direction: column; padding: 0; border-right: 1px solid var(--border); overflow: hidden; min-width: 0; }
+.modal-hero-wrap { position: relative; flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; }
+.carousel-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 3; }
+.carousel-nav-btn:hover { background: rgba(0,0,0,0.75); }
+.carousel-counter { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.55); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px; z-index: 3; }
+.carousel-strip { display: flex; gap: 8px; padding: 10px; background: var(--surface); border-top: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+.carousel-thumb { width: 52px; height: 52px; border-radius: 6px; overflow: hidden; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; }
+.carousel-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.carousel-thumb.active { border-color: var(--accent); }
+.modal-hero-wrap img { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; display: block; }
+.modal-hero-wrap video { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; display: block; }
 .modal-right { flex: 0 0 380px; padding: 24px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
 .ig-post-header { display: flex; align-items: center; gap: 9px; padding-bottom: 10px; }
 .ig-post-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -187,6 +195,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .story-progress-fill { position: absolute; top:0; left:0; bottom:0; width: 0%; background: #fff; }
 .story-progress-fill.animate { transition: width 10s linear; width: 100%; }
 #story-media-slot img, #story-media-slot video { width: 100%; height: 100%; object-fit: cover; }
+.story-header-overlay { position: absolute; top: 0; left: 0; right: 0; padding: 16px 12px 24px; display: flex; align-items: center; gap: 8px; background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent); z-index: 2; }
+.story-header-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--accent); flex-shrink: 0; }
+.story-header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.story-header-name { font-size: 12px; font-weight: 600; color: #fff; }
+.story-header-time { font-size: 10px; color: rgba(255,255,255,0.75); }
 .caption-toggle { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 12px; border-radius: 20px; }
 .caption-toggle:hover { border-color: var(--accent); }
 .caption-toggle input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
@@ -315,6 +328,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="story-progress" id="story-progress"></div>
     <div style="aspect-ratio:9/16; border-radius:14px; overflow:hidden; background:#111; position:relative;">
       <div id="story-media-slot" style="width:100%;height:100%;"></div>
+      <div class="story-header-overlay" id="story-header-overlay">
+        <div class="story-header-avatar" id="story-header-avatar"></div>
+        <div class="story-header-text">
+          <div class="story-header-name" id="story-header-name">—</div>
+          <div class="story-header-time" id="story-header-time">—</div>
+        </div>
+      </div>
       <div style="position:absolute; inset:0; display:flex;">
         <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); prevStory();"></div>
         <div style="flex:1;cursor:pointer;" onclick="event.stopPropagation(); nextStory();"></div>
@@ -330,9 +350,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <button class="modal-close" onclick="closeModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <!-- Sol: Orijinal boyutlu görsel -->
     <div class="modal-left" id="modal-left">
-      <img id="modal-hero-img" alt="" style="display:none;">
-      <span id="modal-hero-video-slot"></span>
-      <span id="modal-hero-emoji" style="color:var(--text3);"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+      <div class="modal-hero-wrap" id="modal-hero-wrap">
+        <img id="modal-hero-img" alt="" style="display:none;">
+        <span id="modal-hero-video-slot"></span>
+        <span id="modal-hero-emoji" style="color:var(--text3);"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+        <button class="carousel-nav-btn" id="modal-carousel-prev" style="display:none;left:10px;" onclick="modalCarouselNav(-1)"></button>
+        <button class="carousel-nav-btn" id="modal-carousel-next" style="display:none;right:10px;" onclick="modalCarouselNav(1)"></button>
+        <div class="carousel-counter" id="modal-carousel-counter" style="display:none;"></div>
+      </div>
+      <div class="carousel-strip" id="modal-carousel-strip" style="display:none;"></div>
     </div>
     <!-- Sağ: Instagram gönderisi gibi + onay alanı -->
     <div class="modal-right">
@@ -501,6 +527,8 @@ const ICONS = {
   moon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>',
   reels: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
   carousel: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 13V5a2 2 0 0 1 2-2h8"/></svg>',
+  chevronLeft: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevronRight: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
 };
 
 const BG = ['#2A2E3B','#2B332C','#332A2E','#332C24','#242C33','#302E24','#242F27','#2E2433'];
@@ -693,6 +721,13 @@ function showStoryAt(idx) {
   document.getElementById('story-media-slot').innerHTML = imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : '';
   document.getElementById('story-caption').textContent = item.fields['İçerik Adı'] || '';
 
+  const logoUrl = brandRecord ? (brandRecord['Logo URL'] || '') : '';
+  const brandName = brandRecord ? (brandRecord['Marka Adı'] || '—') : '—';
+  const avatarEl = document.getElementById('story-header-avatar');
+  avatarEl.innerHTML = logoUrl ? '<img src="' + logoUrl + '" alt="">' : '';
+  document.getElementById('story-header-name').textContent = brandName;
+  document.getElementById('story-header-time').textContent = item.fields['Yayın Tarihi'] ? new Date(item.fields['Yayın Tarihi']).toLocaleDateString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+
   const fills = document.querySelectorAll('.story-progress-fill');
   fills.forEach((fill, i) => {
     fill.classList.remove('animate');
@@ -850,6 +885,9 @@ function renderCurrentMonth() {
 }
 
 function changeMonth(dir) { currentMonthOffset += dir; renderCurrentMonth(); }
+let modalCarouselImages = [];
+let modalCarouselIdx = 0;
+
 function openModal(rec, idx) {
   const f = rec.fields;
   const status = f['Durum'] || 'Beklemede';
@@ -870,19 +908,46 @@ function openModal(rec, idx) {
   const imgEl = document.getElementById('modal-hero-img');
   const emojiEl = document.getElementById('modal-hero-emoji');
   const heroVideoSlot = document.getElementById('modal-hero-video-slot');
+  const prevBtn = document.getElementById('modal-carousel-prev');
+  const nextBtn = document.getElementById('modal-carousel-next');
+  const counter = document.getElementById('modal-carousel-counter');
+  const strip = document.getElementById('modal-carousel-strip');
   heroVideoSlot.innerHTML = '';
-  if (imgUrl && isVideoUrl(imgUrl)) {
-    heroVideoSlot.innerHTML = mediaTag(imgUrl, '');
-    imgEl.style.display = 'none';
-    emojiEl.style.display = 'none';
-    document.getElementById('modal-left').style.background = '';
-  } else if (imgUrl) {
-    imgEl.src = imgUrl; imgEl.style.display = 'block';
-    emojiEl.style.display = 'none';
-    document.getElementById('modal-left').style.background = '';
+
+  if (f['Format'] === 'Carousel' && f['Carousel Görselleri']) {
+    modalCarouselImages = f['Carousel Görselleri'].split(',').map(s => s.trim()).filter(Boolean);
   } else {
-    imgEl.style.display = 'none'; emojiEl.style.display = 'flex';
-    document.getElementById('modal-left').style.background = BG[idx%BG.length];
+    modalCarouselImages = [];
+  }
+
+  if (modalCarouselImages.length > 1) {
+    modalCarouselIdx = 0;
+    document.getElementById('modal-left').style.background = '';
+    emojiEl.style.display = 'none';
+    showModalCarouselImage(0);
+    prevBtn.style.display = 'flex'; prevBtn.innerHTML = ICONS.chevronLeft;
+    nextBtn.style.display = 'flex'; nextBtn.innerHTML = ICONS.chevronRight;
+    counter.style.display = 'block';
+    strip.style.display = 'flex';
+    strip.innerHTML = modalCarouselImages.map((url, i) =>
+      '<div class="carousel-thumb' + (i===0?' active':'') + '" onclick="showModalCarouselImage(' + i + ')"><img src="' + url + '"></div>'
+    ).join('');
+  } else {
+    prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; counter.style.display = 'none';
+    strip.style.display = 'none'; strip.innerHTML = '';
+    if (imgUrl && isVideoUrl(imgUrl)) {
+      heroVideoSlot.innerHTML = mediaTag(imgUrl, '');
+      imgEl.style.display = 'none';
+      emojiEl.style.display = 'none';
+      document.getElementById('modal-left').style.background = '';
+    } else if (imgUrl) {
+      imgEl.src = imgUrl; imgEl.style.display = 'block';
+      emojiEl.style.display = 'none';
+      document.getElementById('modal-left').style.background = '';
+    } else {
+      imgEl.style.display = 'none'; emojiEl.style.display = 'flex';
+      document.getElementById('modal-left').style.background = BG[idx%BG.length];
+    }
   }
 
   const sb = document.getElementById('modal-status');
@@ -893,6 +958,22 @@ function openModal(rec, idx) {
   document.getElementById('modal-decision').style.display = readOnly ? 'none' : 'block';
   document.getElementById('modal-readonly-note').style.display = readOnly ? 'block' : 'none';
   document.getElementById('content-modal').classList.add('open');
+}
+
+function showModalCarouselImage(i) {
+  modalCarouselIdx = i;
+  const imgEl = document.getElementById('modal-hero-img');
+  document.getElementById('modal-hero-video-slot').innerHTML = '';
+  imgEl.src = modalCarouselImages[i]; imgEl.style.display = 'block';
+  document.getElementById('modal-carousel-counter').textContent = (i+1) + ' / ' + modalCarouselImages.length;
+  document.querySelectorAll('#modal-carousel-strip .carousel-thumb').forEach((t, ti) => t.classList.toggle('active', ti === i));
+}
+function modalCarouselNav(dir) {
+  if (!modalCarouselImages.length) return;
+  let next = modalCarouselIdx + dir;
+  if (next < 0) next = modalCarouselImages.length - 1;
+  if (next >= modalCarouselImages.length) next = 0;
+  showModalCarouselImage(next);
 }
 
 function closeModal() {
