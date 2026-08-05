@@ -435,8 +435,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <input type="text" id="nb-ig" placeholder="örn: bonairfly">
       </div>
       <div class="field">
-        <label>Müşteri E-postası *</label>
-        <input type="text" id="nb-email" placeholder="musteri@ornek.com">
+        <label>Müşteri E-postaları * <span style="font-weight:400;color:var(--text3);">(birden fazlaysa virgülle ayır)</span></label>
+        <input type="text" id="nb-email" placeholder="musteri@ornek.com, arkadas@ornek.com">
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;">Buraya girdiğin her mail, kendi Google hesabıyla giriş yaptığında bu markanın planını görebilir.</div>
       </div>
       <div class="field">
         <label>Logo</label>
@@ -1273,6 +1274,23 @@ async function loadBrands() {
     if (chip) chip.classList.add('active');
   }
   renderActiveBrandBanner();
+  checkDuplicateBrandEmails();
+}
+
+function checkDuplicateBrandEmails() {
+  if (!hasPermission('Marka Yönetimi')) return;
+  const seen = {};
+  const dupes = [];
+  brands.forEach(b => {
+    const emails = (b.fields['Müşteri E-postası'] || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+    emails.forEach(email => {
+      if (seen[email]) dupes.push(seen[email] + ' / ' + (b.fields['Marka Adı'] || '—'));
+      else seen[email] = b.fields['Marka Adı'] || '—';
+    });
+  });
+  if (dupes.length) {
+    showToast('Dikkat: Aynı müşteri e-postası birden fazla markada kayıtlı (' + dupes.join(', ') + '). Müşteriler yanlış markayı görebilir, lütfen düzeltin.');
+  }
 }
 
 let selectedBrandId = '';
@@ -2348,6 +2366,16 @@ async function saveNewBrand() {
   const email = document.getElementById('nb-email').value.trim();
   if (!name) { showToast('Marka adı gerekli'); return; }
   if (!email) { showToast('Müşteri e-postası gerekli'); return; }
+  const newEmails = email.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+  for (const b of brands) {
+    if (b.id === editingBrandId) continue;
+    const otherEmails = (b.fields['Müşteri E-postası'] || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+    const clash = newEmails.find(e => otherEmails.includes(e));
+    if (clash) {
+      showToast('"' + clash + '" zaten "' + (b.fields['Marka Adı'] || 'başka bir marka') + '" için kayıtlı. Aynı mail iki markada olamaz, müşteri yanlış markayı görür.');
+      return;
+    }
+  }
   const saveBtn = document.getElementById('nb-save-btn');
   const originalBtnText = saveBtn.textContent;
   try {

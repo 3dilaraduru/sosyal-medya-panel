@@ -308,6 +308,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   </div>
 </div>
 
+<div id="access-denied-screen" style="display:none; align-items: center; justify-content: center; height: 100vh;">
+  <div class="login-card">
+    <div class="login-logo" style="background:var(--red);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    <div class="login-title">Erişim yok</div>
+    <div class="login-sub"><span id="access-denied-email">—</span> hesabının erişim yetkisi yok. Ajansınızla iletişime geçin.</div>
+    <button class="btn-google" style="justify-content:center;" onclick="window.firebaseSignOut()">Çıkış Yap</button>
+  </div>
+</div>
+
 <!-- GENEL AMAÇLI ONAY / NOT PENCERESİ (tarayıcı confirm/prompt yerine) -->
 <div class="confirm-overlay" id="confirm-modal">
   <div class="confirm-box">
@@ -1273,19 +1282,28 @@ async function loadRevizes() {
   allRevizes = data.records || [];
 }
 
+function denyAccess(email) {
+  document.getElementById('access-denied-email').textContent = email;
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('access-denied-screen').style.display = 'flex';
+}
+
 window.initApp = async function(email) {
   document.getElementById('user-email').textContent = email;
   try {
     // Marka bul
-    const formula = encodeURIComponent('{Müşteri E-postası} = "' + email + '"');
+    const emailNorm = email.trim().toLowerCase();
+    const formula = encodeURIComponent(
+      'FIND(",' + emailNorm + ',", "," & SUBSTITUTE(LOWER({Müşteri E-postası}), " ", "") & ",") > 0'
+    );
     const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar?filterByFormula=' + formula, { headers: H });
     const data = await res.json();
     if (data.records && data.records.length > 0) {
       brandRecord = data.records[0].fields;
     } else {
-      const all = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar?maxRecords=1', { headers: H });
-      const bd = await all.json();
-      if (bd.records && bd.records.length > 0) brandRecord = bd.records[0].fields;
+      denyAccess(email);
+      return;
     }
     if (brandRecord) {
       const name = brandRecord['Marka Adı'] || 'Marka';
@@ -1355,10 +1373,12 @@ window.firebaseSignOut = async () => { await signOut(auth); };
 onAuthStateChanged(auth, user => {
   if (user) {
     document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('access-denied-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'flex';
     window.initApp(user.email);
   } else {
     document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('access-denied-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'none';
   }
 });
