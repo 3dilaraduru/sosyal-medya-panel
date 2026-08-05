@@ -178,7 +178,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .badge-ok { background: var(--green-bg); color: var(--green); }
 .badge-wait { background: var(--amber-bg); color: var(--amber); }
 .badge-rev { background: var(--red-bg); color: var(--red); }
-.badge-past { background: var(--surface2); color: var(--text2); }
+.badge-past { background: rgba(30,45,77,0.12); color: var(--accent); }
 .badge-taslak { background: var(--surface2); color: var(--text2); }
 
 /* FEED GRID - bottom 75% */
@@ -224,7 +224,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .dot-ok { background: var(--green); }
 .dot-wait { background: var(--amber); }
 .dot-rev { background: var(--red); }
-.dot-past { background: #555; }
+.dot-past { background: var(--accent); }
 .feed-cell-btns { display: flex; gap: 4px; padding: 5px 6px; background: var(--surface); border-top: 1px solid var(--border); }
 .feed-cell-caption { font-size: 10px; color: var(--text2); line-height: 1.4; padding: 5px 6px; background: var(--surface); border-top: 1px solid var(--border); }
 .feed-btn { flex: 1; padding: 4px 6px; border-radius: 4px; border: none; font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
@@ -290,17 +290,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-@media (max-width: 900px) {
-  .main { flex-direction: column; height: auto; }
-  .col-left, .col-mid, .col-right { flex: 1 1 auto !important; max-width: 100% !important; width: 100% !important; border-right: none; border-bottom: 1px solid var(--border); }
-  .resize-handle { display: none; }
-  .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
-  .topbar-right { flex-wrap: wrap; gap: 6px; }
-  .feed-grid { grid-template-columns: repeat(3, 1fr); max-width: 100%; }
-  .modal-box { flex-direction: column; max-height: 92vh; overflow-y: auto; }
-  .modal-left { flex: none !important; }
-  .modal-right { flex: none !important; }
-}
 </style>
 </head>
 <body>
@@ -639,11 +628,12 @@ function isVideoUrl(url) {
 function mediaTag(url, cls, opts) {
   if (!url) return '';
   opts = opts || {};
+  const altText = (opts.alt || '').replace(/"/g, '');
   if (isVideoUrl(url)) {
     const controls = opts.noControls ? '' : 'controls';
-    return '<video class="' + cls + '" src="' + url + '" ' + controls + ' playsinline preload="metadata"></video>';
+    return '<video class="' + cls + '" src="' + url + '" ' + controls + ' playsinline preload="metadata" aria-label="' + altText + '"></video>';
   }
-  return '<img class="' + cls + '" src="' + url + '" alt="">';
+  return '<img class="' + cls + '" src="' + url + '" alt="' + altText + '">';
 }
 
 let showCaptions = false;
@@ -861,8 +851,12 @@ function renderGrid(el, recs) {
       return !solved && id === rec.id;
     }).length;
     const revizeBadgeHtml = openRevizeCount > 0 ? '<div class="revize-count-badge">' + openRevizeCount + '</div>' : '';
-    if (imgUrl) {
-      imgDiv.innerHTML = mediaTag(imgUrl, '', {noControls:true}) + '<div class="feed-dot ' + dc(status) + '"></div>' + revizeBadgeHtml;
+    const altText = rec.fields['İçerik Adı'] || 'İçerik görseli';
+    if (imgUrl && !isVideoUrl(imgUrl)) {
+      imgDiv.innerHTML = mediaTag(imgUrl, '', {noControls:true, alt: altText}) + '<div class="feed-dot ' + dc(status) + '"></div>' + revizeBadgeHtml;
+    } else if (imgUrl && isVideoUrl(imgUrl)) {
+      imgDiv.style.background = BG[i%BG.length];
+      imgDiv.innerHTML = '<span style="opacity:0.55;">' + ICONS.reels + '</span><div class="feed-dot ' + dc(status) + '"></div>' + revizeBadgeHtml;
     } else {
       imgDiv.style.background = BG[i%BG.length];
       imgDiv.innerHTML = '<span style="opacity:0.55;">' + ICONS.image + '</span><div class="feed-dot ' + dc(status) + '"></div>' + revizeBadgeHtml;
@@ -1046,16 +1040,7 @@ function closeModalOutside(e) {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { closeModal(); closeHighlightViewer(); }
-  if (document.getElementById('story-viewer').classList.contains('open')) {
-    if (e.key === 'ArrowRight') nextStory();
-    if (e.key === 'ArrowLeft') prevStory();
-    return;
-  }
-  if (document.getElementById('content-modal').classList.contains('open') && modalCarouselImages.length > 1) {
-    if (e.key === 'ArrowRight') modalCarouselNav(1);
-    if (e.key === 'ArrowLeft') modalCarouselNav(-1);
-  }
+  if (e.key === 'Escape') closeModal();
 });
 
 function toggleModalNote() {
@@ -1329,7 +1314,7 @@ window.initApp = async function(email) {
       records = records.concat(d.records||[]);
       offset = d.offset;
     } while (offset);
-    allRecords = records;
+    allRecords = records.filter(r => r.fields['Durum'] !== 'Silindi');
 
     // Revizeleri çek
     await loadRevizes();
@@ -1337,7 +1322,7 @@ window.initApp = async function(email) {
     renderCurrentMonth();
 
     const cur = getRange(0);
-    const curRecs = records.filter(r => { if (!r.fields['Yayın Tarihi']) return false; if (r.fields['Format'] === 'Story') return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
+    const curRecs = allRecords.filter(r => { if (!r.fields['Yayın Tarihi']) return false; if (r.fields['Format'] === 'Story') return false; const d=new Date(r.fields['Yayın Tarihi']); return d>=cur.start&&d<=cur.end; });
     curRecs.sort((a, b) => {
       const sa = a.fields['Sıra'], sb = b.fields['Sıra'];
       if (sa != null && sb != null) return sb - sa;
@@ -1346,7 +1331,7 @@ window.initApp = async function(email) {
       return new Date(b.fields['Yayın Tarihi'] || 0) - new Date(a.fields['Yayın Tarihi'] || 0);
     });
     if (curRecs.length > 0) selectRecord(curRecs[0], 0);
-    else if (records.length > 0) selectRecord(records[0], 0);
+    else if (allRecords.length > 0) selectRecord(allRecords[0], 0);
     renderAllComments();
   } catch(e) { showToast('Veriler yüklenemedi.'); console.error(e); }
 };

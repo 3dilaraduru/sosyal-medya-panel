@@ -45,6 +45,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .topbar-title { font-family: var(--font-voice); font-size: 17px; font-weight: 600; }
 .topbar-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--accent); color: #fff; font-weight: 500; }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
+.topbar-stats { display: flex; gap: 5px; }
+.stat-chip { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.chip-all { background: var(--surface2); color: var(--text2); }
+.chip-wait { background: var(--amber-bg); color: var(--amber); }
+.chip-ok { background: var(--green-bg); color: var(--green); }
+.chip-rev { background: var(--red-bg); color: var(--red); }
 .user-email { font-size: 12px; color: var(--text2); }
 .theme-toggle { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .theme-toggle:hover { color: var(--text); border-color: var(--accent); }
@@ -53,6 +59,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .team-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface2); border-radius: var(--radius-sm); font-size: 12px; }
 .team-row-name { font-weight: 500; }
 .team-row-email { color: var(--text3); font-size: 11px; }
+.team-row-actions { display: flex; gap: 6px; align-items: center; }
 .check-list { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; max-height: 150px; overflow-y: auto; }
 .check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); cursor: pointer; }
 .check-item input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
@@ -149,9 +156,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .search-row { margin-bottom: 12px; }
 .search-row input { width: 100%; max-width: 320px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
 .search-row input:focus { outline: none; border-color: var(--accent); }
+.status-legend { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .card-select-check { position: absolute; top: 6px; left: 6px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; z-index: 3; cursor: pointer; }
 .format-badge { position: absolute; top: 6px; right: 6px; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
-.revize-count-badge { position: absolute; bottom: 6px; left: 6px; z-index: 2; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 17px; height: 17px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
 .carousel-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .carousel-thumb { position: relative; width: 52px; height: 52px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border2); }
 .carousel-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -194,6 +203,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .month-selector { display: flex; align-items: center; gap: 6px; }
 .month-nav-btn { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
 .month-nav-btn:hover { background: var(--surface2); color: var(--text); }
+.month-jump-picker { width: 26px; height: 24px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: transparent; cursor: pointer; padding: 0; overflow: hidden; }
+.month-jump-picker::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.7; filter: var(--calendar-icon-filter, none); }
+[data-theme="dark"] .month-jump-picker::-webkit-calendar-picker-indicator { filter: invert(1); }
 .month-display { font-size: 13px; color: var(--text); font-weight: 500; min-width: 110px; text-align: center; cursor: pointer; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); background: var(--surface2); }
 .month-all-btn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .month-all-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -206,7 +218,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .dot-beklemede { background: var(--amber); }
 .dot-onaylı { background: var(--green); }
 .dot-revize { background: var(--red); }
-.dot-yayında { background: var(--text3); }
+.dot-yayında { background: var(--accent); }
 
 /* İÇERİK DETAY MODAL */
 .ac-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
@@ -234,7 +246,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .confirm-btns .btn-sm { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
 .card-img-wrap { width: 100%; background: var(--surface2); overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
-.card-img-placeholder { color: var(--text3); padding: 20px; display: flex; align-items: center; justify-content: center; height: 100%; }
+.card-img-placeholder { color: var(--text2); padding: 20px; display: flex; align-items: center; justify-content: center; height: 100%; }
 .card-body { padding: 9px 11px; }
 .card-title { font-size: 12px; font-weight: 500; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-meta { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
@@ -244,7 +256,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .badge-beklemede { background: var(--amber-bg); color: var(--amber); }
 .badge-onaylı { background: var(--green-bg); color: var(--green); }
 .badge-revize { background: var(--red-bg); color: var(--red); }
-.badge-yayında { background: rgba(62,207,142,0.2); color: var(--green); }
+.badge-yayında { background: rgba(30,45,77,0.12); color: var(--accent); }
 .card-brand { font-size: 10px; color: var(--text3); }
 .empty-state { text-align: center; padding: 50px 20px; color: var(--text3); font-size: 13px; grid-column: 1/-1; }
 
@@ -287,7 +299,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .notif-section { flex: 0 0 40%; border-top: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
 .notif-header { padding: 10px 16px; font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .notif-scroll { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-.notif-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.notif-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); position: relative; }
+.notif-card.unread { border-color: var(--accent); background: rgba(30,45,77,0.06); }
+.unread-dot { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .notif-card.onaylı { border-left: 3px solid var(--green); }
 .notif-card.revize { border-left: 3px solid var(--red); }
 .notif-thumb { width: 36px; height: 45px; border-radius: 4px; object-fit: cover; background: var(--surface); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 14px; }
@@ -306,18 +320,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .content-card { cursor: grab; transition: transform 0.15s, opacity 0.15s; }
 .content-card.dragging { opacity: 0.4; cursor: grabbing; transform: scale(0.97); }
 .content-card.drag-over { border-color: var(--accent); border-width: 2px; }
-@media (max-width: 900px) {
-  .main { flex-direction: column; height: auto; }
-  .upload-panel, .list-panel, .comments-col { flex: 1 1 auto !important; max-width: 100% !important; width: 100% !important; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
-  .resize-handle { display: none; }
-  .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
-  .topbar-right { flex-wrap: wrap; gap: 6px; }
-  .brand-bar { flex-wrap: wrap; }
-  .content-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-  .ac-modal-box, .confirm-box { max-width: 94vw !important; }
-  .ac-modal-box { flex-direction: column; max-height: 92vh; overflow-y: auto; }
-  .ac-modal-left { flex: none !important; }
-}
 </style>
 </head>
 <body>
@@ -368,6 +370,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <div class="carousel-counter" id="ac-carousel-counter" style="display:none;"></div>
       </div>
       <div class="carousel-strip" id="ac-carousel-strip" style="display:none;"></div>
+      <input type="file" id="ac-carousel-add-input" accept="image/*" multiple style="display:none;" onchange="handleAcCarouselAdd(this.files)">
       </div>
     </div>
     <div class="ac-modal-right">
@@ -401,10 +404,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <label>Caption</label>
         <textarea id="ac-modal-caption" class="caption-textarea" style="min-height:140px;"></textarea>
       </div>
-      <div class="ac-modal-btns">
+      <div class="ac-modal-btns" id="ac-modal-btns-normal">
         <button class="btn-submit" onclick="acSaveModal()" style="flex:1;">Kaydet</button>
         <button class="btn-sm" onclick="acDuplicateModal()">Kopyala</button>
         <button class="btn-sm" style="border-color:var(--red);color:var(--red);" onclick="acDeleteModal()">Sil</button>
+      </div>
+      <div id="ac-modal-btns-trash" style="display:none; flex-direction:column; gap:8px;">
+        <div style="font-size:12px;color:var(--text3);">Bu içerik Çöp Kutusu'nda.</div>
+        <div class="ac-modal-btns">
+          <button class="btn-submit" onclick="acRestoreModal()" style="flex:1;">Geri Yükle</button>
+          <button class="btn-sm" style="border-color:var(--red);color:var(--red);" onclick="acPermanentDeleteModal()">Kalıcı Olarak Sil</button>
+        </div>
       </div>
     </div>
   </div>
@@ -453,7 +463,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
       <div style="font-size:11px; color:var(--text3);">Müşteri, bu e-posta ile Google hesabından giriş yaptığında kendi içeriklerini ve kendi logosunu görecek.</div>
       <button class="btn-sm" id="nb-copy-link-btn" onclick="copyClientLink()" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg> Müşteri Linkini Kopyala</button>
+      <div id="nb-copy-link-note" style="display:none; font-size:10px; color:var(--text3); margin-top:4px;">Bu link tüm müşteriler için ortaktır — müşteri kendi Google hesabıyla giriş yaptığında otomatik olarak sadece kendi markasını görür.</div>
       <button class="btn-submit" onclick="saveNewBrand()" id="nb-save-btn">Müşteriyi Kaydet</button>
+      <button class="btn-sm" id="nb-delete-btn" style="display:none; margin-top:8px; width:100%; border-color:var(--red); color:var(--red);" onclick="deleteBrand()">Bu Markayı Sil</button>
     </div>
   </div>
 </div>
@@ -498,7 +510,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <label class="check-item"><input type="checkbox" value="Ekip Yönetimi"> Ekip Yönetimi</label>
         </div>
       </div>
-      <button class="btn-submit" onclick="saveTeamMember()">Ekle</button>
+      <button class="btn-submit" id="team-submit-btn" onclick="saveTeamMember()">Ekle</button>
       <div id="team-perms-msg" style="display:none; font-size:11px; color:var(--text3);">Admin rolü tüm yetkilere otomatik sahiptir.</div>
     </div>
   </div>
@@ -544,8 +556,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <span class="month-display" id="ajans-month-display">Tüm Aylar</span>
       <button class="month-nav-btn" onclick="changeAjansMonth(1)">›</button>
       <button class="month-all-btn active" id="all-months-btn" onclick="showAllMonths()">Tümü</button>
+      <input type="month" id="month-jump-picker" class="month-jump-picker" onchange="jumpToMonth(this.value)" title="Belirli bir aya doğrudan git">
     </div>
     <div class="topbar-right">
+      <div class="topbar-stats" id="ajans-stats">
+        <span class="stat-chip chip-all"><span id="ajans-stat-all">0</span> toplam</span>
+        <span class="stat-chip chip-wait"><span id="ajans-stat-wait">0</span> beklemede</span>
+        <span class="stat-chip chip-ok"><span id="ajans-stat-ok">0</span> onaylı</span>
+        <span class="stat-chip chip-rev"><span id="ajans-stat-rev">0</span> revize</span>
+      </div>
       <button class="btn-sm" onclick="openTeamModal()" id="team-btn" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Ekip</button>
       <button class="btn-ilet" onclick="planiIlet()" id="ilet-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Planı Müşteriye İlet</button>
       <span class="role-badge" id="user-role-badge">—</span>
@@ -689,21 +708,37 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <button class="filter-tab" onclick="filterContents('Beklemede', this)">Beklemede</button>
           <button class="filter-tab" onclick="filterContents('Onaylı', this)">Onaylı</button>
           <button class="filter-tab" onclick="filterContents('Revize', this)">Revize</button>
+          <button class="filter-tab" onclick="filterContents('Yayında', this)">Yayında</button>
+          <button class="filter-tab" style="color:var(--red);" onclick="filterContents('Silindi', this)">Çöp Kutusu</button>
         </div>
+        <button class="btn-sm" onclick="exportMonthCsv()">CSV İndir</button>
         <button class="btn-sm" id="bulk-toggle-btn" onclick="toggleBulkMode()">Seç</button>
       </div>
       <div class="bulk-bar" id="bulk-bar" style="display:none;">
         <span id="bulk-count">0 seçili</span>
-        <button class="btn-sm" onclick="bulkSelectAll()">Tümünü Seç</button>
-        <button class="btn-sm" onclick="bulkMarkPublished()">Yayında İşaretle</button>
-        <button class="btn-sm" style="color:var(--red);border-color:var(--red);" onclick="bulkDeleteSelected()">Seçilenleri Sil</button>
+        <button class="btn-sm" onclick="bulkSelectAll()" title="Sadece o an ekranda görünen/filtrelenmiş içerikleri seçer">Tümünü Seç (görünenler)</button>
+        <span id="bulk-actions-normal" style="display:flex; gap:10px;">
+          <button class="btn-sm" onclick="bulkMarkPublished()">Yayında İşaretle</button>
+          <button class="btn-sm" style="color:var(--red);border-color:var(--red);" onclick="bulkDeleteSelected()">Seçilenleri Sil</button>
+        </span>
+        <span id="bulk-actions-trash" style="display:none; gap:10px;">
+          <button class="btn-sm" onclick="bulkRestoreSelected()">Seçilenleri Geri Yükle</button>
+          <button class="btn-sm" style="color:var(--red);border-color:var(--red);" onclick="bulkPermanentDeleteSelected()">Kalıcı Olarak Sil</button>
+        </span>
       </div>
       <div class="undo-bar" id="undo-bar" style="display:none;">
         <span id="undo-text">—</span>
         <button class="btn-sm" onclick="undoBulkDelete()">Geri Al</button>
       </div>
       <div class="search-row">
-        <input type="text" id="content-search" placeholder="İçerik adına göre ara..." oninput="renderContents()">
+        <input type="text" id="content-search" placeholder="İçerik adı veya caption içinde ara..." oninput="renderContents()">
+      </div>
+      <div class="status-legend">
+        <span class="legend-item"><span class="legend-dot dot-taslak"></span>Taslak</span>
+        <span class="legend-item"><span class="legend-dot dot-beklemede"></span>Beklemede</span>
+        <span class="legend-item"><span class="legend-dot dot-onaylı"></span>Onaylı</span>
+        <span class="legend-item"><span class="legend-dot dot-revize"></span>Revize</span>
+        <span class="legend-item"><span class="legend-dot dot-yayında"></span>Yayında</span>
       </div>
       <div class="content-grid" id="content-grid">
         <div class="empty-state">Yükleniyor...</div>
@@ -763,14 +798,24 @@ const ICONS = {
 function isVideoUrl(url) {
   return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url || '');
 }
+function warnIfLargeFile(file) {
+  const isVideo = file.type.startsWith('video/');
+  const limitMB = isVideo ? 100 : 10;
+  const sizeMB = file.size / (1024 * 1024);
+  if (sizeMB > limitMB) {
+    showToast('Uyarı: "' + file.name + '" ' + sizeMB.toFixed(0) + 'MB — büyük dosya, yükleme uzun sürebilir.');
+  }
+}
+
 function mediaTag(url, cls, opts) {
   if (!url) return '';
   opts = opts || {};
+  const altText = (opts.alt || '').replace(/"/g, '');
   if (isVideoUrl(url)) {
     const controls = opts.noControls ? '' : 'controls';
-    return '<video class="' + cls + '" src="' + url + '" ' + controls + ' playsinline preload="metadata"></video>';
+    return '<video class="' + cls + '" src="' + url + '" ' + controls + ' playsinline preload="metadata" aria-label="' + altText + '"></video>';
   }
-  return '<img class="' + cls + '" src="' + url + '" alt="">';
+  return '<img class="' + cls + '" src="' + url + '" alt="' + altText + '">';
 }
 
 let brands = [], allContents = [], selectedFile = null, uploadedUrl = null;
@@ -848,6 +893,18 @@ function getAjansMonthRange(offset) {
   const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
   const label = d.toLocaleDateString('tr-TR', {month: 'long', year: 'numeric'});
   return { start, end, label: label.charAt(0).toUpperCase() + label.slice(1) };
+}
+
+function jumpToMonth(value) {
+  if (!value) return;
+  const [y, m] = value.split('-').map(Number);
+  const today = new Date();
+  const offset = (y - today.getFullYear()) * 12 + (m - 1 - today.getMonth());
+  ajansMonthOffset = offset;
+  const range = getAjansMonthRange(offset);
+  document.getElementById('ajans-month-display').textContent = range.label;
+  document.getElementById('all-months-btn').classList.remove('active');
+  renderContents();
 }
 
 function changeAjansMonth(dir) {
@@ -975,7 +1032,7 @@ function resetFile(e) {
 let carouselFiles = [];
 let carouselUrls = [];
 function handleCarouselFiles(fileList) {
-  [...fileList].forEach(file => carouselFiles.push(file));
+  [...fileList].forEach(file => { warnIfLargeFile(file); carouselFiles.push(file); });
   renderCarouselStrip();
 }
 function removeCarouselFile(idx) {
@@ -1001,6 +1058,7 @@ coverZone.addEventListener('drop', e => { e.preventDefault(); coverZone.classLis
 coverFileInput.addEventListener('change', e => { if (e.target.files[0]) handleCoverFile(e.target.files[0]); });
 
 function handleCoverFile(file) {
+  warnIfLargeFile(file);
   coverFile = file; coverUrl = null;
   const reader = new FileReader();
   reader.onload = e => {
@@ -1058,28 +1116,41 @@ async function submitContent() {
       // Her dosya ayrı bir story kaydı olur; hepsi aynı isimle (Öne Çıkan Adı boşsa İçerik Adı) gruplanır
       const hName = document.getElementById('highlight-name').value.trim() || adi;
       const baseSira = Date.now();
+      let successCount = 0, failCount = 0;
       for (let i = 0; i < carouselFiles.length; i++) {
         setProgress((i+1) + '/' + carouselFiles.length + ' story yükleniyor...', Math.round(((i+1)/carouselFiles.length)*80));
-        const url = await uploadToCloudinary(carouselFiles[i]);
-        const fields = {
-          'İçerik Adı': carouselFiles.length > 1 ? adi + ' ' + (i+1) : adi,
-          'AI Caption Taslak': caption || '',
-          'Yayın Tarihi': new Date(tarihi).toISOString(),
-          'Sıra': baseSira + i,
-          'Durum': 'Taslak',
-          'Görsel URL': url,
-          'Format': 'Story',
-          'Öne Çıkan Adı': hName,
-        };
-        if (markaId) fields['Marka'] = [markaId];
-        const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
-          method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
-        });
-        const data = await res.json();
-        if (!data.id) throw new Error(JSON.stringify(data));
+        try {
+          const url = await uploadToCloudinary(carouselFiles[i]);
+          const fields = {
+            'İçerik Adı': carouselFiles.length > 1 ? adi + ' ' + (i+1) : adi,
+            'AI Caption Taslak': caption || '',
+            'Yayın Tarihi': new Date(tarihi).toISOString(),
+            'Sıra': baseSira + i,
+            'Durum': 'Taslak',
+            'Görsel URL': url,
+            'Format': 'Story',
+            'Öne Çıkan Adı': hName,
+          };
+          if (markaId) fields['Marka'] = [markaId];
+          const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
+            method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
+          });
+          const data = await res.json();
+          if (!data.id) throw new Error(JSON.stringify(data));
+          successCount++;
+        } catch(fileErr) {
+          failCount++;
+          console.error('Story ' + (i+1) + ' başarısız:', fileErr);
+        }
       }
       setProgress('Tamamlandı!', 100);
-      showToast(carouselFiles.length + ' story kaydedildi.');
+      if (failCount === 0) {
+        showToast(successCount + ' story kaydedildi.');
+      } else if (successCount === 0) {
+        showToast('Hiçbiri kaydedilemedi (' + failCount + ' dosya başarısız). Bağlantınızı kontrol edip tekrar deneyin.');
+      } else {
+        showToast(successCount + ' story kaydedildi, ' + failCount + ' tanesi başarısız oldu. Başarısız olanları tekrar yüklemen gerekiyor.');
+      }
       resetForm();
       setTimeout(loadContents, 800);
       btn.disabled = false;
@@ -1205,14 +1276,7 @@ async function loadBrands() {
 }
 
 let selectedBrandId = '';
-function hasPendingUploadFiles() {
-  return !!selectedFile || carouselFiles.length > 0 || !!coverFile;
-}
-
-async function switchBrand(brandId, el) {
-  if (brandId !== selectedBrandId && hasPendingUploadFiles()) {
-    if (!(await showConfirm('Yükleme formunda seçili dosyalar var. Marka değiştirirsen bu dosyalar kaybolacak. Devam edilsin mi?', { okText: 'Devam Et' }))) return;
-  }
+function switchBrand(brandId, el) {
   selectedBrandId = brandId;
   document.querySelectorAll('.brand-chip').forEach(c => { c.classList.remove('active'); c.style.background = ''; c.style.borderColor = ''; });
   el.classList.add('active');
@@ -1223,7 +1287,6 @@ async function switchBrand(brandId, el) {
   }
   // Yükleme formunda da aynı markayı önceden seçili yap, tekrar seçmene gerek kalmasın
   if (brandId) document.getElementById('marka-select').value = brandId;
-  resetFile(); carouselFiles = []; carouselUrls = []; renderCarouselStrip(); resetCoverFile();
   renderContents();
   renderActiveBrandBanner();
 }
@@ -1262,16 +1325,51 @@ function filterContents(f, btn) {
 
 let dragSrcId = null;
 
+function updateAjansStats() {
+  let scope = allContents.filter(r => r.fields['Format'] !== 'Story' && r.fields['Durum'] !== 'Silindi');
+  if (selectedBrandId) {
+    scope = scope.filter(r => {
+      const m = r.fields['Marka'];
+      const id = Array.isArray(m) ? m[0] : m;
+      return id === selectedBrandId;
+    });
+  }
+  if (ajansMonthOffset !== null) {
+    const range = getAjansMonthRange(ajansMonthOffset);
+    scope = scope.filter(r => {
+      if (!r.fields['Yayın Tarihi']) return false;
+      const d = new Date(r.fields['Yayın Tarihi']);
+      return d >= range.start && d <= range.end;
+    });
+  }
+  const elAll = document.getElementById('ajans-stat-all');
+  if (!elAll) return;
+  elAll.textContent = scope.length;
+  document.getElementById('ajans-stat-wait').textContent = scope.filter(r => r.fields['Durum'] === 'Beklemede').length;
+  document.getElementById('ajans-stat-ok').textContent = scope.filter(r => r.fields['Durum'] === 'Onaylı').length;
+  document.getElementById('ajans-stat-rev').textContent = scope.filter(r => r.fields['Durum'] === 'Revize').length;
+}
+
 function renderContents() {
   const grid = document.getElementById('content-grid');
   const titleEl = document.getElementById('list-title');
-  if (titleEl) titleEl.textContent = ajansMonthOffset === null ? 'Tüm İçerikler' : getAjansMonthRange(ajansMonthOffset).label + ' içerikleri';
-  let filtered = currentFilter === 'tümü' ? allContents : allContents.filter(r => r.fields['Durum'] === currentFilter);
+  if (titleEl) titleEl.textContent = currentFilter === 'Silindi' ? 'Çöp Kutusu' : (ajansMonthOffset === null ? 'Tüm İçerikler' : getAjansMonthRange(ajansMonthOffset).label + ' içerikleri');
+  let filtered;
+  if (currentFilter === 'Silindi') {
+    filtered = allContents.filter(r => r.fields['Durum'] === 'Silindi');
+  } else {
+    filtered = allContents.filter(r => r.fields['Durum'] !== 'Silindi');
+    if (currentFilter !== 'tümü') filtered = filtered.filter(r => r.fields['Durum'] === currentFilter);
+  }
   filtered = filtered.filter(r => r.fields['Format'] !== 'Story');
   const searchInput = document.getElementById('content-search');
   const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
   if (searchTerm) {
-    filtered = filtered.filter(r => (r.fields['İçerik Adı'] || '').toLowerCase().includes(searchTerm));
+    filtered = filtered.filter(r => {
+      const name = (r.fields['İçerik Adı'] || '').toLowerCase();
+      const caption = (r.fields['Onaylı Caption'] || r.fields['AI Caption Taslak'] || '').toLowerCase();
+      return name.includes(searchTerm) || caption.includes(searchTerm);
+    });
   }
   renderHighlights();
 
@@ -1293,7 +1391,7 @@ function renderContents() {
       return d >= range.start && d <= range.end;
     });
   }
-  if (!filtered.length) { grid.innerHTML = '<div class="empty-state">İçerik bulunamadı.</div>'; return; }
+  if (!filtered.length) { grid.innerHTML = '<div class="empty-state">İçerik bulunamadı.</div>'; updateAjansStats(); return; }
   
   // Sort by Sıra field
   filtered.sort((a, b) => {
@@ -1308,6 +1406,7 @@ function renderContents() {
   const ratioMap = { 'Feed 4:5': '4/5', 'Reels 9:16': '9/16', 'Kare 1:1': '1/1', 'Carousel': '4/5', 'Story': '9/16' };
   
   grid.innerHTML = '';
+  updateAjansStats();
   filtered.forEach(rec => {
     const f = rec.fields;
     const status = f['Durum'] || 'Taslak';
@@ -1326,20 +1425,11 @@ function renderContents() {
     card.className = 'content-card' + (bulkSelected.has(rec.id) ? ' bulk-selected' : '');
     card.draggable = !bulkMode;
     card.dataset.id = rec.id;
-    const openRevizeCount = allRevizes.filter(r => {
-      const rf = r.fields;
-      const solved = rf['Durum'] === 'çözüldü' || rf['Durum'] === 'Çözüldü';
-      const ids = rf['İçerik'];
-      const id = Array.isArray(ids) ? ids[0] : ids;
-      return !solved && id === rec.id;
-    }).length;
-
     card.innerHTML = 
       '<div class="card-img-wrap" style="aspect-ratio:' + ar + ';">' +
         (bulkMode ? '<div class="card-select-check' + (bulkSelected.has(rec.id)?' checked':'') + '">' + (bulkSelected.has(rec.id) ? ICONS.check : '') + '</div>' : '') +
-        (imgUrl ? mediaTag(imgUrl, 'card-img', {noControls:true}) : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
+        (imgUrl && !isVideoUrl(imgUrl) ? mediaTag(imgUrl, 'card-img', {noControls:true, alt: f['İçerik Adı'] || 'İçerik görseli'}) : imgUrl && isVideoUrl(imgUrl) ? '<div class="card-img-placeholder">' + ICONS.reels + '</div>' : '<div class="card-img-placeholder">' + ICONS.image + '</div>') +
         (fmt === 'Reels 9:16' ? '<div class="format-badge">' + ICONS.reels + '</div>' : fmt === 'Carousel' ? '<div class="format-badge">' + ICONS.carousel + '</div>' : '') +
-        (openRevizeCount > 0 ? '<div class="revize-count-badge">' + openRevizeCount + '</div>' : '') +
         '<div class="feed-dot dot-' + (bmap[status]||'taslak') + '"></div>' +
       '</div>' +
       (showAcCaptions ? (
@@ -1522,16 +1612,16 @@ function openAcModal(recId) {
     acCarouselImages = [];
   }
 
-  if (acCarouselImages.length > 1) {
+  const isCarouselFormat = f['Format'] === 'Carousel';
+  if (isCarouselFormat) {
     acCarouselIdx = 0;
-    showAcCarouselImage(0);
-    prevBtn.style.display = 'flex'; prevBtn.innerHTML = ICONS.chevronLeft;
-    nextBtn.style.display = 'flex'; nextBtn.innerHTML = ICONS.chevronRight;
-    counter.style.display = 'block';
+    if (acCarouselImages.length) showAcCarouselImage(0);
+    else { mediaEl.innerHTML = ''; mediaEl.style.display = 'none'; ph.style.display = 'flex'; }
+    prevBtn.style.display = acCarouselImages.length > 1 ? 'flex' : 'none'; prevBtn.innerHTML = ICONS.chevronLeft;
+    nextBtn.style.display = acCarouselImages.length > 1 ? 'flex' : 'none'; nextBtn.innerHTML = ICONS.chevronRight;
+    counter.style.display = acCarouselImages.length > 1 ? 'block' : 'none';
     strip.style.display = 'flex';
-    strip.innerHTML = acCarouselImages.map((url, i) =>
-      '<div class="carousel-thumb' + (i===0?' active':'') + '" onclick="showAcCarouselImage(' + i + ')"><img src="' + url + '"></div>'
-    ).join('');
+    renderAcCarouselStrip();
   } else {
     const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
     if (imgUrl) { mediaEl.innerHTML = mediaTag(imgUrl, ''); mediaEl.style.display = 'block'; ph.style.display = 'none'; }
@@ -1557,7 +1647,49 @@ function openAcModal(recId) {
     highlightField.style.display = 'none';
   }
 
+  const isTrashed = rec.fields['Durum'] === 'Silindi';
+  document.getElementById('ac-modal-btns-normal').style.display = isTrashed ? 'none' : 'flex';
+  document.getElementById('ac-modal-btns-trash').style.display = isTrashed ? 'flex' : 'none';
+
   document.getElementById('ac-modal').classList.add('open');
+}
+
+function renderAcCarouselStrip() {
+  const strip = document.getElementById('ac-carousel-strip');
+  strip.innerHTML = acCarouselImages.map((url, i) =>
+    '<div class="carousel-thumb' + (i===acCarouselIdx?' active':'') + '" onclick="showAcCarouselImage(' + i + ')"><img src="' + url + '"><span class="remove-thumb" onclick="event.stopPropagation(); removeAcCarouselImage(' + i + ')">' + ICONS.x + '</span></div>'
+  ).join('') + '<div class="carousel-add-tile" onclick="document.getElementById(\'ac-carousel-add-input\').click()">+</div>';
+}
+
+function removeAcCarouselImage(i) {
+  if (acCarouselImages.length <= 2) { showToast('Carousel için en az 2 görsel kalmalı.'); return; }
+  acCarouselImages.splice(i, 1);
+  acCarouselIdx = Math.min(acCarouselIdx, acCarouselImages.length - 1);
+  renderAcCarouselStrip();
+  showAcCarouselImage(acCarouselIdx);
+  const counter = document.getElementById('ac-carousel-counter');
+  counter.style.display = acCarouselImages.length > 1 ? 'block' : 'none';
+  document.getElementById('ac-carousel-prev').style.display = acCarouselImages.length > 1 ? 'flex' : 'none';
+  document.getElementById('ac-carousel-next').style.display = acCarouselImages.length > 1 ? 'flex' : 'none';
+}
+
+async function handleAcCarouselAdd(fileList) {
+  if (!fileList.length) return;
+  showToast('Görseller yükleniyor...');
+  for (const file of fileList) {
+    warnIfLargeFile(file);
+    try {
+      const url = await uploadToCloudinary(file);
+      acCarouselImages.push(url);
+    } catch(e) { showToast('Bir görsel yüklenemedi.'); console.error(e); }
+  }
+  renderAcCarouselStrip();
+  showAcCarouselImage(acCarouselImages.length - 1);
+  document.getElementById('ac-carousel-counter').style.display = acCarouselImages.length > 1 ? 'block' : 'none';
+  document.getElementById('ac-carousel-prev').style.display = acCarouselImages.length > 1 ? 'flex' : 'none';
+  document.getElementById('ac-carousel-next').style.display = acCarouselImages.length > 1 ? 'flex' : 'none';
+  document.getElementById('ac-carousel-add-input').value = '';
+  showToast('Görseller eklendi. Kaydetmeyi unutma.');
 }
 
 function showAcCarouselImage(i) {
@@ -1588,16 +1720,7 @@ function acCloseOutside(e) {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { acCloseModal(); closeNewBrandModal(); closeHighlightViewer(); }
-  if (document.getElementById('story-viewer').classList.contains('open')) {
-    if (e.key === 'ArrowRight') nextStory();
-    if (e.key === 'ArrowLeft') prevStory();
-    return;
-  }
-  if (document.getElementById('ac-modal').classList.contains('open') && acCarouselImages.length > 1) {
-    if (e.key === 'ArrowRight') acCarouselNav(1);
-    if (e.key === 'ArrowLeft') acCarouselNav(-1);
-  }
+  if (e.key === 'Escape') { acCloseModal(); closeNewBrandModal(); }
 });
 
 async function acSaveModal() {
@@ -1613,6 +1736,11 @@ async function acSaveModal() {
   if (rec0 && rec0.fields['Format'] === 'Story') {
     fields['Öne Çıkan Adı'] = document.getElementById('ac-modal-highlight').value.trim();
   }
+  if (rec0 && rec0.fields['Format'] === 'Carousel') {
+    if (acCarouselImages.length < 2) { showToast('Carousel için en az 2 görsel gerekli.'); return; }
+    fields['Carousel Görselleri'] = acCarouselImages.join(',');
+    fields['Görsel URL'] = acCarouselImages[0];
+  }
   try {
     await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
       method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
@@ -1620,21 +1748,6 @@ async function acSaveModal() {
     const rec = allContents.find(r => r.id === acCurrentId);
     if (rec) Object.assign(rec.fields, fields);
     showToast('İçerik güncellendi.');
-    acCloseModal();
-    renderContents();
-  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
-}
-
-async function acDeleteModal() {
-  if (!acCurrentId) return;
-  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
-  if (!(await showConfirm('Bu içeriği silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', { okText: 'Sil' }))) return;
-  try {
-    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
-      method: 'DELETE', headers: AT_HDR
-    });
-    allContents = allContents.filter(r => r.id !== acCurrentId);
-    showToast('İçerik silindi');
     acCloseModal();
     renderContents();
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
@@ -1666,6 +1779,52 @@ async function acDuplicateModal() {
     showToast('İçerik kopyalandı, en üste eklendi.');
     acCloseModal();
     await loadContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+async function acDeleteModal() {
+  if (!acCurrentId) return;
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!(await showConfirm('Bu içerik Çöp Kutusu\'na taşınacak, istersen sonra geri getirebilirsin. Emin misiniz?', { okText: 'Çöp Kutusuna Taşı' }))) return;
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
+      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Silindi' }, typecast: true })
+    });
+    const rec = allContents.find(r => r.id === acCurrentId);
+    if (rec) rec.fields['Durum'] = 'Silindi';
+    showToast('İçerik Çöp Kutusu\'na taşındı.');
+    acCloseModal();
+    renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+async function acRestoreModal() {
+  if (!acCurrentId) return;
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
+      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Taslak' } })
+    });
+    const rec = allContents.find(r => r.id === acCurrentId);
+    if (rec) rec.fields['Durum'] = 'Taslak';
+    showToast('İçerik geri yüklendi (Taslak olarak).');
+    acCloseModal();
+    renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
+async function acPermanentDeleteModal() {
+  if (!acCurrentId) return;
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!(await showConfirm('Bu içerik KALICI olarak silinecek, bir daha geri getirilemez. Emin misiniz?', { okText: 'Kalıcı Olarak Sil' }))) return;
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
+      method: 'DELETE', headers: AT_HDR
+    });
+    allContents = allContents.filter(r => r.id !== acCurrentId);
+    showToast('İçerik kalıcı olarak silindi.');
+    acCloseModal();
+    renderContents();
   } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
 }
 
@@ -1822,7 +1981,7 @@ async function deleteCurrentStory() {
 
 function renderHighlights() {
   const row = document.getElementById('highlights-row');
-  let stories = allContents.filter(r => r.fields['Format'] === 'Story');
+  let stories = allContents.filter(r => r.fields['Format'] === 'Story' && r.fields['Durum'] !== 'Silindi');
   if (selectedBrandId) {
     stories = stories.filter(r => {
       const m = r.fields['Marka'];
@@ -1844,7 +2003,9 @@ function renderHighlights() {
   const groups = {};
   const order = [];
   stories.forEach(s => {
-    const name = s.fields['Öne Çıkan Adı'] || ('__single__' + s.id);
+    const m = s.fields['Marka'];
+    const brandId = Array.isArray(m) ? m[0] : m;
+    const name = (s.fields['Öne Çıkan Adı'] ? brandId + '::' + s.fields['Öne Çıkan Adı'] : ('__single__' + s.id));
     if (!groups[name]) { groups[name] = []; order.push(name); }
     groups[name].push(s);
   });
@@ -1854,7 +2015,7 @@ function renderHighlights() {
     const items = groups[name];
     const first = items[0];
     const imgUrl = first.fields['Görsel URL'] || (first.fields['Görsel/Video'] && first.fields['Görsel/Video'][0] ? first.fields['Görsel/Video'][0].url : '');
-    const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : name;
+    const displayName = name.startsWith('__single__') ? (first.fields['İçerik Adı'] || 'Story') : (first.fields['Öne Çıkan Adı'] || name);
     const idsAttr = items.map(i => i.id).join(',');
     const hasRevize = items.some(i => i.fields['Durum'] === 'Revize');
     const allApproved = items.every(i => i.fields['Durum'] === 'Onaylı');
@@ -1871,6 +2032,9 @@ function toggleBulkMode() {
   bulkSelected.clear();
   document.getElementById('bulk-toggle-btn').textContent = bulkMode ? 'Vazgeç' : 'Seç';
   document.getElementById('bulk-bar').style.display = bulkMode ? 'flex' : 'none';
+  const isTrash = currentFilter === 'Silindi';
+  document.getElementById('bulk-actions-normal').style.display = isTrash ? 'none' : 'flex';
+  document.getElementById('bulk-actions-trash').style.display = isTrash ? 'flex' : 'none';
   updateBulkBar();
   renderContents();
 }
@@ -1904,15 +2068,20 @@ let pendingDeleteTimer = null;
 async function bulkDeleteSelected() {
   if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
-  if (!(await showConfirm(bulkSelected.size + ' içerik silinecek. Emin misiniz? (6 saniye içinde geri alabilirsiniz)', { okText: 'Sil' }))) return;
+  if (!(await showConfirm(bulkSelected.size + ' içerik Çöp Kutusu\'na taşınacak. Emin misiniz? (6 saniye içinde geri alabilirsiniz)', { okText: 'Taşı' }))) return;
   const ids = [...bulkSelected];
-  // Optimistik: hemen listeden kaldır, gerçek silme işlemini 6sn ertele (geri alınabilsin diye)
-  pendingDeleteItems = allContents.filter(r => ids.includes(r.id));
-  allContents = allContents.filter(r => !ids.includes(r.id));
+  pendingDeleteItems = ids.map(id => {
+    const rec = allContents.find(r => r.id === id);
+    return { id, prevStatus: rec ? rec.fields['Durum'] : 'Taslak' };
+  });
+  ids.forEach(id => {
+    const rec = allContents.find(r => r.id === id);
+    if (rec) rec.fields['Durum'] = 'Silindi';
+  });
   bulkSelected.clear();
   toggleBulkMode();
   document.getElementById('undo-bar').style.display = 'flex';
-  document.getElementById('undo-text').textContent = ids.length + ' içerik silindi.';
+  document.getElementById('undo-text').textContent = ids.length + ' içerik Çöp Kutusu\'na taşındı.';
   clearTimeout(pendingDeleteTimer);
   pendingDeleteTimer = setTimeout(commitPendingDelete, 6000);
 }
@@ -1922,17 +2091,22 @@ async function commitPendingDelete() {
   pendingDeleteItems = [];
   document.getElementById('undo-bar').style.display = 'none';
   let failed = 0;
-  for (const rec of items) {
+  for (const item of items) {
     try {
-      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + rec.id, { method: 'DELETE', headers: AT_HDR });
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + item.id, {
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Silindi' }, typecast: true })
+      });
     } catch(e) { failed++; console.error(e); }
   }
-  if (failed) showToast(failed + ' içerik silinemedi, tekrar deneyin.');
+  if (failed) showToast(failed + ' içerik taşınamadı, tekrar deneyin.');
 }
 
 function undoBulkDelete() {
   clearTimeout(pendingDeleteTimer);
-  allContents = allContents.concat(pendingDeleteItems);
+  pendingDeleteItems.forEach(item => {
+    const rec = allContents.find(r => r.id === item.id);
+    if (rec) rec.fields['Durum'] = item.prevStatus;
+  });
   pendingDeleteItems = [];
   document.getElementById('undo-bar').style.display = 'none';
   showToast('Silme geri alındı.');
@@ -1943,7 +2117,7 @@ async function bulkMarkPublished() {
   if (!hasPermission('İçerik Düzenleme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
   const ids = [...bulkSelected];
-  if (!(await showConfirm(ids.length + ' içerik "Yayında" olarak işaretlenecek. Emin misiniz?', { okText: 'İşaretle', danger: false }))) return;
+  if (!(await showConfirm(ids.length + ' içerik "Yayında" olarak işaretlenecek. Emin misiniz?', { okText: 'İşaretle' }))) return;
   let failed = 0;
   for (const id of ids) {
     try {
@@ -1957,6 +2131,90 @@ async function bulkMarkPublished() {
   bulkSelected.clear();
   toggleBulkMode();
   showToast(failed ? (ids.length - failed) + ' işaretlendi, ' + failed + ' başarısız oldu.' : ids.length + ' içerik Yayında olarak işaretlendi.');
+}
+
+async function bulkRestoreSelected() {
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
+  const ids = [...bulkSelected];
+  let failed = 0;
+  for (const id of ids) {
+    try {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, {
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Taslak' } })
+      });
+      const rec = allContents.find(r => r.id === id);
+      if (rec) rec.fields['Durum'] = 'Taslak';
+    } catch(e) { failed++; console.error(e); }
+  }
+  bulkSelected.clear();
+  toggleBulkMode();
+  showToast(failed ? (ids.length - failed) + ' geri yüklendi, ' + failed + ' başarısız oldu.' : ids.length + ' içerik geri yüklendi.');
+}
+
+async function bulkPermanentDeleteSelected() {
+  if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!bulkSelected.size) { showToast('Hiçbir içerik seçilmedi.'); return; }
+  if (!(await showConfirm(bulkSelected.size + ' içerik KALICI olarak silinecek, geri getirilemez. Emin misiniz?', { okText: 'Kalıcı Olarak Sil' }))) return;
+  const ids = [...bulkSelected];
+  let failed = 0;
+  for (const id of ids) {
+    try {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, { method: 'DELETE', headers: AT_HDR });
+      allContents = allContents.filter(r => r.id !== id);
+    } catch(e) { failed++; console.error(e); }
+  }
+  bulkSelected.clear();
+  toggleBulkMode();
+  showToast(failed ? (ids.length - failed) + ' kalıcı silindi, ' + failed + ' başarısız oldu.' : ids.length + ' içerik kalıcı olarak silindi.');
+}
+
+function exportMonthCsv() {
+  let rows = allContents.filter(r => r.fields['Format'] !== 'Story');
+  if (currentFilter === 'Silindi') rows = rows.filter(r => r.fields['Durum'] === 'Silindi');
+  else {
+    rows = rows.filter(r => r.fields['Durum'] !== 'Silindi');
+    if (currentFilter !== 'tümü') rows = rows.filter(r => r.fields['Durum'] === currentFilter);
+  }
+  if (selectedBrandId) {
+    rows = rows.filter(r => {
+      const m = r.fields['Marka'];
+      const id = Array.isArray(m) ? m[0] : m;
+      return id === selectedBrandId;
+    });
+  }
+  if (ajansMonthOffset !== null) {
+    const range = getAjansMonthRange(ajansMonthOffset);
+    rows = rows.filter(r => {
+      if (!r.fields['Yayın Tarihi']) return false;
+      const d = new Date(r.fields['Yayın Tarihi']);
+      return d >= range.start && d <= range.end;
+    });
+  }
+  if (!rows.length) { showToast('Dışa aktarılacak içerik yok.'); return; }
+
+  const esc = (v) => '"' + String(v || '').replace(/"/g, '""') + '"';
+  const header = ['İçerik Adı', 'Marka', 'Format', 'Yayın Tarihi', 'Durum', 'Caption'];
+  const lines = [header.map(esc).join(',')];
+  rows.forEach(r => {
+    const f = r.fields;
+    const m = f['Marka'];
+    const brandId = Array.isArray(m) ? m[0] : m;
+    const brandRec = brands.find(b => b.id === brandId);
+    const brandName = brandRec ? (brandRec.fields['Marka Adı'] || '—') : '—';
+    const date = f['Yayın Tarihi'] ? new Date(f['Yayın Tarihi']).toLocaleString('tr-TR') : '';
+    const caption = (f['Onaylı Caption'] || f['AI Caption Taslak'] || '').replace(/\n/g, ' ');
+    lines.push([f['İçerik Adı'] || '', brandName, f['Format'] || '', date, f['Durum'] || '', caption].map(esc).join(','));
+  });
+  const csv = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const monthLabel = ajansMonthOffset === null ? 'tum-icerikler' : getAjansMonthRange(ajansMonthOffset).label.replace(/\s+/g, '-');
+  a.href = url; a.download = 'icerik-plani-' + monthLabel + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(rows.length + ' içerik CSV olarak indirildi.');
 }
 
 function applyThemeIcon(theme) {
@@ -1978,13 +2236,6 @@ function toggleTheme() {
 }
 initTheme();
 
-window.addEventListener('beforeunload', (e) => {
-  if (typeof hasPendingUploadFiles === 'function' && hasPendingUploadFiles()) {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-});
-
 function copyClientLink() {
   const url = window.location.origin + window.location.pathname.replace(/ajans\.html$/, '');
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1998,12 +2249,40 @@ function copyClientLink() {
   }
 }
 
+async function deleteBrand() {
+  if (!hasPermission('Marka Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  if (!editingBrandId) return;
+  const brand = brands.find(b => b.id === editingBrandId);
+  if (!brand) return;
+  const brandName = brand.fields['Marka Adı'] || 'Bu marka';
+  const contentCount = allContents.filter(r => {
+    const m = r.fields['Marka'];
+    const id = Array.isArray(m) ? m[0] : m;
+    return id === editingBrandId;
+  }).length;
+  const msg = contentCount > 0
+    ? brandName + ' silinecek. Bu markaya ait ' + contentCount + ' içerik silinmeyecek ama artık hiçbir markayla ilişkilendirilmemiş görünecek. Emin misiniz?'
+    : brandName + ' silinecek. Emin misiniz?';
+  if (!(await showConfirm(msg, { okText: 'Markayı Sil' }))) return;
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Markalar/' + editingBrandId, { method: 'DELETE', headers: AT_HDR });
+    brands = brands.filter(b => b.id !== editingBrandId);
+    showToast(brandName + ' silindi.');
+    closeNewBrandModal();
+    if (selectedBrandId === editingBrandId) { selectedBrandId = null; }
+    await loadBrands();
+    renderContents();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
 function openNewBrandModal() {
   if (!hasPermission('Marka Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   editingBrandId = null;
   document.getElementById('nb-modal-title').textContent = 'Yeni müşteri ekle';
   document.getElementById('nb-save-btn').textContent = 'Müşteriyi Kaydet';
   document.getElementById('nb-copy-link-btn').style.display = 'none';
+  document.getElementById('nb-copy-link-note').style.display = 'none';
+  document.getElementById('nb-delete-btn').style.display = 'none';
   document.getElementById('nb-name').value = '';
   document.getElementById('nb-ig').value = '';
   document.getElementById('nb-email').value = '';
@@ -2021,6 +2300,8 @@ function openEditBrandModal(brandId) {
   document.getElementById('nb-modal-title').textContent = f['Marka Adı'] + ' — düzenle';
   document.getElementById('nb-save-btn').textContent = 'Kaydet';
   document.getElementById('nb-copy-link-btn').style.display = 'block';
+  document.getElementById('nb-copy-link-note').style.display = 'block';
+  document.getElementById('nb-delete-btn').style.display = 'block';
   document.getElementById('nb-name').value = f['Marka Adı'] || '';
   document.getElementById('nb-ig').value = f['Instagram Hesabı'] || '';
   document.getElementById('nb-email').value = f['Müşteri E-postası'] || '';
@@ -2046,6 +2327,20 @@ function closeNewBrandOutside(e) {
   if (e.target === document.getElementById('new-brand-modal')) closeNewBrandModal();
 }
 
+async function cascadeRenameTeamAssignments(oldName, newName) {
+  try {
+    await loadTeam();
+    const affected = teamMembers.filter(m => (m.fields['Atanan Markalar'] || []).includes(oldName));
+    for (const m of affected) {
+      const updated = (m.fields['Atanan Markalar'] || []).map(n => n === oldName ? newName : n);
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar/' + m.id, {
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ typecast: true, fields: { 'Atanan Markalar': updated } })
+      });
+    }
+    if (affected.length) showToast(affected.length + ' ekip üyesinin marka ataması otomatik güncellendi.');
+  } catch(e) { console.error('Ekip ataması güncellenemedi:', e); }
+}
+
 async function saveNewBrand() {
   if (!hasPermission('Marka Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   const name = document.getElementById('nb-name').value.trim();
@@ -2066,10 +2361,15 @@ async function saveNewBrand() {
     const fields = { 'Marka Adı': name, 'Instagram Hesabı': ig, 'Müşteri E-postası': email, 'Logo URL': logo, 'Marka Rengi': document.getElementById('nb-color').value };
     saveBtn.textContent = 'Kaydediliyor...';
     if (editingBrandId) {
+      const oldBrand = brands.find(b => b.id === editingBrandId);
+      const oldName = oldBrand ? oldBrand.fields['Marka Adı'] : null;
       await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Markalar/' + editingBrandId, {
         method: 'PATCH', headers: AT_HDR,
         body: JSON.stringify({ fields })
       });
+      if (oldName && oldName !== name) {
+        await cascadeRenameTeamAssignments(oldName, name);
+      }
       showToast(name + ' güncellendi.');
       closeNewBrandModal();
       await loadBrands();
@@ -2137,10 +2437,15 @@ function renderNotifications() {
     const status = f['Durum'];
     const imgUrl = f['Görsel URL'] || (f['Görsel/Video'] && f['Görsel/Video'][0] ? f['Görsel/Video'][0].url : '');
     const name = f['İçerik Adı'] || '—';
+    const actionDate = f['Onay Tarihi'] || f['Oluşturma Tarihi'];
     const dateStr = f['Onay Tarihi'] ? fmtDate(f['Onay Tarihi']) : '';
     const isOk = status === 'Onaylı';
+    let lastSeen = 0;
+    try { lastSeen = parseInt(localStorage.getItem('vitrinLastSeenNotif') || '0'); } catch(e) {}
+    const isUnread = actionDate && new Date(actionDate).getTime() > lastSeen;
 
-    return '<div class="notif-card ' + (isOk ? 'onaylı' : 'revize') + '">' +
+    return '<div class="notif-card ' + (isOk ? 'onaylı' : 'revize') + (isUnread ? ' unread' : '') + '">' +
+      (isUnread ? '<span class="unread-dot"></span>' : '') +
       '<div class="notif-thumb">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div>' +
       '<div class="notif-body">' +
         '<div class="notif-title">' + name + '</div>' +
@@ -2149,6 +2454,12 @@ function renderNotifications() {
       '</div>' +
     '</div>';
   }).join('');
+  list.onclick = markNotificationsSeen;
+}
+
+function markNotificationsSeen() {
+  try { localStorage.setItem('vitrinLastSeenNotif', Date.now().toString()); } catch(e) {}
+  document.querySelectorAll('.notif-card.unread').forEach(el => { el.classList.remove('unread'); const d = el.querySelector('.unread-dot'); if (d) d.remove(); });
 }
 
 let currentUserRole = null;
@@ -2202,7 +2513,12 @@ function renderTeamList() {
   if (!teamMembers.length) { list.innerHTML = '<div style="font-size:12px;color:var(--text3);">Henüz ekip üyesi yok.</div>'; return; }
   list.innerHTML = teamMembers.map(m => {
     const f = m.fields;
-    return '<div class="team-row"><div><div class="team-row-name">' + (f['Ad'] || f['E-posta']) + '</div><div class="team-row-email">' + f['E-posta'] + '</div></div><span class="role-badge' + (f['Rol']==='Admin'?' admin':'') + '">' + (f['Rol']||'Ekip Üyesi') + '</span></div>';
+    return '<div class="team-row"><div><div class="team-row-name">' + (f['Ad'] || f['E-posta']) + '</div><div class="team-row-email">' + f['E-posta'] + '</div></div>' +
+      '<span class="role-badge' + (f['Rol']==='Admin'?' admin':'') + '">' + (f['Rol']||'Ekip Üyesi') + '</span>' +
+      '<span class="team-row-actions">' +
+        '<button class="comment-icon-btn" title="Düzenle" onclick="editTeamMember(\'' + m.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="comment-icon-btn danger" title="Kaldır" onclick="removeTeamMember(\'' + m.id + '\')">' + ICONS.trash + '</button>' +
+      '</span></div>';
   }).join('');
 }
 
@@ -2222,6 +2538,8 @@ function renderTeamBrandsList() {
 
 function openTeamModal() {
   if (!hasPermission('Ekip Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  editingTeamMemberId = null;
+  document.getElementById('team-submit-btn').textContent = 'Ekle';
   document.getElementById('team-name').value = '';
   document.getElementById('team-email').value = '';
   document.getElementById('team-role').value = 'Ekip Üyesi';
@@ -2234,6 +2552,38 @@ function openTeamModal() {
 function closeTeamModal() { document.getElementById('team-modal').classList.remove('open'); }
 function closeTeamOutside(e) { if (e.target === document.getElementById('team-modal')) closeTeamModal(); }
 
+let editingTeamMemberId = null;
+
+function editTeamMember(memberId) {
+  const m = teamMembers.find(t => t.id === memberId);
+  if (!m) return;
+  const f = m.fields;
+  editingTeamMemberId = memberId;
+  document.getElementById('team-name').value = f['Ad'] || '';
+  document.getElementById('team-email').value = f['E-posta'] || '';
+  document.getElementById('team-role').value = f['Rol'] || 'Ekip Üyesi';
+  toggleTeamPermFields(f['Rol'] || 'Ekip Üyesi');
+  const assigned = f['Atanan Markalar'] || [];
+  document.querySelectorAll('#team-brands-list input[type=checkbox]').forEach(cb => cb.checked = assigned.includes(cb.value));
+  const perms = f['Yetkiler'] || [];
+  document.querySelectorAll('#team-perms-field input[type=checkbox]').forEach(cb => cb.checked = perms.includes(cb.value));
+  document.getElementById('team-submit-btn').textContent = 'Güncelle';
+}
+
+async function removeTeamMember(memberId) {
+  if (!hasPermission('Ekip Yönetimi')) { showToast('Bu işlem için yetkiniz yok.'); return; }
+  const m = teamMembers.find(t => t.id === memberId);
+  if (!m) return;
+  if (!(await showConfirm((m.fields['Ad'] || m.fields['E-posta']) + ' ekipten kaldırılacak. Emin misiniz?', { okText: 'Kaldır' }))) return;
+  try {
+    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar/' + memberId, { method: 'DELETE', headers: AT_HDR });
+    showToast('Ekip üyesi kaldırıldı.');
+    if (editingTeamMemberId === memberId) { editingTeamMemberId = null; document.getElementById('team-submit-btn').textContent = 'Ekle'; }
+    await loadTeam();
+    renderTeamList();
+  } catch(e) { showToast(e.message || 'Hata oluştu.'); console.error(e); }
+}
+
 async function saveTeamMember() {
   const name = document.getElementById('team-name').value.trim();
   const email = document.getElementById('team-email').value.trim();
@@ -2242,11 +2592,20 @@ async function saveTeamMember() {
   const assignedBrands = [...document.querySelectorAll('#team-brands-list input:checked')].map(cb => cb.value);
   const permissions = [...document.querySelectorAll('#team-perms-field input:checked')].map(cb => cb.value);
   try {
-    await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', {
-      method: 'POST', headers: AT_HDR,
-      body: JSON.stringify({ typecast: true, fields: { 'Ad': name, 'E-posta': email, 'Rol': role, 'Atanan Markalar': assignedBrands, 'Yetkiler': permissions } })
-    });
-    showToast((name || email) + ' eklendi.');
+    const fields = { 'Ad': name, 'E-posta': email, 'Rol': role, 'Atanan Markalar': assignedBrands, 'Yetkiler': permissions };
+    if (editingTeamMemberId) {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar/' + editingTeamMemberId, {
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ typecast: true, fields })
+      });
+      showToast((name || email) + ' güncellendi.');
+      editingTeamMemberId = null;
+      document.getElementById('team-submit-btn').textContent = 'Ekle';
+    } else {
+      await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', {
+        method: 'POST', headers: AT_HDR, body: JSON.stringify({ typecast: true, fields })
+      });
+      showToast((name || email) + ' eklendi.');
+    }
     await loadTeam();
     renderTeamList();
     document.getElementById('team-name').value = '';
@@ -2277,7 +2636,6 @@ window.initApp = async function(email) {
   document.getElementById('all-months-btn').classList.remove('active');
   await loadContents();
   await loadRevizes();  // içerikler yüklendikten sonra çalışır
-  renderContents(); // revize sayıları rozetlere yansısın diye ızgarayı tazele
   renderNotifications();
   const now = new Date(); now.setHours(now.getHours() + 2, 0, 0, 0);
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);
