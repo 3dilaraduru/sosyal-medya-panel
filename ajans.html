@@ -1243,7 +1243,15 @@ async function planiIlet() {
 
 
 async function loadBrands() {
-  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
+  let res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
+  if (res.status === 429) {
+    await new Promise(r => setTimeout(r, 1500));
+    res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
+  }
+  if (!res.ok) {
+    showToast('Markalar yüklenemedi (Airtable ' + res.status + '). Sayfayı yenileyip tekrar deneyin.');
+    return;
+  }
   const data = await res.json();
   let allBrands = data.records || [];
   if (currentUserRole !== 'Admin' && currentUserBrands.length > 0) {
@@ -1333,7 +1341,15 @@ async function loadContents() {
   let url = 'https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler?sort[0][field]=Yay%C4%B1n%20Tarihi&sort[0][direction]=desc';
   let records = [], offset = null;
   do {
-    const res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
+    let res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
+    if (res.status === 429) {
+      await new Promise(r => setTimeout(r, 1500));
+      res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
+    }
+    if (!res.ok) {
+      showToast('İçerikler tam yüklenemedi (Airtable ' + res.status + '). Sayfayı yenileyin.');
+      break;
+    }
     const data = await res.json();
     records = records.concat(data.records || []);
     offset = data.offset;
@@ -1538,7 +1554,15 @@ async function reorderCards(srcId, targetId) {
 let allRevizes = [];
 
 async function loadRevizes() {
-  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
+  let res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
+  if (res.status === 429) {
+    await new Promise(r => setTimeout(r, 1500));
+    res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
+  }
+  if (!res.ok) {
+    showToast('Revizeler yüklenemedi (Airtable ' + res.status + ').');
+    return;
+  }
   const data = await res.json();
   allRevizes = data.records || [];
   console.log('Revizeler:', allRevizes.length, allRevizes.map(r => r.fields['Revize Adı']));
@@ -2392,10 +2416,11 @@ async function saveNewBrand() {
   }
   const saveBtn = document.getElementById('nb-save-btn');
   const originalBtnText = saveBtn.textContent;
+  if (saveBtn.disabled) return;
+  saveBtn.disabled = true;
   try {
     let logo = document.getElementById('nb-logo').value.trim();
     if (nbLogoFile) {
-      saveBtn.disabled = true;
       saveBtn.textContent = 'Logo yükleniyor...';
       logo = await uploadToCloudinary(nbLogoFile, 'logolar');
       document.getElementById('nb-logo').value = logo;
