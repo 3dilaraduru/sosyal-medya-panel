@@ -302,6 +302,14 @@ body.compact-view .month-summary { max-width: 100%; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+@media print {
+  body * { visibility: hidden; }
+  .month-summary-wrap.anchor-month, .month-summary-wrap.anchor-month * { visibility: visible; }
+  .month-summary-wrap.anchor-month { position: absolute; top: 0; left: 0; width: 100%; }
+  .month-summary-wrap.anchor-month .feed-dot, .month-summary-wrap.anchor-month .format-badge,
+  .month-summary-wrap.anchor-month .revize-count-badge, .month-summary-wrap.anchor-month .new-badge { display: none !important; }
+  .feed-grid { grid-template-columns: repeat(3, 1fr) !important; max-width: 100% !important; }
+}
 </style>
 </head>
 <body>
@@ -465,6 +473,7 @@ body.compact-view .month-summary { max-width: 100%; }
         <span class="stat-chip chip-rev"><span id="stat-rev">0</span> revize</span>
       </div>
       <span class="user-email" id="user-email"></span>
+      <button class="btn-sm" onclick="printMonthPlan()" title="Bu ayı yazdır / PDF olarak kaydet">Yazdır</button>
       <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Görünümü değiştir"></button>
       <button class="signout-btn" onclick="window.firebaseSignOut()">Çıkış</button>
     </div>
@@ -730,6 +739,19 @@ function toggleTheme() {
   applyThemeIcon(next);
   try { localStorage.setItem('vitrinTheme', next); } catch(e) {}
 }
+function printMonthPlan() {
+  const wasShowingCaptions = showCaptions;
+  showCaptions = true;
+  document.getElementById('caption-toggle').checked = true;
+  renderCurrentMonth();
+  setTimeout(() => {
+    window.print();
+    showCaptions = wasShowingCaptions;
+    document.getElementById('caption-toggle').checked = wasShowingCaptions;
+    renderCurrentMonth();
+  }, 100);
+}
+
 function toggleCompactView() {
   const isCompact = document.body.classList.toggle('compact-view');
   try { localStorage.setItem('vitrinCompactView', isCompact ? '1' : '0'); } catch(e) {}
@@ -745,6 +767,21 @@ function initCompactView() {
     document.getElementById('compact-toggle').style.borderColor = 'var(--accent)';
   }
 }
+function setupSwipe(el, onSwipeLeft, onSwipeRight) {
+  if (!el) return;
+  let startX = 0, startY = 0;
+  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) onSwipeLeft(); else onSwipeRight();
+    }
+  }, { passive: true });
+}
+setupSwipe(document.getElementById('modal-hero-wrap'), () => { if (modalCarouselImages.length > 1) modalCarouselNav(1); }, () => { if (modalCarouselImages.length > 1) modalCarouselNav(-1); });
+setupSwipe(document.getElementById('story-media-slot').parentElement, () => nextStory(), () => prevStory());
+
 initCompactView();
 
 initTheme();
@@ -1090,6 +1127,7 @@ function resetFeedToMonth(offset) {
   container.innerHTML = '';
   document.getElementById('scroll-end-message').style.display = 'none';
   const anchorSection = buildMonthSectionEl(offset, true);
+  anchorSection.classList.add('anchor-month');
   container.appendChild(anchorSection);
   const { recs } = getMonthRecords(offset);
   document.getElementById('month-label').textContent = getRange(offset).label;

@@ -1185,6 +1185,7 @@ async function submitContent() {
       'Durum': 'Taslak',
       'Görsel URL': uploadedUrl,
       'Format': currentFormat.name,
+      'Son Düzenleyen': window.currentUserEmail || '',
     };
     if (markaId) fields['Marka'] = [markaId];
     if (carouselJoined) fields['Carousel Görselleri'] = carouselJoined;
@@ -1329,9 +1330,15 @@ function renderActiveBrandBanner() {
 }
 
 async function loadContents() {
-  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler?sort[0][field]=Yay%C4%B1n%20Tarihi&sort[0][direction]=desc', { headers: AT_HDR });
-  const data = await res.json();
-  allContents = data.records || [];
+  let url = 'https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler?sort[0][field]=Yay%C4%B1n%20Tarihi&sort[0][direction]=desc';
+  let records = [], offset = null;
+  do {
+    const res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
+    const data = await res.json();
+    records = records.concat(data.records || []);
+    offset = data.offset;
+  } while (offset);
+  allContents = records;
   renderContents();
 }
 
@@ -1657,7 +1664,10 @@ function openAcModal(recId) {
   document.getElementById('ac-modal-date').value = f['Yayın Tarihi'] ? f['Yayın Tarihi'].slice(0,16) : '';
   document.getElementById('ac-modal-status').value = f['Durum'] || 'Taslak';
   const approverEl = document.getElementById('ac-modal-approver');
-  if (f['Onaylayan E-posta']) { approverEl.textContent = 'Onaylayan: ' + f['Onaylayan E-posta']; approverEl.style.display = 'block'; }
+  const editorLine = f['Son Düzenleyen'] ? 'Son düzenleyen: ' + f['Son Düzenleyen'] : '';
+  const approverLine = f['Onaylayan E-posta'] ? 'Onaylayan: ' + f['Onaylayan E-posta'] : '';
+  const combined = [editorLine, approverLine].filter(Boolean).join(' · ');
+  if (combined) { approverEl.textContent = combined; approverEl.style.display = 'block'; }
   else { approverEl.style.display = 'none'; }
   document.getElementById('ac-modal-caption').value = f['Onaylı Caption'] || f['AI Caption Taslak'] || '';
 
@@ -1752,7 +1762,7 @@ async function acSaveModal() {
   const dateVal = document.getElementById('ac-modal-date').value;
   const status = document.getElementById('ac-modal-status').value;
   const caption = document.getElementById('ac-modal-caption').value;
-  const fields = { 'İçerik Adı': title, 'Durum': status, 'AI Caption Taslak': caption };
+  const fields = { 'İçerik Adı': title, 'Durum': status, 'AI Caption Taslak': caption, 'Son Düzenleyen': window.currentUserEmail || '' };
   if (dateVal) fields['Yayın Tarihi'] = new Date(dateVal).toISOString();
   const rec0 = allContents.find(r => r.id === acCurrentId);
   if (rec0 && rec0.fields['Format'] === 'Story') {
@@ -1810,7 +1820,7 @@ async function acDeleteModal() {
   if (!(await showConfirm('Bu içerik Çöp Kutusu\'na taşınacak, istersen sonra geri getirebilirsin. Emin misiniz?', { okText: 'Çöp Kutusuna Taşı' }))) return;
   try {
     await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
-      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Silindi' }, typecast: true })
+      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Silindi', 'Son Düzenleyen': window.currentUserEmail || '' }, typecast: true })
     });
     const rec = allContents.find(r => r.id === acCurrentId);
     if (rec) rec.fields['Durum'] = 'Silindi';
@@ -1825,7 +1835,7 @@ async function acRestoreModal() {
   if (!hasPermission('İçerik Silme')) { showToast('Bu işlem için yetkiniz yok.'); return; }
   try {
     await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + acCurrentId, {
-      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Taslak' } })
+      method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Taslak', 'Son Düzenleyen': window.currentUserEmail || '' }, typecast: true })
     });
     const rec = allContents.find(r => r.id === acCurrentId);
     if (rec) rec.fields['Durum'] = 'Taslak';
@@ -2116,7 +2126,7 @@ async function commitPendingDelete() {
   for (const item of items) {
     try {
       await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + item.id, {
-        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Silindi' }, typecast: true })
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Silindi', 'Son Düzenleyen': window.currentUserEmail || '' }, typecast: true })
       });
     } catch(e) { failed++; console.error(e); }
   }
@@ -2144,7 +2154,7 @@ async function bulkMarkPublished() {
   for (const id of ids) {
     try {
       await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, {
-        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Yayında' } })
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Yayında', 'Son Düzenleyen': window.currentUserEmail || '' }, typecast: true })
       });
       const rec = allContents.find(r => r.id === id);
       if (rec) rec.fields['Durum'] = 'Yayında';
@@ -2163,7 +2173,7 @@ async function bulkRestoreSelected() {
   for (const id of ids) {
     try {
       await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler/' + id, {
-        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Taslak' } })
+        method: 'PATCH', headers: AT_HDR, body: JSON.stringify({ fields: { 'Durum': 'Taslak', 'Son Düzenleyen': window.currentUserEmail || '' }, typecast: true })
       });
       const rec = allContents.find(r => r.id === id);
       if (rec) rec.fields['Durum'] = 'Taslak';
@@ -2646,6 +2656,7 @@ async function saveTeamMember() {
 }
 
 window.initApp = async function(email) {
+  window.currentUserEmail = email;
   const access = await checkUserAccess(email);
   if (!access) {
     document.getElementById('access-denied-email').textContent = email;
