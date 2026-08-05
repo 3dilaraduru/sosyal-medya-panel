@@ -826,7 +826,7 @@ async function airtableCall(url, options, retries) {
   retries = retries === undefined ? 3 : retries;
   let res = await fetch(url, options);
   if (res.status === 429 && retries > 0) {
-    await new Promise(r => setTimeout(r, (4 - retries) * 1200));
+    await new Promise(r => setTimeout(r, (4 - retries) * 8000));
     return airtableCall(url, options, retries - 1);
   }
   if (!res.ok) {
@@ -1251,7 +1251,7 @@ async function loadBrands() {
   let res, attempt = 0;
   while (true) {
     res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
-    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 1200)); continue; }
+    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
     break;
   }
   if (!res.ok) {
@@ -1350,7 +1350,7 @@ async function loadContents() {
     let res, attempt = 0;
     while (true) {
       res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
-      if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 1200)); continue; }
+      if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
       break;
     }
     if (!res.ok) {
@@ -1564,7 +1564,7 @@ async function loadRevizes() {
   let res, attempt = 0;
   while (true) {
     res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
-    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 1200)); continue; }
+    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
     break;
   }
   if (!res.ok) {
@@ -2716,7 +2716,7 @@ window.initApp = async function(email) {
   const now = new Date(); now.setHours(now.getHours() + 2, 0, 0, 0);
   document.getElementById('yayin-tarihi').value = now.toISOString().slice(0,16);
   // Her 30 saniyede bir revize güncelle
-  setInterval(async () => { await loadRevizes(); await loadContents(); renderNotifications(); }, 30000);
+  setInterval(async () => { await loadRevizes(); await loadContents(); renderNotifications(); }, 90000);
 };
 </script>
 
