@@ -395,6 +395,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <option value="Revize">Revize</option>
           <option value="Yayında">Yayında</option>
         </select>
+        <div id="ac-modal-approver" style="font-size:11px;color:var(--text3);margin-top:4px;display:none;"></div>
       </div>
       <div class="field" id="ac-modal-highlight-field" style="display:none;">
         <label>Öne Çıkan Adı <span style="font-weight:400;color:var(--text3);">(aynı isimdeki story'ler birlikte gruplanır)</span></label>
@@ -1571,7 +1572,7 @@ function renderRevizes() {
         '<div class="rev-thumb">' + (imgUrl ? mediaTag(imgUrl, '', {noControls:true}) : ICONS.image) + '</div>' +
         '<div class="rev-meta">' +
           '<div class="rev-title">' + icerikAdi + '</div>' +
-          '<div class="rev-date">' + fmtDate(f['Tarih']) + '</div>' +
+          '<div class="rev-date">' + fmtDate(f['Tarih']) + (f['Yazan E-posta'] ? ' — ' + f['Yazan E-posta'] : '') + '</div>' +
           '<div class="rev-note-label">Müşteri Notu</div>' +
           '<div class="rev-note">' + (f['Müşteri Notu'] || '—') + '</div>' +
         '</div>' +
@@ -1655,6 +1656,9 @@ function openAcModal(recId) {
   document.getElementById('ac-modal-brand').textContent = brandRec ? (brandRec.fields['Marka Adı'] || '—') : '—';
   document.getElementById('ac-modal-date').value = f['Yayın Tarihi'] ? f['Yayın Tarihi'].slice(0,16) : '';
   document.getElementById('ac-modal-status').value = f['Durum'] || 'Taslak';
+  const approverEl = document.getElementById('ac-modal-approver');
+  if (f['Onaylayan E-posta']) { approverEl.textContent = 'Onaylayan: ' + f['Onaylayan E-posta']; approverEl.style.display = 'block'; }
+  else { approverEl.style.display = 'none'; }
   document.getElementById('ac-modal-caption').value = f['Onaylı Caption'] || f['AI Caption Taslak'] || '';
 
   const highlightField = document.getElementById('ac-modal-highlight-field');
