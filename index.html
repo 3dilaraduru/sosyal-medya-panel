@@ -337,6 +337,15 @@ body.compact-view .month-summary { max-width: 100%; }
   </div>
 </div>
 
+<div id="connection-error-screen" style="display:none; align-items: center; justify-content: center; height: 100vh;">
+  <div class="login-card">
+    <div class="login-logo" style="background:var(--amber);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg></div>
+    <div class="login-title">Bağlantı sorunu</div>
+    <div class="login-sub" id="connection-error-detail">Şu anda verilere ulaşılamıyor. Bu genellikle geçicidir, birkaç saniye içinde tekrar dene.</div>
+    <button class="btn-google" style="justify-content:center;" onclick="window.location.reload()">Tekrar Dene</button>
+  </div>
+</div>
+
 <!-- GENEL AMAÇLI ONAY / NOT PENCERESİ (tarayıcı confirm/prompt yerine) -->
 <div class="confirm-overlay" id="confirm-modal">
   <div class="confirm-box">
@@ -1277,8 +1286,13 @@ function toggleModalNote() {
   nw.style.display = nw.style.display === 'none' ? 'flex' : 'none';
 }
 
-async function airtableCall(url, options) {
-  const res = await fetch(url, options);
+async function airtableCall(url, options, retries) {
+  retries = retries === undefined ? 3 : retries;
+  let res = await fetch(url, options);
+  if (res.status === 429 && retries > 0) {
+    await new Promise(r => setTimeout(r, (4 - retries) * 1200));
+    return airtableCall(url, options, retries - 1);
+  }
   if (!res.ok) {
     let detail = '';
     try { const j = await res.json(); detail = j?.error?.message || j?.error?.type || ''; } catch(e) {}
@@ -1560,6 +1574,14 @@ function denyAccess(email) {
   document.getElementById('access-denied-screen').style.display = 'flex';
 }
 
+function showConnectionError(detail) {
+  if (detail) document.getElementById('connection-error-detail').textContent = detail;
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('access-denied-screen').style.display = 'none';
+  document.getElementById('connection-error-screen').style.display = 'flex';
+}
+
 window.initApp = async function(email) {
   document.getElementById('user-email').textContent = email;
   window.currentUserEmail = email;
@@ -1569,7 +1591,13 @@ window.initApp = async function(email) {
     const formula = encodeURIComponent(
       'FIND(",' + emailNorm + ',", "," & SUBSTITUTE(LOWER({Müşteri E-postası}), " ", "") & ",") > 0'
     );
-    const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar?filterByFormula=' + formula, { headers: H });
+    let res;
+    try {
+      res = await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Markalar?filterByFormula=' + formula, { headers: H });
+    } catch(fetchErr) {
+      showConnectionError(fetchErr.message);
+      return;
+    }
     const data = await res.json();
     if (data.records && data.records.length > 0) {
       brandRecord = data.records[0].fields;
@@ -1654,11 +1682,13 @@ onAuthStateChanged(auth, user => {
   if (user) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('access-denied-screen').style.display = 'none';
+    document.getElementById('connection-error-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'flex';
     window.initApp(user.email);
   } else {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('access-denied-screen').style.display = 'none';
+    document.getElementById('connection-error-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'none';
   }
 });

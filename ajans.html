@@ -822,8 +822,13 @@ function mediaTag(url, cls, opts) {
 
 let brands = [], allContents = [], selectedFile = null, uploadedUrl = null;
 
-async function airtableCall(url, options) {
-  const res = await fetch(url, options);
+async function airtableCall(url, options, retries) {
+  retries = retries === undefined ? 3 : retries;
+  let res = await fetch(url, options);
+  if (res.status === 429 && retries > 0) {
+    await new Promise(r => setTimeout(r, (4 - retries) * 1200));
+    return airtableCall(url, options, retries - 1);
+  }
   if (!res.ok) {
     let detail = '';
     try { const j = await res.json(); detail = j?.error?.message || j?.error?.type || ''; } catch(e) {}
@@ -1243,10 +1248,11 @@ async function planiIlet() {
 
 
 async function loadBrands() {
-  let res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
-  if (res.status === 429) {
-    await new Promise(r => setTimeout(r, 1500));
+  let res, attempt = 0;
+  while (true) {
     res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
+    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 1200)); continue; }
+    break;
   }
   if (!res.ok) {
     showToast('Markalar yüklenemedi (Airtable ' + res.status + '). Sayfayı yenileyip tekrar deneyin.');
@@ -1341,10 +1347,11 @@ async function loadContents() {
   let url = 'https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler?sort[0][field]=Yay%C4%B1n%20Tarihi&sort[0][direction]=desc';
   let records = [], offset = null;
   do {
-    let res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
-    if (res.status === 429) {
-      await new Promise(r => setTimeout(r, 1500));
+    let res, attempt = 0;
+    while (true) {
       res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
+      if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 1200)); continue; }
+      break;
     }
     if (!res.ok) {
       showToast('İçerikler tam yüklenemedi (Airtable ' + res.status + '). Sayfayı yenileyin.');
@@ -1554,10 +1561,11 @@ async function reorderCards(srcId, targetId) {
 let allRevizes = [];
 
 async function loadRevizes() {
-  let res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
-  if (res.status === 429) {
-    await new Promise(r => setTimeout(r, 1500));
+  let res, attempt = 0;
+  while (true) {
     res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
+    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 1200)); continue; }
+    break;
   }
   if (!res.ok) {
     showToast('Revizeler yüklenemedi (Airtable ' + res.status + ').');
