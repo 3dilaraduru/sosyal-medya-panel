@@ -1156,7 +1156,7 @@ async function submitContent() {
             'Öne Çıkan Adı': hName,
           };
           if (markaId) fields['Marka'] = [markaId];
-          const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
+          const res = await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
             method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
           });
           const data = await res.json();
@@ -1212,7 +1212,7 @@ async function submitContent() {
     if (markaId) fields['Marka'] = [markaId];
     if (carouselJoined) fields['Carousel Görselleri'] = carouselJoined;
     if (coverUploaded) fields['Kapak Görseli URL'] = coverUploaded;
-    const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
+    const res = await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/%C4%B0%C3%A7erikler', {
       method: 'POST', headers: AT_HDR, body: JSON.stringify({ fields, typecast: true })
     });
     const data = await res.json();
@@ -2570,7 +2570,13 @@ function hasPermission(perm) {
 async function checkUserAccess(email) {
   try {
     const formula = encodeURIComponent('{E-posta} = "' + email + '"');
-    const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar?filterByFormula=' + formula, { headers: AT_HDR });
+    let res, attempt = 0;
+    while (true) {
+      await waitForSharedCooldown();
+      res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar?filterByFormula=' + formula, { headers: AT_HDR });
+      if (res.status === 429 && attempt < 3) { attempt++; setSharedCooldown(30000); await waitForSharedCooldown(); continue; }
+      break;
+    }
     if (!res.ok) {
       // Kullanıcılar tablosu henüz yok / erişilemiyor -> kilitlenmeyi önlemek için Admin say
       return { role: 'Admin', brands: [], permissions: [] };
@@ -2597,7 +2603,9 @@ function applyRolePermissions(role) {
 }
 
 async function loadTeam() {
-  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', { headers: AT_HDR });
+  await waitForSharedCooldown();
+  let res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', { headers: AT_HDR });
+  if (res.status === 429) { setSharedCooldown(30000); await waitForSharedCooldown(); res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Kullanıcılar', { headers: AT_HDR }); }
   if (!res.ok) { teamMembers = []; return; }
   const data = await res.json();
   teamMembers = data.records || [];
