@@ -822,12 +822,29 @@ function mediaTag(url, cls, opts) {
 
 let brands = [], allContents = [], selectedFile = null, uploadedUrl = null;
 
+const RATE_LIMIT_KEY = 'vitrinRateLimitUntil';
+
+async function waitForSharedCooldown() {
+  try {
+    const until = parseInt(localStorage.getItem(RATE_LIMIT_KEY) || '0');
+    const remaining = until - Date.now();
+    if (remaining > 0) await new Promise(r => setTimeout(r, remaining));
+  } catch(e) {}
+}
+function setSharedCooldown(ms) {
+  try { localStorage.setItem(RATE_LIMIT_KEY, (Date.now() + ms).toString()); } catch(e) {}
+}
+
 async function airtableCall(url, options, retries) {
   retries = retries === undefined ? 3 : retries;
+  await waitForSharedCooldown();
   let res = await fetch(url, options);
-  if (res.status === 429 && retries > 0) {
-    await new Promise(r => setTimeout(r, (4 - retries) * 8000));
-    return airtableCall(url, options, retries - 1);
+  if (res.status === 429) {
+    setSharedCooldown(30000);
+    if (retries > 0) {
+      await waitForSharedCooldown();
+      return airtableCall(url, options, retries - 1);
+    }
   }
   if (!res.ok) {
     let detail = '';
@@ -1250,8 +1267,9 @@ async function planiIlet() {
 async function loadBrands() {
   let res, attempt = 0;
   while (true) {
+    await waitForSharedCooldown();
     res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Markalar', { headers: AT_HDR });
-    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
+    if (res.status === 429 && attempt < 3) { attempt++; setSharedCooldown(30000); await waitForSharedCooldown(); continue; }
     break;
   }
   if (!res.ok) {
@@ -1349,8 +1367,9 @@ async function loadContents() {
   do {
     let res, attempt = 0;
     while (true) {
+      await waitForSharedCooldown();
       res = await fetch(url + (offset ? '&offset=' + offset : ''), { headers: AT_HDR });
-      if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
+      if (res.status === 429 && attempt < 3) { attempt++; setSharedCooldown(30000); await waitForSharedCooldown(); continue; }
       break;
     }
     if (!res.ok) {
@@ -1563,8 +1582,9 @@ let allRevizes = [];
 async function loadRevizes() {
   let res, attempt = 0;
   while (true) {
+    await waitForSharedCooldown();
     res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: AT_HDR });
-    if (res.status === 429 && attempt < 3) { attempt++; await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
+    if (res.status === 429 && attempt < 3) { attempt++; setSharedCooldown(30000); await waitForSharedCooldown(); continue; }
     break;
   }
   if (!res.ok) {

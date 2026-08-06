@@ -1286,12 +1286,29 @@ function toggleModalNote() {
   nw.style.display = nw.style.display === 'none' ? 'flex' : 'none';
 }
 
+const RATE_LIMIT_KEY = 'vitrinRateLimitUntil';
+
+async function waitForSharedCooldown() {
+  try {
+    const until = parseInt(localStorage.getItem(RATE_LIMIT_KEY) || '0');
+    const remaining = until - Date.now();
+    if (remaining > 0) await new Promise(r => setTimeout(r, remaining));
+  } catch(e) {}
+}
+function setSharedCooldown(ms) {
+  try { localStorage.setItem(RATE_LIMIT_KEY, (Date.now() + ms).toString()); } catch(e) {}
+}
+
 async function airtableCall(url, options, retries) {
   retries = retries === undefined ? 3 : retries;
+  await waitForSharedCooldown();
   let res = await fetch(url, options);
-  if (res.status === 429 && retries > 0) {
-    await new Promise(r => setTimeout(r, (4 - retries) * 8000));
-    return airtableCall(url, options, retries - 1);
+  if (res.status === 429) {
+    setSharedCooldown(30000);
+    if (retries > 0) {
+      await waitForSharedCooldown();
+      return airtableCall(url, options, retries - 1);
+    }
   }
   if (!res.ok) {
     let detail = '';
@@ -1562,9 +1579,11 @@ async function toggleSolved(revId, solved) {
 }
 
 async function loadRevizes() {
-  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: H });
-  const data = await res.json();
-  allRevizes = data.records || [];
+  try {
+    const res = await airtableCall('https://api.airtable.com/v0/' + BASE_ID + '/Revizeler', { headers: H });
+    const data = await res.json();
+    allRevizes = data.records || [];
+  } catch(e) { console.error('Revizeler yüklenemedi:', e); }
 }
 
 function denyAccess(email) {
@@ -1635,7 +1654,13 @@ window.initApp = async function(email) {
     if (markaAdi) url += '&filterByFormula=' + encodeURIComponent('{Marka} = "' + markaAdi + '"');
     let records = [], offset = null;
     do {
-      const r = await fetch(url + (offset?'&offset='+offset:''), { headers: H });
+      let r;
+      try {
+        r = await airtableCall(url + (offset?'&offset='+offset:''), { headers: H });
+      } catch(e) {
+        showConnectionError(e.message);
+        return;
+      }
       const d = await r.json();
       records = records.concat(d.records||[]);
       offset = d.offset;
