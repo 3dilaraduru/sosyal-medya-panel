@@ -2733,7 +2733,17 @@ const app = initializeApp({
 });
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-window.firebaseSignIn = async () => { try { document.getElementById('login-error').style.display = 'none'; await signInWithPopup(auth, provider); } catch(e) { document.getElementById('login-error').style.display = 'block'; } };
+window.firebaseSignIn = async () => {
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    console.error('Firebase giriş hatası:', e.code, e.message);
+    errEl.textContent = 'Giriş başarısız oldu (' + (e.code || 'bilinmeyen hata') + '). Lütfen tekrar deneyin.';
+    errEl.style.display = 'block';
+  }
+};
 window.firebaseSignOut = async () => { await signOut(auth); };
 onAuthStateChanged(auth, user => {
   if (user) {
